@@ -45,19 +45,18 @@ public class StepCandidate {
     private String[] composedSteps;
     private StepMonitor stepMonitor = new SilentStepMonitor();
 
-    public StepCandidate(String patternAsString, int priority, StepType stepType, Method method, Class<?> stepsType,
-            InjectableStepsFactory stepsFactory, StepsContext stepsContext, Keywords keywords,
-            StepPatternParser stepPatternParser, ParameterConverters parameterConverters,
-            ParameterControls parameterControls) {
-        this.patternAsString = patternAsString;
-        this.priority = priority;
-        this.stepType = stepType;
-        this.method = method;
-        this.stepsType = stepsType;
-        this.stepsFactory = stepsFactory;
+    public StepCandidate(StepCandidateParamObj stepCandidateParamObj, StepsContext stepsContext, Keywords keywords,
+                         StepPatternParser stepPatternParser, ParameterConverters parameterConverters,
+                         ParameterControls parameterControls) {
+        this.patternAsString = stepCandidateParamObj.getPatternAsString();
+        this.priority = stepCandidateParamObj.getPriority();
+        this.stepType = stepCandidateParamObj.getStepType();
+        this.method = stepCandidateParamObj.getMethod();
+        this.stepsType = stepCandidateParamObj.getStepsType();
+        this.stepsFactory = stepCandidateParamObj.getStepsFactory();
         this.keywords = keywords;
-        this.stepMatcher = stepPatternParser.parseStep(stepType, patternAsString);
-        this.stepCreator = new StepCreator(stepsType, stepsFactory, stepsContext, parameterConverters,
+        this.stepMatcher = stepPatternParser.parseStep(stepCandidateParamObj.getStepType(), stepCandidateParamObj.getPatternAsString());
+        this.stepCreator = new StepCreator(stepCandidateParamObj.getStepsType(), stepCandidateParamObj.getStepsFactory(), stepsContext, parameterConverters,
                 parameterControls, stepMatcher, stepMonitor);
     }
 
