@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import javassist.runtime.Desc;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Description;
 import org.jbehave.core.model.ExamplesTable;
@@ -27,6 +28,8 @@ import org.junit.jupiter.api.Test;
 class PostStoryStatisticsCollectorBehaviour {
     private OutputStream out;
     private PrintStream printStream;
+    private final Object OUTCOMES_VALUE = 100.0;
+    private final Object OUTCOMES_VALUE_2 = 50.;
 
     private PostStoryStatisticsCollector reporter;
 
@@ -111,8 +114,9 @@ class PostStoryStatisticsCollectorBehaviour {
     }
 
     private void narrateAnInterestingStory() {
-        Story story = new Story("/path/to/story", new Description("An interesting story"), new Narrative(
-                "renovate my house", "customer", "get a loan"), new ArrayList<Scenario>());
+        Description description = new Description("An interesting story");
+        Narrative narrative = new Narrative("renovate my house", "customer", "get a loan");
+        Story story = new Story("/path/to/story", description, narrative, new ArrayList<Scenario>());
         reporter.dryRun();
         // begin story
         reporter.beforeStory(story, false);
@@ -151,7 +155,7 @@ class PostStoryStatisticsCollectorBehaviour {
         // 2nd scenario
         reporter.beforeScenario(new Scenario("A failing scenario", Meta.EMPTY));
         OutcomesTable outcomesTable = new OutcomesTable();
-        outcomesTable.addOutcome("I don't return all", 100.0, equalTo(50.));
+        outcomesTable.addOutcome("I don't return all", OUTCOMES_VALUE, equalTo(OUTCOMES_VALUE_2));
         try {
             outcomesTable.verify();
         } catch (UUIDExceptionWrapper e) {

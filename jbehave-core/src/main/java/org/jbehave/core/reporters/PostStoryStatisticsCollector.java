@@ -79,6 +79,25 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         add("stepsNotPerformed");
         add("currentScenarioSteps");
     }
+    @Override
+    public void storyCancelled(Story story, StoryDuration storyDuration) {
+        add("cancelled");
+    }
+
+    @Override
+    public void givenStories(GivenStories givenStories) {
+        add("givenStories");
+    }
+
+    @Override
+    public void givenStories(List<String> storyPaths) {
+        add("givenStories");
+    }
+
+    @Override
+    public void example(Map<String, String> tableRow, int exampleIndex) {
+        add("examples");
+    }
 
     @Override
     public void failed(String step, Throwable cause) {
@@ -117,10 +136,6 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         writeData();
     }
 
-    @Override
-    public void storyCancelled(Story story, StoryDuration storyDuration) {
-        add("cancelled");
-    }
 
     @Override
     public void afterStory(boolean givenStory) {
@@ -142,15 +157,6 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         }
     }
 
-    @Override
-    public void givenStories(GivenStories givenStories) {
-        add("givenStories");
-    }
-
-    @Override
-    public void givenStories(List<String> storyPaths) {
-        add("givenStories");
-    }
 
     @Override
     public void beforeScenario(Scenario scenario) {
@@ -178,7 +184,8 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         } else {
             countScenarios("scenarios");
         }
-        if (has("currentScenarioStepsPending") || (!has("currentScenarioSteps") && !currentScenarioExcluded)) {
+        boolean scenarioNotStepsAndNotExcluded = (!has("currentScenarioSteps") && !currentScenarioExcluded);
+        if (has("currentScenarioStepsPending") || scenarioNotStepsAndNotExcluded) {
             if (givenStories > 0) {
                 add("givenStoryScenariosPending");
             } else {
@@ -198,10 +205,6 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         }
     }
 
-    @Override
-    public void example(Map<String, String> tableRow, int exampleIndex) {
-        add("examples");
-    }
 
     @Override
     public void restartedStory(Story story, Throwable cause) {
