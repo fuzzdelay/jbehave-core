@@ -227,9 +227,28 @@ public class StepCandidate {
             }
         }
     }
-
+    
     private StepCandidate findComposedCandidate(String composedStep, String previousNonAndStep,
             List<StepCandidate> allCandidates) {
+        StepType stepType;
+        stepType = getStepType(composedStep, previousNonAndStep);
+        if (stepType == null) return null;
+        for (StepCandidate candidate : allCandidates) {
+            StepCandidate candidate1 = getStepCandidate(composedStep, previousNonAndStep, stepType, candidate);
+            if (candidate1 != null) return candidate1;
+        }
+        return null;
+    }
+
+    private StepCandidate getStepCandidate(String composedStep, String previousNonAndStep, StepType stepType, StepCandidate candidate) {
+        if (stepType == candidate.getStepType() && (StringUtils.endsWith(composedStep,
+                candidate.getPatternAsString()) || candidate.matches(composedStep, previousNonAndStep))) {
+            return candidate;
+        }
+        return null;
+    }
+
+    private StepType getStepType(String composedStep, String previousNonAndStep) {
         StepType stepType;
         if (keywords.isAndStep(composedStep)) {
             if (previousNonAndStep != null) {
@@ -241,13 +260,7 @@ public class StepCandidate {
         } else {
             stepType = keywords.stepTypeFor(composedStep);
         }
-        for (StepCandidate candidate : allCandidates) {
-            if (stepType == candidate.getStepType() && (StringUtils.endsWith(composedStep,
-                    candidate.getPatternAsString()) || candidate.matches(composedStep, previousNonAndStep))) {
-                return candidate;
-            }
-        }
-        return null;
+        return stepType;
     }
 
     private String stripStartingWord(String stepAsString) {
