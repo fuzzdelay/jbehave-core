@@ -38,8 +38,8 @@ public abstract class AbstractCandidateSteps implements CandidateSteps {
 
     protected StepCandidate createCandidate(String stepPatternAsString, int priority, StepType stepType, Method method,
             Class<?> type, InjectableStepsFactory stepsFactory) {
-        StepCandidate candidate = new StepCandidate(stepPatternAsString, priority, stepType, method, type,
-                stepsFactory, configuration.stepsContext(), configuration.keywords(), configuration.stepPatternParser(),
+        StepCandidate candidate = new StepCandidate(
+                new StepCandidateParamObj(stepPatternAsString, priority, stepType, method, type, stepsFactory), configuration.stepsContext(), configuration.keywords(), configuration.stepPatternParser(),
                 configuration.parameterConverters(), configuration.parameterControls());
         candidate.useStepMonitor(configuration.stepMonitor());
         candidate.useParanamer(configuration.paranamer());
