@@ -392,6 +392,25 @@ public class ExamplesTable {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
+    public Map<String, String> parametersByAnchor(String anchor, GivenStories givenStories) {
+        int examplesRow = -1;
+        if (!StringUtils.isBlank(anchor)) {
+            try {
+                examplesRow = Integer.parseInt(anchor);
+            } catch (NumberFormatException e) {
+                // continue
+            }
+        }
+        Map<String, String> parameters = null;
+        if (examplesRow > -1 && this != null && examplesRow < getRowCount()) {
+            parameters = getRow(examplesRow);
+        }
+        if (parameters == null) {
+            return new HashMap<>();
+        }
+        return parameters;
+    }
+
     @SuppressWarnings("serial")
     public static class RowNotFound extends RuntimeException {
         public RowNotFound(int row) {

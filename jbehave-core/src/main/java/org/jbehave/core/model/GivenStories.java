@@ -2,9 +2,7 @@ package org.jbehave.core.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -29,28 +27,9 @@ public class GivenStories {
 
     public List<GivenStory> getStories() {
         for (GivenStory story : stories) {
-            story.useParameters(parametersByAnchor(story.getAnchor()));
+            story.useParameters(examplesTable.parametersByAnchor(story.getAnchor(), this));
         }
         return stories;
-    }
-
-    private Map<String, String> parametersByAnchor(String anchor) {
-        int examplesRow = -1;
-        if (!StringUtils.isBlank(anchor)) {
-            try {
-                examplesRow = Integer.parseInt(anchor);
-            } catch (NumberFormatException e) {
-                // continue
-            }
-        }
-        Map<String, String> parameters = null;
-        if (examplesRow > -1 && examplesTable != null && examplesRow < examplesTable.getRowCount()) {
-            parameters = examplesTable.getRow(examplesRow);
-        }
-        if (parameters == null) {
-            return new HashMap<>();
-        }
-        return parameters;
     }
 
     public List<String> getPaths() {
