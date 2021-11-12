@@ -96,11 +96,19 @@ public class Lifecycle {
         MetaFilter filter = getMetaFilter(outcome);
         List<Steps> afterSteps = new ArrayList<>();
         for (Steps steps : after) {
-            if (outcome == steps.outcome && (meta.equals(Meta.EMPTY) || !filter.excluded(meta))) {
-                afterSteps.add(stepsByScope(steps, scope));
+            if (afterStepsBool(outcome, meta, filter, steps)) {
+                isAddAfterSteps(scope, (List<Steps>) afterSteps, steps);
             }
         }
         return unwrap(afterSteps);
+    }
+
+    private boolean isAddAfterSteps(Scope scope, List<Steps> afterSteps, Steps steps) {
+        return afterSteps.add(stepsByScope(steps, scope));
+    }
+
+    private boolean afterStepsBool(Outcome outcome, Meta meta, MetaFilter filter, Steps steps) {
+        return outcome == steps.outcome && (meta.equals(Meta.EMPTY) || !filter.excluded(meta));
     }
 
     public List<Steps> getAfter() {
@@ -135,7 +143,7 @@ public class Lifecycle {
     private List<Steps> filter(List<Steps> stepsCollection, Scope scope) {
         List<Steps> filteredSteps = new ArrayList<>();
         for (Steps steps : stepsCollection) {
-            filteredSteps.add(stepsByScope(steps, scope));
+            isAddAfterSteps(scope, filteredSteps, steps);
         }
         return filteredSteps;
     }
