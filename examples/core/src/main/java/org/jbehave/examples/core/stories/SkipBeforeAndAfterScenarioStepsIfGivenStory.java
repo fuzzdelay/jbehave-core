@@ -8,8 +8,7 @@ public class SkipBeforeAndAfterScenarioStepsIfGivenStory extends CoreStory {
 
     @Override
     public Configuration configuration() {
-        return super.configuration().useStoryControls(
-                new StoryControls().doSkipBeforeAndAfterScenarioStepsIfGivenStory(true));
+        return super.configuration().useStoryControls(new StoryControls().doSkipBeforeAndAfterScenarioStepsIfGivenStory(true));
     }
 
 }

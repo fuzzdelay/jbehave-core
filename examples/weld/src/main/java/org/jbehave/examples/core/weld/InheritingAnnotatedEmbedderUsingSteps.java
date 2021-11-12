@@ -12,21 +12,22 @@ import org.jbehave.examples.core.steps.CalendarSteps;
 import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
+import org.junit.Test;
 
 /**
  * Here we show how configuation annotations can be split across parent-child hierarchies
  */
 @UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PriorityMatchingSteps.class, SandpitSteps.class })
+        PriorityMatchingSteps.class, SandpitSteps.class })
 public class InheritingAnnotatedEmbedderUsingSteps extends ParentAnnotatedEmbedderUsingWeld {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 

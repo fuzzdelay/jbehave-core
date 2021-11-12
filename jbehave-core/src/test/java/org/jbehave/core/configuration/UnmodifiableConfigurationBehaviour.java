@@ -1,13 +1,8 @@
 package org.jbehave.core.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
-
-import com.thoughtworks.paranamer.Paranamer;
 
 import org.hamcrest.Matchers;
 import org.jbehave.core.embedder.StoryControls;
@@ -25,13 +20,20 @@ import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.StepCollector;
 import org.jbehave.core.steps.StepMonitor;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class UnmodifiableConfigurationBehaviour {
+import com.thoughtworks.paranamer.Paranamer;
+
+import static org.hamcrest.Matchers.is;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+public class UnmodifiableConfigurationBehaviour {
 
     @Test
-    void shouldProvideDelegateConfigurationElements() {
+    public void shouldProvideDelegateConfigurationElements() {
         Configuration delegate = new MostUsefulConfiguration();
+        String storyPath = "path";
         Configuration unmodifiable = new UnmodifiableConfiguration(delegate);
         assertThat(unmodifiable.dryRun(), is(delegate.dryRun()));
         assertThat(unmodifiable.keywords(), is(delegate.keywords()));
@@ -40,7 +42,7 @@ class UnmodifiableConfigurationBehaviour {
         assertThat(unmodifiable.storyParser(), is(delegate.storyParser()));
         assertThat(unmodifiable.storyPathResolver(), is(delegate.storyPathResolver()));
         assertThat(unmodifiable.defaultStoryReporter(), is(delegate.defaultStoryReporter()));
-        assertThat(unmodifiable.storyReporter("storyPath"), is(Matchers.notNullValue(Object.class)));
+        assertThat(unmodifiable.storyReporter(storyPath), is(Matchers.notNullValue(Object.class)));
         assertThat(unmodifiable.storyReporterBuilder(), is(delegate.storyReporterBuilder()));
         assertThat(unmodifiable.failureStrategy(), is(delegate.failureStrategy()));
         assertThat(unmodifiable.pendingStepStrategy(), is(delegate.pendingStepStrategy()));
@@ -56,7 +58,7 @@ class UnmodifiableConfigurationBehaviour {
     }
 
     @Test
-    void shouldNotAllowModificationOfConfigurationElements() throws NoSuchMethodException,
+    public void shouldNotAllowModificationOfConfigurationElements() throws NoSuchMethodException,
             IllegalAccessException {
         Configuration delegate = new MostUsefulConfiguration();
         Configuration unmodifiable = new UnmodifiableConfiguration(delegate);
@@ -103,7 +105,7 @@ class UnmodifiableConfigurationBehaviour {
     }
 
     @Test
-    void shouldReportDelegateInToString() {
+    public void shouldReportDelegateInToString() {
         assertThat(new UnmodifiableConfiguration(new MostUsefulConfiguration()).toString(), Matchers
                 .containsString(MostUsefulConfiguration.class.getName()));
     }

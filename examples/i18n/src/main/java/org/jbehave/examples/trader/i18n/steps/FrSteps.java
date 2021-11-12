@@ -1,8 +1,5 @@
 package org.jbehave.examples.trader.i18n.steps;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
 import java.util.Locale;
 import java.util.Map;
 
@@ -16,6 +13,10 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.steps.Parameters;
 import org.jbehave.examples.core.model.Stock;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.equalTo;
 
 public class FrSteps {
 
@@ -43,26 +44,26 @@ public class FrSteps {
     }
 
     @Then("la table a $rows rangs")
-    public void hasRows(int rows) {
+    public void hasRows(int rows){
         assertThat(table.getRowCount(), equalTo(rows));
     }
 
     @Then("au rang $row et en colonne $column on trouve: $value")
-    public void theRowValuesAre(int row, String column, String value) {
-        Map<String, String> rowValues = table.getRow(row - 1);
+    public void theRowValuesAre(int row, String column, String value){
+        Map<String,String> rowValues = table.getRow(row-1);      
         assertThat(rowValues.get(column), equalTo(value));
     }
 
     @Then("les valeurs multipliées par $multiplier sont: $table")
-    public void theResultsMultipliedByAre(int multiplier, ExamplesTable results) {
+    public void theResultsMultipliedByAre(int multiplier, ExamplesTable results){
         OutcomesTable outcomes = new OutcomesTable(new LocalizedKeywords(new Locale("fr")));
         for (int row = 0; row < results.getRowCount(); row++) {
             Parameters expected = results.getRowAsParameters(row);
             Parameters original = table.getRowAsParameters(row);
             int one = original.valueAs("un", Integer.class);
             int two = original.valueAs("deux", Integer.class);
-            outcomes.addOutcome("un", one * multiplier, equalTo(expected.valueAs("un", Integer.class)));
-            outcomes.addOutcome("deux", two * multiplier, equalTo(expected.valueAs("deux", Integer.class)));
+            outcomes.addOutcome("un", one*multiplier, Matchers.equalTo(expected.valueAs("un", Integer.class)));
+            outcomes.addOutcome("deux", two*multiplier, Matchers.equalTo(expected.valueAs("deux", Integer.class)));
         }
         outcomes.verify();
     }

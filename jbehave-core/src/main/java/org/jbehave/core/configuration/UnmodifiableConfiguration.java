@@ -1,9 +1,5 @@
 package org.jbehave.core.configuration;
 
-import java.util.Comparator;
-
-import com.thoughtworks.paranamer.Paranamer;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jbehave.core.embedder.StoryControls;
@@ -24,6 +20,10 @@ import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.StepCollector;
 import org.jbehave.core.steps.StepMonitor;
 
+import java.util.Comparator;
+
+import com.thoughtworks.paranamer.Paranamer;
+
 /**
  * Decorator of Configuration that disables modification of configuration
  * elements.
@@ -36,6 +36,10 @@ public class UnmodifiableConfiguration extends Configuration {
         this.delegate = delegate;
     }
 
+    /**
+     * @deprecated Use {@link StoryReporterBuilder}
+     */
+    @Deprecated
     @Override
     public StoryReporter defaultStoryReporter() {
         return delegate.defaultStoryReporter();
@@ -76,7 +80,7 @@ public class UnmodifiableConfiguration extends Configuration {
     }
 
     @Override
-    public ParameterControls parameterControls() {
+    public ParameterControls parameterControls(){
         return delegate.parameterControls();
     }
     
@@ -251,7 +255,7 @@ public class UnmodifiableConfiguration extends Configuration {
 
     @SuppressWarnings("serial")
     public static class ModificationNotAllowed extends RuntimeException {
-        public ModificationNotAllowed() {
+        public ModificationNotAllowed(){
             super("Configuration elements are unmodifiable");
         }
     }

@@ -6,42 +6,27 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
-import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TablePropertiesQueue;
 import org.jbehave.core.model.ExamplesTable.TableRows;
-import org.jbehave.core.steps.ParameterConverters;
 
 public class TableParsers {
 
     private static final String ROW_SEPARATOR_PATTERN = "\r?\n";
 
-    private final Keywords keywords;
-    private final ParameterConverters parameterConverters;
-    private final Optional<String> defaultNullPlaceholder;
+    public TableParsers(){}
 
-    public TableParsers(ParameterConverters parameterConverters) {
-        this(new LocalizedKeywords(), parameterConverters);
+    public TablePropertiesQueue parseProperties(String tableAsString, Keywords keywords) {
+        return parseProperties(tableAsString, keywords.examplesTableHeaderSeparator(), keywords.examplesTableValueSeparator(),
+                keywords.examplesTableIgnorableSeparator());
     }
 
-    public TableParsers(Keywords keywords, ParameterConverters parameterConverters) {
-        this(keywords, parameterConverters, Optional.empty());
-    }
-
-    public TableParsers(Keywords keywords, ParameterConverters parameterConverters,
-            Optional<String> defaultNullPlaceholder) {
-        this.keywords = keywords;
-        this.parameterConverters = parameterConverters;
-        this.defaultNullPlaceholder = defaultNullPlaceholder;
-    }
-
-    public TablePropertiesQueue parseProperties(String tableAsString) {
+    public TablePropertiesQueue parseProperties(String tableAsString, String headerSeparator, String valueSeparator,
+                                                              String ignorableSeparator) {
         Deque<TableProperties> properties = new LinkedList<>();
         String tableWithoutProperties = tableAsString.trim();
         Matcher matcher = ExamplesTable.INLINED_PROPERTIES_PATTERN.matcher(tableWithoutProperties);
@@ -49,12 +34,13 @@ public class TableParsers {
             String propertiesAsString = matcher.group(1);
             propertiesAsString = StringUtils.replace(propertiesAsString, "\\{", "{");
             propertiesAsString = StringUtils.replace(propertiesAsString, "\\}", "}");
-            properties.add(new TableProperties(propertiesAsString, keywords, parameterConverters));
+            properties.add(new TableProperties(propertiesAsString, headerSeparator,
+                    valueSeparator, ignorableSeparator));
             tableWithoutProperties = matcher.group(2).trim();
             matcher = ExamplesTable.INLINED_PROPERTIES_PATTERN.matcher(tableWithoutProperties);
         }
         if (properties.isEmpty()) {
-            properties.add(new TableProperties("", keywords, parameterConverters));
+            properties.add(new TableProperties("", headerSeparator, valueSeparator, ignorableSeparator));
         }
         return new TablePropertiesQueue(tableWithoutProperties, properties);
     }
@@ -65,14 +51,13 @@ public class TableParsers {
 
         String[] rows = tableAsString.split(ROW_SEPARATOR_PATTERN);
         for (String row : rows) {
-            String trimmedRow = row.trim();
-            if (trimmedRow.startsWith(properties.getIgnorableSeparator()) || trimmedRow.isEmpty()) {
+            if (row.startsWith(properties.getIgnorableSeparator()) || row.isEmpty()) {
                 // skip ignorable or empty lines
                 continue;
             } else if (headers.isEmpty()) {
-                headers.addAll(parseRow(trimmedRow, true, properties));
+                headers.addAll(parseRow(row, true, properties));
             } else {
-                List<String> columns = parseRow(trimmedRow, false, properties);
+                List<String> columns = parseRow(row, false, properties);
                 Map<String, String> map = new LinkedHashMap<>();
                 for (int column = 0; column < columns.size(); column++) {
                     if (column < headers.size()) {
@@ -88,21 +73,29 @@ public class TableParsers {
 
     public List<String> parseRow(String rowAsString, boolean header, TableProperties properties) {
         String separator = header ? properties.getHeaderSeparator() : properties.getValueSeparator();
-        String commentSeparator = properties.getCommentSeparator();
-        Optional<String> nullPlaceholder = properties.getNullPlaceholder().map(Optional::of).orElse(
-                defaultNullPlaceholder);
-        UnaryOperator<String> trimmer = properties.isTrim() ? String::trim : UnaryOperator.identity();
-        String[] cells = StringUtils.splitByWholeSeparatorPreserveAllTokens(rowAsString.trim(), separator);
-        List<String> row = new ArrayList<>(cells.length);
-        for (int i = 0; i < cells.length; i++) {
-            String cell = cells[i];
-            cell = StringUtils.substringBefore(cell, commentSeparator);
-            if ((i == 0 || i == cells.length - 1) && cell.isEmpty()) {
-                continue;
-            }
-            String trimmedCell = trimmer.apply(cell);
-            row.add(nullPlaceholder.filter(trimmedCell::equals).isPresent() ? null : trimmedCell);
+        return parseRow(rowAsString, separator, properties.getCommentSeparator(), properties.isTrim());
+    }
+
+    private List<String> parseRow(String rowAsString, String separator, String commentSeparator,
+            boolean trimValues) {
+        StringBuilder regex = new StringBuilder();
+        for (char c : separator.toCharArray()) {
+            regex.append("\\").append(c);
         }
-        return row;
+        List<String> values = new ArrayList<>();
+        for (String value : rowAsString.split(regex.toString(), -1)) {
+            String stripped = StringUtils.substringBefore(value, commentSeparator);
+            String trimmed = trimValues ? stripped.trim() : stripped;
+            values.add(StringUtils.substringBefore(trimmed, commentSeparator));
+        }
+        // ignore a leading and a trailing empty value
+        if (StringUtils.isBlank(values.get(0))) {
+            values.remove(0);
+        }
+        int lastIndex = values.size() - 1;
+        if (lastIndex != -1 && StringUtils.isBlank(values.get(lastIndex))) {
+            values.remove(lastIndex);
+        }
+        return values;
     }
 }

@@ -42,12 +42,13 @@ import org.jbehave.core.steps.Stepdoc;
  */
 public class Embedder {
 
-    protected StoryMapper storyMapper;
-    protected EmbedderMonitor embedderMonitor;
-    protected EmbedderClassLoader classLoader;
-    protected EmbedderControls embedderControls;
-    protected EmbedderFailureStrategy embedderFailureStrategy;
+	protected StoryMapper storyMapper;
+	protected EmbedderMonitor embedderMonitor;
+	protected EmbedderClassLoader classLoader;
+	protected EmbedderControls embedderControls;
+	protected EmbedderFailureStrategy embedderFailureStrategy;
     protected Configuration configuration;
+    protected List<CandidateSteps> candidateSteps;
     protected InjectableStepsFactory stepsFactory;
     protected List<String> metaFilters;
     protected Map<String,MetaMatcher> metaMatchers;
@@ -241,20 +242,6 @@ public class Embedder {
         }
     }
 
-    private void handleFailures(ReportsCount count) {
-        boolean failed = count.failed();
-        if (configuration().pendingStepStrategy() instanceof FailingUponPendingStep) {
-            failed = failed || count.pending();
-        }
-        if (failed) {
-            if (embedderControls().ignoreFailureInView()) {
-                embedderMonitor.reportsViewFailures(count);
-            } else {
-                embedderFailureStrategy().handleFailures(count);
-            }
-        }
-    }
-
     public void generateReportsView() {
         StoryReporterBuilder builder = configuration().storyReporterBuilder();
         File outputDirectory = builder.outputDirectory();
@@ -282,6 +269,27 @@ public class Embedder {
 
     }
 
+    private void handleFailures(ReportsCount count) {
+        boolean failed = count.failed();
+        if (configuration().pendingStepStrategy() instanceof FailingUponPendingStep) {
+            failed = failed || count.pending();
+        }
+        if (failed) {
+            if (embedderControls().ignoreFailureInView()) {
+                embedderMonitor.reportsViewFailures(count);
+            } else {
+                embedderFailureStrategy().handleFailures(count);
+            }
+        }
+    }
+
+    public void generateCrossReference() {
+        StoryReporterBuilder builder = configuration().storyReporterBuilder();
+        if (builder.hasCrossReference()) {
+            builder.crossReference().serialise(storyManager().performableRoot(), builder.outputDirectory());
+        }
+    }
+
     public void generateSurefireReport() {
         StoryReporterBuilder builder = configuration().storyReporterBuilder();
         if (builder.hasSurefireReporter()) {
@@ -290,14 +298,7 @@ public class Embedder {
     }
 
     public void reportStepdocs() {
-        reportStepdocs(configuration(), stepsFactory().createCandidateSteps());
-    }
-
-    public void reportStepdocs(Configuration configuration, List<CandidateSteps> candidateSteps) {
-        StepFinder finder = configuration.stepFinder();
-        StepdocReporter reporter = configuration.stepdocReporter();
-        List<Object> stepsInstances = finder.stepsInstances(candidateSteps);
-        reporter.stepdocs(finder.stepdocs(candidateSteps), stepsInstances);
+        reportStepdocs(configuration(), candidateSteps());
     }
 
     public void reportStepdocsAsEmbeddables(List<String> classNames) {
@@ -310,8 +311,11 @@ public class Embedder {
         for (Embeddable embeddable : embeddables(classNames, classLoader())) {
             if (embeddable instanceof ConfigurableEmbedder) {
                 ConfigurableEmbedder configurableEmbedder = (ConfigurableEmbedder) embeddable;
-                Embedder configuredEmbedder = configurableEmbedder.configuredEmbedder();
-                List<CandidateSteps> steps = configuredEmbedder.stepsFactory().createCandidateSteps();
+				Embedder configuredEmbedder = configurableEmbedder.configuredEmbedder();
+				List<CandidateSteps> steps = configuredEmbedder.candidateSteps();
+                if (steps.isEmpty()) {
+                    steps = configuredEmbedder.stepsFactory().createCandidateSteps();
+                }
                 reportStepdocs(configuredEmbedder.configuration(), steps);
             } else {
                 embedderMonitor.embeddableNotConfigurable(embeddable.getClass().getName());
@@ -319,9 +323,16 @@ public class Embedder {
         }
     }
 
+    public void reportStepdocs(Configuration configuration, List<CandidateSteps> candidateSteps) {
+        StepFinder finder = configuration.stepFinder();
+        StepdocReporter reporter = configuration.stepdocReporter();
+        List<Object> stepsInstances = finder.stepsInstances(candidateSteps);
+        reporter.stepdocs(finder.stepdocs(candidateSteps), stepsInstances);
+    }
+
     public void reportMatchingStepdocs(String stepAsString) {
         Configuration configuration = configuration();
-        List<CandidateSteps> candidateSteps = stepsFactory().createCandidateSteps();
+        List<CandidateSteps> candidateSteps = candidateSteps();
         StepFinder finder = configuration.stepFinder();
         StepdocReporter reporter = configuration.stepdocReporter();
         List<Stepdoc> matching = finder.findMatching(stepAsString, candidateSteps);
@@ -357,9 +368,16 @@ public class Embedder {
         return configuration;
     }
 
+    public List<CandidateSteps> candidateSteps() {
+        if (candidateSteps == null) {
+            candidateSteps = new ArrayList<>();
+        }
+        return candidateSteps;
+    }
+
     public InjectableStepsFactory stepsFactory() {
         if (stepsFactory == null) {
-            stepsFactory = new ProvidedStepsFactory();
+            stepsFactory = new ProvidedStepsFactory(candidateSteps());
         }
         return stepsFactory;
     }
@@ -443,11 +461,11 @@ public class Embedder {
         return metaFilters;
     }
 
-    public Map<String,MetaMatcher> metaMatchers() {
-        if (metaMatchers == null) {
-            metaMatchers = new HashMap<>();
-        }
-        return metaMatchers;
+    public Map<String,MetaMatcher> metaMatchers(){
+    	if (metaMatchers == null){
+    		metaMatchers = new HashMap<>();
+    	}
+    	return metaMatchers;
     }
     
     public MetaFilter metaFilter() {
@@ -465,11 +483,11 @@ public class Embedder {
         return systemProperties;
     }
     
-    public TimeoutParser[] timeoutParsers() {
-        if (timeoutParsers == null) {
-            timeoutParsers = new TimeoutParser[]{};
-        }
-        return timeoutParsers;
+    public TimeoutParser[] timeoutParsers(){
+    	if (timeoutParsers == null){
+    		timeoutParsers = new TimeoutParser[]{};
+    	}
+    	return timeoutParsers;
     }
 
     public void useClassLoader(EmbedderClassLoader classLoader) {
@@ -480,8 +498,12 @@ public class Embedder {
         this.configuration = configuration;
     }
 
+    public void useCandidateSteps(List<CandidateSteps> candidateSteps) {
+        this.candidateSteps = candidateSteps;
+    }
+
     public void useStepsFactory(InjectableStepsFactory stepsFactory) {
-        this.stepsFactory = stepsFactory;
+		this.stepsFactory = stepsFactory;
     }
 
     public void useEmbedderControls(EmbedderControls embedderControls) {
@@ -517,8 +539,8 @@ public class Embedder {
         this.systemProperties = systemProperties;
     }
 
-    public void useTimeoutParsers(TimeoutParser... timeoutParsers) {
-        this.timeoutParsers = timeoutParsers;        
+    public void useTimeoutParsers(TimeoutParser... timeoutParsers){
+		this.timeoutParsers = timeoutParsers;    	
     }
     
     @Override

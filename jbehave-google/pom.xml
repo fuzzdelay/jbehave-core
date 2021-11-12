@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jbehave</groupId>
     <artifactId>jbehave</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>4.8.3</version>
   </parent>
   <artifactId>jbehave-google</artifactId>
   <name>JBehave Google</name>
@@ -17,8 +17,13 @@
     </dependency>
     <dependency>
       <groupId>com.google.gdata</groupId>
-      <artifactId>core</artifactId>
-      <version>1.47.1</version>
+      <artifactId>gdata-java-client</artifactId>
+      <version>1.40.0.atlassian-2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.1</version>
     </dependency>
   </dependencies>
 

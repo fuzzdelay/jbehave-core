@@ -1,29 +1,32 @@
 package org.jbehave.core.model;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.jbehave.core.io.UnderscoredToCapitalized;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class StoryMapsBehaviour {
+import static java.util.Arrays.asList;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
+public class StoryMapsBehaviour {
     @Test
-    void shouldMapStoriesByFilterInLanes() {
+    public void shouldMapStoriesByFilterInLanes() {
         // Given
         String storyPath1 = "/path/to/story_one.story"; 
         String storyPath2 = "/path/to/story_two.story";
+        String storyPath3 = "/path/to/story_three.story";
         // story paths in non-natural order to verify ordering
         List<String> storyPaths = asList(storyPath2, storyPath1);
         Map<String, Story> storiesByPath = new HashMap<>();
-        for (String storyPath : storyPaths) {
+        for (String storyPath : storyPaths ) {
             storiesByPath.put(storyPath, new Story(storyPath));
         }
         
@@ -44,7 +47,6 @@ class StoryMapsBehaviour {
         assertThat(storyLanes.getLanes().get(0), equalTo("filter"));
         assertThat(storyLanes.inLane("filter", storiesByPath.get(storyPath1)), is(true));
         assertThat(storyLanes.inLane("filter", storiesByPath.get(storyPath2)), is(true));
-        String storyPath3 = "/path/to/story_three.story";
         assertThat(storyLanes.inLane("filter", new Story(storyPath3)), is(false));
         assertThat(storyLanes.inLane("none", new Story(storyPath3)), is(false));
     }

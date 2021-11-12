@@ -1,11 +1,5 @@
 package org.jbehave.examples.core.annotations;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
@@ -35,24 +29,27 @@ import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
+
 @RunWith(AnnotatedEmbedderRunner.class)
-@Configure(stepPatternParser = MyRegexPrefixCapturingPatternParser.class, storyControls = MyStoryControls.class,
-        storyLoader = MyStoryLoader.class, storyReporterBuilder = MyReportBuilder.class,
-        parameterConverters = { MyDateConverter.class })
-@UsingEmbedder(embedder = MyEmbedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true, verboseFailures = true, verboseFiltering = true, storyTimeouts = "100", threads = 1,
-        metaFilters = "-skip")
+@Configure(stepPatternParser = MyRegexPrefixCapturingPatternParser.class, storyControls = MyStoryControls.class, storyLoader = MyStoryLoader.class, storyReporterBuilder = MyReportBuilder.class, parameterConverters = { MyDateConverter.class })
+@UsingEmbedder(embedder = MyEmbedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true, verboseFailures = true, verboseFiltering = true, storyTimeouts = "100", threads = 1, metaFilters = "-skip")
 @UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
+        PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
 public class CoreAnnotatedEmbedder extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         List<String> storyPaths = new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"),
-                "**/*.story", "**/custom/*.story,**/failing/*.story,**/given/*.story,**/pending/*.story");
+                "**/*.story", "**/examples_table_loaded*");
         injectedEmbedder().runStoriesAsPaths(storyPaths);
     }
 

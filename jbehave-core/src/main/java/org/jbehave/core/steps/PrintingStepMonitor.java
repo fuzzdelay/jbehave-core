@@ -18,10 +18,8 @@ import org.jbehave.core.model.StepPattern;
 public abstract class PrintingStepMonitor implements StepMonitor {
 
     private static final String CONVERTED_VALUE_OF_TYPE = "Converted value '%s' of type '%s' to '%s' with %s '%s'";
-    private static final String STEP_MATCHES_TYPE = "Step '%s' (with previous step '%s') %s type '%s' for method '%s' "
-            + "with annotations '%s' in steps instance '%s'";
-    private static final String STEP_MATCHES_PATTERN = "Step '%s' %s pattern '%s' for method '%s' with annotations '%s'"
-            + " in steps instance '%s'";
+    private static final String STEP_MATCHES_TYPE = "Step '%s' (with previous step '%s') %s type '%s' for method '%s' with annotations '%s' in steps instance '%s'";
+    private static final String STEP_MATCHES_PATTERN = "Step '%s' %s pattern '%s' for method '%s' with annotations '%s' in steps instance '%s'";
     private static final String PERFORMING = "Performing step '%s'%s";
     private static final String DRY_RUN = " (DRY RUN)";
     private static final String MATCHES = "matches";
@@ -48,10 +46,27 @@ public abstract class PrintingStepMonitor implements StepMonitor {
         print(STEP_MATCHES_PATTERN, step, matches(matches), stepPattern, method, getAnnotations(method), stepsInstance);
     }
 
+    /**
+     * @deprecated Use {@link #convertedValueOfType(String, Type, Object, Queue)}
+     */
+    @Override
+    public void convertedValueOfType(String value, Type type, Object converted, Class<?> converterClass) {
+        print(CONVERTED_VALUE_OF_TYPE, value, type, converted, "converter", converterClass);
+    }
+
     @Override
     public void convertedValueOfType(String value, Type type, Object converted, Queue<Class<?>> converterClasses) {
         String classes = converterClasses.stream().map(Class::getName).collect(Collectors.joining(" -> "));
         print(CONVERTED_VALUE_OF_TYPE, value, type, converted, "converters", classes);
+    }
+
+    /**
+     * @deprecated Use {@link #beforePerforming(String, boolean, Method)} and
+     * {@link #afterPerforming(String, boolean, Method)}
+     */
+    @Override
+    @Deprecated
+    public void performing(String step, boolean dryRun) {
     }
 
     @Override

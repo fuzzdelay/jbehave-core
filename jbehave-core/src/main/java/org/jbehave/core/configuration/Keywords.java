@@ -1,18 +1,16 @@
 package org.jbehave.core.configuration;
 
-import static java.util.Arrays.asList;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jbehave.core.steps.StepType;
+
+import static java.util.Arrays.asList;
 
 /**
  * Provides the keywords which allow parsers to find steps in stories and match
@@ -20,7 +18,6 @@ import org.jbehave.core.steps.StepType;
  * words (Given, When, Then And, "!--") using in parsing, as well as providing
  * keywords used in reporting.
  */
-@SuppressWarnings("checkstyle:MemberName")
 public class Keywords {
 
     private static final String SYNONYM_SEPARATOR = "\\|";
@@ -71,53 +68,12 @@ public class Keywords {
     public static final String YES = "Yes";
     public static final String NO = "No";
 
-    public static final List<String> KEYWORDS = asList(
-            META,
-            META_PROPERTY,
-            NARRATIVE,
-            IN_ORDER_TO,
-            AS_A,
-            I_WANT_TO,
-            SO_THAT,
-            SCENARIO,
-            GIVEN_STORIES,
-            LIFECYCLE,
-            BEFORE,
-            AFTER,
-            EXAMPLES_TABLE,
-            EXAMPLES_TABLE_ROW,
-            EXAMPLES_TABLE_HEADER_SEPARATOR,
-            EXAMPLES_TABLE_VALUE_SEPARATOR,
-            EXAMPLES_TABLE_IGNORABLE_SEPARATOR,
-            GIVEN,
-            WHEN,
-            THEN,
-            AND,
-            IGNORABLE,
-            COMPOSITE,
-            PRIORITY,
-            PENDING,
-            NOT_PERFORMED,
-            FAILED,
-            DRY_RUN,
-            STORY_CANCELLED,
-            DURATION,
-            SCOPE,
-            SCOPE_STEP,
-            SCOPE_SCENARIO,
-            SCOPE_STORY,
-            OUTCOME,
-            OUTCOME_ANY,
-            OUTCOME_SUCCESS,
-            OUTCOME_FAILURE,
-            OUTCOME_DESCRIPTION,
-            OUTCOME_VALUE,
-            OUTCOME_MATCHER,
-            OUTCOME_VERIFIED,
-            META_FILTER,
-            YES,
-            NO
-    );
+    public static final List<String> KEYWORDS = asList(META, META_PROPERTY, NARRATIVE, IN_ORDER_TO, AS_A, I_WANT_TO, SO_THAT,
+            SCENARIO, GIVEN_STORIES, LIFECYCLE, BEFORE, AFTER, EXAMPLES_TABLE, EXAMPLES_TABLE_ROW, EXAMPLES_TABLE_HEADER_SEPARATOR,
+            EXAMPLES_TABLE_VALUE_SEPARATOR, EXAMPLES_TABLE_IGNORABLE_SEPARATOR, GIVEN, WHEN, THEN, AND, IGNORABLE, COMPOSITE, PRIORITY,
+            PENDING, NOT_PERFORMED, FAILED, DRY_RUN, STORY_CANCELLED, DURATION, SCOPE, SCOPE_STEP, SCOPE_SCENARIO, SCOPE_STORY,
+            OUTCOME, OUTCOME_ANY, OUTCOME_SUCCESS, OUTCOME_FAILURE, OUTCOME_DESCRIPTION, OUTCOME_VALUE, OUTCOME_MATCHER,
+            OUTCOME_VERIFIED, META_FILTER, YES, NO);
 
 
     private final String meta;
@@ -413,51 +369,43 @@ public class Keywords {
         return duration;
     }
 
-    public String scope() {
-        return scope;
-    }
+    public String scope() { return scope; }
 
-    public String scopeStep() {
-        return scopeStep;
-    }
+    public String scopeStep() { return scopeStep; }
 
-    public String scopeScenario() {
-        return scopeScenario;
-    }
+    public String scopeScenario() { return scopeScenario; }
 
-    public String scopeStory() {
-        return scopeStory;
-    }
+    public String scopeStory() { return scopeStory; }
 
     public String outcome() {
         return outcome;
     }
 
-    public String outcomeAny() {
+    public String outcomeAny(){
         return outcomeAny;
     }
 
-    public String outcomeSuccess() {
+    public String outcomeSuccess(){
         return outcomeSuccess;
     }
 
-    public String outcomeFailure() {
+    public String outcomeFailure(){
         return outcomeFailure;
     }
 
-    public String outcomeDescription() {
+    public String outcomeDescription(){
         return outcomeDescription;
     }
 
-    public String outcomeValue() {
+    public String outcomeValue(){
         return outcomeValue;
     }
 
-    public String outcomeMatcher() {
+    public String outcomeMatcher(){
         return outcomeMatcher;
     }
 
-    public String outcomeVerified() {
+    public String outcomeVerified(){
         return outcomeVerified;
     }
 
@@ -481,14 +429,12 @@ public class Keywords {
         return word.split(SYNONYM_SEPARATOR);
     }
 
-    public Stream<String> startingWords(Predicate<StepType> stepTypeFilter) {
-        return startingWordsByType()
-                .entrySet()
-                .stream()
-                .filter(e -> stepTypeFilter.test(e.getKey()))
-                .map(Entry::getValue)
-                .map(this::synonymsOf)
-                .flatMap(Stream::of);
+    public String[] startingWords() {
+        List<String> words = new ArrayList<>();
+        for (String word : startingWordsByType().values()) {
+            words.addAll(asList(synonymsOf(word)));
+        }
+        return words.toArray(new String[words.size()]);
     }
 
     public Map<StepType, String> startingWordsByType() {
@@ -499,9 +445,8 @@ public class Keywords {
         boolean isType = false;
         for (String word : startingWordsFor(stepType)) {
             isType = stepStartsWithWord(stepAsString, word);
-            if (isType) {
+            if (isType)
                 break;
-            }
         }
         return isType;
     }

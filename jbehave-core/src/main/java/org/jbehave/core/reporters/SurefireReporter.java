@@ -1,32 +1,25 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jbehave.core.embedder.PerformableTree.*;
+import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Story;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.jbehave.core.embedder.PerformableTree.PerformableRoot;
-import org.jbehave.core.embedder.PerformableTree.PerformableScenario;
-import org.jbehave.core.embedder.PerformableTree.PerformableStory;
-import org.jbehave.core.embedder.PerformableTree.Status;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.xml.sax.SAXException;
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class SurefireReporter {
 
@@ -60,8 +53,7 @@ public class SurefireReporter {
             this(DEFAULT_REPORT_NAME, DEFAULT_NAMING_STRATEGY, DEFAULT_REPORT_BY_STORY, DEFAULT_INCLUDE_PROPERTIES);
         }
 
-        public Options(String reportName, TestCaseNamingStrategy namingStrategy, boolean reportByStory,
-                boolean includeProperties) {
+        public Options(String reportName, TestCaseNamingStrategy namingStrategy, boolean reportByStory, boolean includeProperties) {
             this.reportName = reportName;
             this.namingStrategy = namingStrategy;
             this.includeProperties = includeProperties;
@@ -73,7 +65,7 @@ public class SurefireReporter {
             return this;
         }
 
-        public Options withNamingStrategy(TestCaseNamingStrategy strategy) {
+        public Options withNamingStrategy(TestCaseNamingStrategy strategy){
             this.namingStrategy = strategy;
             return this;
         }
@@ -105,8 +97,8 @@ public class SurefireReporter {
     public synchronized void generate(PerformableRoot root,
                                       File outputDirectory) {
         List<PerformableStory> stories = root.getStories();
-        if (reportByStory) {
-            for (PerformableStory story : stories) {
+        if ( reportByStory ){
+            for ( PerformableStory story : stories ){
                 String name = reportName(story.getStory().getPath());
                 File file = outputFile(outputDirectory, name);
                 generateReport(asList(story), file);
@@ -143,8 +135,7 @@ public class SurefireReporter {
 
     private void validateOutput(File file, String surefireXsd) throws SAXException, IOException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(
-                new StreamSource(this.getClass().getClassLoader().getResourceAsStream(surefireXsd)));
+        Schema schema = schemaFactory.newSchema(new StreamSource(this.getClass().getClassLoader().getResourceAsStream(surefireXsd)));
         Validator validator = schema.newValidator();
         validator.validate(new StreamSource(file));
     }
@@ -157,8 +148,7 @@ public class SurefireReporter {
         private final List<TestCase> testCases;
         private final boolean includeProperties;
 
-        public TestSuite(Class<?> embeddableClass, TestCaseNamingStrategy namingStrategy,
-                List<PerformableStory> stories, boolean includeProperties) {
+        public TestSuite(Class<?> embeddableClass, TestCaseNamingStrategy namingStrategy, List<PerformableStory> stories, boolean includeProperties) {
             this.embeddableClass = embeddableClass;
             this.namingStrategy = namingStrategy;
             this.testCounts = collectTestCounts(stories);
@@ -180,15 +170,13 @@ public class SurefireReporter {
                             counts.addFailure();
                             break;
                         case PENDING:
-                        case EXCLUDED:
+                        case NOT_ALLOWED:
                         case NOT_PERFORMED:
                             counts.addSkipped();
                             break;
                         case SUCCESSFUL:
                             counts.addSuccessful();
                             break;
-                        default:
-                            throw new IllegalArgumentException("Unsupported status: " + status);
                     }
                 }
             }
@@ -350,9 +338,9 @@ public class SurefireReporter {
         }
 
         private void collectParentNames(File file, List<String> parents) {
-            if (file.getParent() != null) {
+            if ( file.getParent() != null ){
                 String name = file.getParentFile().getName();
-                if (!StringUtils.isBlank(name)) {
+                if ( !StringUtils.isBlank(name) ) {
                     parents.add(0, name);
                 }
                 collectParentNames(file.getParentFile(), parents);

@@ -3,15 +3,6 @@ package org.jbehave.core.configuration.guice;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Binding;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
-import com.google.inject.util.Modules;
-
 import org.jbehave.core.annotations.guice.UsingGuice;
 import org.jbehave.core.configuration.AnnotationBuilder;
 import org.jbehave.core.configuration.AnnotationFinder;
@@ -26,6 +17,15 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.guice.GuiceStepsFactory;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
+import com.google.inject.util.Modules;
 
 /**
  * Extends {@link AnnotationBuilder} to provide Guice-based dependency injection
@@ -178,7 +178,7 @@ public class GuiceAnnotationBuilder extends AnnotationBuilder {
     }
 
     protected Injector createInjector(List<Module> modules) {
-        if (injector != null) {
+        if ( injector != null ){
             return injector;
         }
         Injector root = Guice.createInjector(new AbstractModule() {        

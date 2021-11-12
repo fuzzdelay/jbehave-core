@@ -1,14 +1,12 @@
 package org.jbehave.core.reporters;
 
-import static org.jbehave.core.reporters.SGRCodes.SGRCode.RESET;
-import static org.jbehave.core.reporters.SGRCodes.SGRCode.UNDERLINE;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_END;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_START;
-
 import java.util.Properties;
-
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.reporters.SGRCodes.SGRCode;
+
+import static org.jbehave.core.reporters.SGRCodes.SGRCode.*;
+import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_END;
+import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_START;
 
 /**
  * <p>
@@ -16,7 +14,6 @@ import org.jbehave.core.reporters.SGRCodes.SGRCode;
  * Uses {@link SGRCodes} to decorate ConsoleOutput format patterns.
  * </p>
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class ANSIConsoleOutput extends ConsoleOutput {
 
     private static final char ESCAPE_CHARACTER = (char) 27;

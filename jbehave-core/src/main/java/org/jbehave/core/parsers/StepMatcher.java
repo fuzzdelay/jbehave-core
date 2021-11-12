@@ -1,7 +1,5 @@
 package org.jbehave.core.parsers;
 
-import java.util.regex.Matcher;
-
 import org.jbehave.core.model.StepPattern;
 
 /**
@@ -10,9 +8,14 @@ import org.jbehave.core.model.StepPattern;
  */
 public interface StepMatcher {
 
-    Matcher matcher(String stepWithoutStartingWord);
+    boolean matches(String stepWithoutStartingWord);
+
+    boolean find(String stepWithoutStartingWord);
+
+    String parameter(int matchedPosition);
 
     String[] parameterNames();
 
     StepPattern pattern();
+
 }

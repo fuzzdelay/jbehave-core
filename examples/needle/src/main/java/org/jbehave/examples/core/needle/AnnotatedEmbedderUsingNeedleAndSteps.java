@@ -1,7 +1,5 @@
 package org.jbehave.examples.core.needle;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-
 import java.util.List;
 
 import org.jbehave.core.InjectableEmbedder;
@@ -19,30 +17,32 @@ import org.jbehave.examples.core.steps.CalendarSteps;
 import org.jbehave.examples.core.steps.PendingSteps;
 import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
 
 /**
  * Run stories via annotated embedder configuration and steps using Needle. The textual trader stories are exactly the
- * same ones found in the jbehave-core-example. Here we are only concerned with using the container to compose the
+ * same ones found in the jbehave-trader-example. Here we are only concerned with using the container to compose the
  * configuration and the steps instances.
  */
 @RunWith(NeedleAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingSteps(instances = { NeedleTraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PendingSteps.class, PriorityMatchingSteps.class, SandpitSteps.class })
+		PendingSteps.class, PriorityMatchingSteps.class, SandpitSteps.class })
 @UsingNeedle
 public class AnnotatedEmbedderUsingNeedleAndSteps extends InjectableEmbedder {
 
-    @Override
-    @org.junit.Test
-    public void run() {
-        injectedEmbedder().runStoriesAsPaths(storyPaths());
-    }
+	@Override
+    @Test
+	public void run() {
+		injectedEmbedder().runStoriesAsPaths(storyPaths());
+	}
 
-    public List<String> storyPaths() {
-        return new StoryFinder().findPaths(codeLocationFromPath("../trader/src/main/java"), "**/*.story", "");
-    }
+	protected List<String> storyPaths() {
+		return new StoryFinder().findPaths(codeLocationFromPath("../trader/src/main/java"), "**/*.story", "");
+	}
 
 }

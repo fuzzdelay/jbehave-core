@@ -1,43 +1,29 @@
 package org.jbehave.core.io;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.*;
 
-class IOUtilsBehaviour {
+public class IOUtilsBehaviour {
 
     @Test
-    void shouldProcessReader() throws IOException {
+    public void shouldProcessReader() throws IOException {
         assertThat(IOUtils.toString(new StringReader(""), true), equalTo(""));
         assertThat(IOUtils.toString(new StringReader("a"), true), equalTo("a"));
         assertThat(IOUtils.toString(new StringReader("asdf"), true), equalTo("asdf"));
         assertThat(IOUtils.toString(new StringReader("äöü"), true), equalTo("äöü"));
 
         // close() can be called more than once, a more elaborate test is below 
-        Reader reader = new StringReader("hello");
+        Reader reader=new StringReader("hello");
         assertThat(IOUtils.toString(reader, false), equalTo("hello"));
         reader.close();
 
-        String longString = createLongString();
+        String longString=createLongString();
         assertThat(IOUtils.toString(new StringReader(longString), true), equalTo(longString));
 
         // read an actual file
@@ -45,15 +31,15 @@ class IOUtilsBehaviour {
 
     }
 
-    @Test
-    void shouldHandleReaderNull() {
+    @Test(expected=NullPointerException.class)
+    public void shouldHandleReaderNull() throws IOException {
         // this causes a NPE in the apache-commons code, no point
         // in changing the logic in our implementation, I guess
-        assertThrows(NullPointerException.class, () -> IOUtils.toString((Reader) null, true));
+        IOUtils.toString((Reader)null, true);
     }
 
     @Test
-    void shouldCloseReader() throws IOException {
+    public void shouldCloseReader() throws IOException {
         Reader reader = mock(Reader.class);
         when(reader.read(isA(char[].class))).thenReturn(-1);
         IOUtils.toString(reader, true);
@@ -61,53 +47,52 @@ class IOUtilsBehaviour {
     }
 
     @Test
-    void shouldNotCloseReader() throws IOException {
+    public void shouldNotCloseReader() throws IOException {
         Reader reader = mock(Reader.class);
         when(reader.read(isA(char[].class))).thenReturn(-1);
         IOUtils.toString(reader, false);
         verify(reader, never()).close();
     }
 
-    @Test
-    void shouldCloseReaderException() throws IOException {
+    @Test(expected = IOException.class)
+    public void shouldCloseReaderException() throws IOException {
         Reader reader = mock(Reader.class);
         when(reader.read(isA(char[].class))).thenThrow(new IOException());
-        assertThrows(IOException.class, () -> IOUtils.toString(reader, true));
-        verify(reader).close();
+        try {
+            IOUtils.toString(reader, true);
+        } finally {
+            verify(reader).close();
+        }
     }
 
     // same for InputStream
     @Test
-    void shouldProcessInputStream() throws IOException {
+    public void shouldProcessInputStream() throws IOException {
         assertThat(IOUtils.toString(new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)), true), equalTo(""));
-        assertThat(IOUtils.toString(new ByteArrayInputStream("a".getBytes(StandardCharsets.UTF_8)), true),
-                equalTo("a"));
-        assertThat(IOUtils.toString(new ByteArrayInputStream("asdf".getBytes(StandardCharsets.UTF_8)), true),
-                equalTo("asdf"));
-        assertThat(IOUtils.toString(new ByteArrayInputStream("äöü".getBytes(StandardCharsets.UTF_8)), true),
-                equalTo("äöü"));
+        assertThat(IOUtils.toString(new ByteArrayInputStream("a".getBytes(StandardCharsets.UTF_8)), true), equalTo("a"));
+        assertThat(IOUtils.toString(new ByteArrayInputStream("asdf".getBytes(StandardCharsets.UTF_8)), true), equalTo("asdf"));
+        assertThat(IOUtils.toString(new ByteArrayInputStream("äöü".getBytes(StandardCharsets.UTF_8)), true), equalTo("äöü"));
 
         ByteArrayInputStream input = new ByteArrayInputStream("asdf".getBytes(StandardCharsets.UTF_8));
         assertThat(IOUtils.toString(input, false), equalTo("asdf"));
         input.close();
 
-        String longString = createLongString();
-        assertThat(IOUtils.toString(new ByteArrayInputStream(longString.getBytes(StandardCharsets.UTF_8)), true),
-                equalTo(longString));
+        String longString=createLongString();
+        assertThat(IOUtils.toString(new ByteArrayInputStream(longString.getBytes(StandardCharsets.UTF_8)), true), equalTo(longString));
 
         assertThat(IOUtils.toString(new FileInputStream("src/test/resources/testfile"), true), equalTo("##########"));
 
     }
 
-    @Test
-    void shouldHandleInputStreamNull() {
+    @Test(expected=NullPointerException.class)
+    public void shouldHandleInputStreamNull() throws IOException {
         // this causes a NPE in the apache-commons code, no point
         // in changing the logic in our implementation, I guess
-        assertThrows(NullPointerException.class, () -> IOUtils.toString((InputStream) null, true));
+        IOUtils.toString((InputStream)null, true);
     }
 
     @Test
-    void shouldCloseInputStream() throws IOException {
+    public void shouldCloseInputStream() throws IOException {
         InputStream stream = mock(InputStream.class);
         when(stream.read(isA(byte[].class), anyInt(), anyInt())).thenReturn(-1);
         IOUtils.toString(stream, true);
@@ -115,21 +100,19 @@ class IOUtilsBehaviour {
     }
 
     @Test
-    void shouldNotCloseInputStream() throws IOException {
+    public void shouldNotCloseInputStream() throws IOException {
         InputStream stream = mock(InputStream.class);
         when(stream.read(isA(byte[].class), anyInt(), anyInt())).thenReturn(-1);
         IOUtils.toString(stream, false);
         verify(stream, never()).close();
     }
 
-    @Test
-    void shouldCloseInputStreamException() throws IOException {
+    @Test(expected = IOException.class)
+    public void shouldCloseInputStreamException() throws IOException {
         InputStream stream = mock(InputStream.class);
         when(stream.read(isA(byte[].class), anyInt(), anyInt())).thenThrow(new IOException());
         try {
             IOUtils.toString(stream, true);
-        } catch (Exception e) {
-            assertThat(e, is(instanceOf(IOException.class)));
         } finally {
             verify(stream).close();
         }
@@ -139,9 +122,9 @@ class IOUtilsBehaviour {
      * create a 1mb String
      */
     private String createLongString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb=new StringBuilder();
         sb.append("*");
-        for (int i = 0; i < 20; i++) {
+        for(int i=0;i<20;i++) {
             sb.append(sb);
         }
         return sb.toString();

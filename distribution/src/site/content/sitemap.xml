@@ -40,6 +40,8 @@
     <page>locating-stories.html</page>
     <page>reporting-stories.html</page>
     <page>running-stories.html</page>
+    <page>ant-tasks.html</page>
+    <page>hudson-plugin.html</page>
     <page>maven-goals.html</page>
     <page>stories-in-your-language.html</page>    
   </section>
@@ -64,6 +66,7 @@
     <page>story-mapping.html</page>
     <page>story-timeouts.html</page>
     <page>story-transformers.html</page>
+    <page>cross-reference.html</page>
     <page>surefire-reporter.html</page>
     <page>context-view.html</page>
     <page>multi-threading.html</page>    

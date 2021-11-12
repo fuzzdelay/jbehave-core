@@ -10,11 +10,11 @@ import static org.jbehave.core.steps.StepType.WHEN;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
@@ -39,6 +39,7 @@ import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.parsers.RegexPrefixCapturingPatternParser;
 import org.jbehave.core.parsers.StepPatternParser;
+import org.jbehave.core.steps.StepCollector.Stage;
 
 /**
  * <p>
@@ -71,9 +72,8 @@ import org.jbehave.core.parsers.StepPatternParser;
  * For instance, you could define a method as:
  * 
  * <pre>
- * <code>@When("I log in as $username with password: $password")
+ * @When("I log in as $username with password: $password")
  * public void logIn(String username, String password) { //... }
- * </code>
  * </pre>
  * 
  * and this would match the step:
@@ -99,9 +99,9 @@ import org.jbehave.core.parsers.StepPatternParser;
  */
 public class Steps extends AbstractCandidateSteps {
 
-    private final Class<?> type;
-    private final InjectableStepsFactory stepsFactory;
-    private final StepCreator stepCreator;
+    private Class<?> type;
+    private InjectableStepsFactory stepsFactory;
+    private StepCreator stepCreator;
 
     /**
      * Creates Steps with default configuration for a class extending this
@@ -192,16 +192,14 @@ public class Steps extends AbstractCandidateSteps {
         return candidates;
     }
 
-    private void addCandidatesFromVariants(List<StepCandidate> candidates, Method method, StepType stepType,
-            String value, int priority) {
+    private void addCandidatesFromVariants(List<StepCandidate> candidates, Method method, StepType stepType, String value, int priority) {
         PatternVariantBuilder b = new PatternVariantBuilder(value);
         for (String variant : b.allVariants()) {
             addCandidate(candidates, method, stepType, variant, priority);
         }
     }
-
-    private void addCandidatesFromAliases(List<StepCandidate> candidates, Method method, StepType stepType,
-            int priority) {
+    
+    private void addCandidatesFromAliases(List<StepCandidate> candidates, Method method, StepType stepType, int priority) {
         if (method.isAnnotationPresent(Aliases.class)) {
             String[] aliases = method.getAnnotation(Aliases.class).values();
             for (String alias : aliases) {
@@ -225,69 +223,50 @@ public class Steps extends AbstractCandidateSteps {
     }
 
     @Override
-    public List<BeforeOrAfterStep> listBeforeStories() {
-        return listSteps(BeforeStories.class, v -> true, BeforeStories::order);
+    public List<BeforeOrAfterStep> listBeforeOrAfterStories() {
+        List<BeforeOrAfterStep> steps = new ArrayList<>();
+        steps.addAll(listSteps(BeforeStories.class, Stage.BEFORE, v -> true, BeforeStories::order));
+        steps.addAll(listSteps(AfterStories.class, Stage.AFTER, v -> true, AfterStories::order));
+        return steps;
     }
 
     @Override
-    public List<BeforeOrAfterStep> listAfterStories() {
-        return listSteps(AfterStories.class, v -> true, AfterStories::order);
+    public List<BeforeOrAfterStep> listBeforeOrAfterStory(boolean givenStory) {
+        List<BeforeOrAfterStep> steps = new ArrayList<>();
+        steps.addAll(listSteps(BeforeStory.class, Stage.BEFORE, v -> v.uponGivenStory() == givenStory, BeforeStory::order));
+        steps.addAll(listSteps(AfterStory.class, Stage.AFTER, v -> v.uponGivenStory() == givenStory, AfterStory::order));
+        return steps;
     }
 
     @Override
-    public List<BeforeOrAfterStep> listBeforeStory(boolean givenStory) {
-        return listSteps(BeforeStory.class, v -> v.uponGivenStory() == givenStory, BeforeStory::order);
-    }
-
-    @Override
-    public List<BeforeOrAfterStep> listAfterStory(boolean givenStory) {
-        return listSteps(AfterStory.class, v -> v.uponGivenStory() == givenStory, AfterStory::order);
-    }
-
-    @Override
-    public Map<ScenarioType, List<BeforeOrAfterStep>> listBeforeScenario() {
-        Map<Method, BeforeScenario> beforeScenarioMethods = methodsAnnotatedWith(BeforeScenario.class);
-        Map<ScenarioType, List<BeforeOrAfterStep>> stepsPerType = new EnumMap<>(ScenarioType.class);
-        for (ScenarioType scenarioType : ScenarioType.values()) {
-            stepsPerType.put(scenarioType,
-                    listSteps(beforeScenarioMethods, v -> v.uponType() == scenarioType, BeforeScenario::order));
+    public List<BeforeOrAfterStep> listBeforeOrAfterScenario(ScenarioType type) {
+        List<BeforeOrAfterStep> steps = new ArrayList<>();
+        steps.addAll(listSteps(BeforeScenario.class, Stage.BEFORE, v -> v.uponType() == type, BeforeScenario::order));
+        for (Outcome outcome : new Outcome[] { ANY, SUCCESS, FAILURE }) {
+            steps.addAll(listSteps(AfterScenario.class, Stage.AFTER,
+                m -> new BeforeOrAfterStep(Stage.AFTER, m, outcome, stepCreator),
+                v -> v.uponType() == type && v.uponOutcome() == outcome, AfterScenario::order));
         }
-        return stepsPerType;
+        return steps;
     }
 
-    @Override
-    public Map<ScenarioType, List<BeforeOrAfterStep>> listAfterScenario() {
-        Map<Method, AfterScenario> afterScenarioMethods = methodsAnnotatedWith(AfterScenario.class);
-        Map<ScenarioType, List<BeforeOrAfterStep>> stepsPerType = new EnumMap<>(ScenarioType.class);
-        for (ScenarioType scenarioType : ScenarioType.values()) {
-            List<BeforeOrAfterStep> steps = new ArrayList<>();
-            for (Outcome outcome : new Outcome[] { ANY, SUCCESS, FAILURE }) {
-                steps.addAll(listSteps(afterScenarioMethods,
-                        v -> v.uponType() == scenarioType && v.uponOutcome() == outcome,
-                        (m, a) -> new BeforeOrAfterStep(m, a.order(), outcome, stepCreator)));
-            }
-            stepsPerType.put(scenarioType, steps);
-        }
-        return stepsPerType;
-    }
-
-    private <T extends Annotation> List<BeforeOrAfterStep> listSteps(Class<T> type, Predicate<T> predicate,
+    private <T extends Annotation> List<BeforeOrAfterStep> listSteps(Class<T> type, Stage stage, Predicate<T> predicate,
             ToIntFunction<T> order) {
-        return listSteps(methodsAnnotatedWith(type), predicate, order);
+        return listSteps(type, stage, m -> new BeforeOrAfterStep(stage, m, stepCreator), predicate, order);
     }
 
-    private <T extends Annotation> List<BeforeOrAfterStep> listSteps(Map<Method, T> methods, Predicate<T> predicate,
-            ToIntFunction<T> order) {
-        return listSteps(methods, predicate, (m, a) -> new BeforeOrAfterStep(m, order.applyAsInt(a), stepCreator));
-    }
-
-    private <T extends Annotation> List<BeforeOrAfterStep> listSteps(Map<Method, T> methods,
-            Predicate<T> predicate, BiFunction<Method, T, BeforeOrAfterStep> factory) {
-        return methods.entrySet()
-                .stream()
-                .filter(e -> predicate.test(e.getValue()))
-                .map(e -> factory.apply(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+    private <T extends Annotation> List<BeforeOrAfterStep> listSteps(Class<T> type, Stage stage,
+            Function<Method, BeforeOrAfterStep> factory, Predicate<T> predicate, ToIntFunction<T> order) {
+        Comparator<Integer> orderComparator = Stage.AFTER == stage ? Comparator.naturalOrder()
+                : Comparator.reverseOrder();
+        return methodsAnnotatedWith(type).entrySet().stream()
+                                                    .filter(e -> predicate.test(e.getValue()))
+                                                    .collect(Collectors.toList())
+                                                    .stream()
+                                                    .sorted(Comparator.comparing(e -> order.applyAsInt(e.getValue()), orderComparator))
+                                                    .map(Map.Entry::getKey)
+                                                    .map(factory)
+                                                    .collect(Collectors.toList());
     }
 
     private Method[] allMethods() {

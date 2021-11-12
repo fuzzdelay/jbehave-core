@@ -1,5 +1,7 @@
 package org.jbehave.core.embedder;
 
+import groovy.lang.GroovyClassLoader;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,8 +18,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Meta.Property;
-
-import groovy.lang.GroovyClassLoader;
 
 /**
  * <p>
@@ -37,8 +37,8 @@ import groovy.lang.GroovyClassLoader;
  * 
  * <pre>
  * MetaFilter filter = new MetaFilter(
- *         &quot;+author Mauro -theme smoke testing +map *API -skip&quot;);
- * filter.excluded(new Meta(asList(&quot;map someAPI&quot;)));
+ * 		&quot;+author Mauro -theme smoke testing +map *API -skip&quot;);
+ * filter.allow(new Meta(asList(&quot;map someAPI&quot;)));
  * </pre>
  * 
  * </p>
@@ -49,7 +49,7 @@ import groovy.lang.GroovyClassLoader;
  * 
  * <pre>
  * MetaFilter filter = new MetaFilter(
- *         &quot;groovy: (a == '11' | a == '22') &amp;&amp; b == '33'&quot;);
+ * 		&quot;groovy: (a == '11' | a == '22') &amp;&amp; b == '33'&quot;);
  * </pre>
  * <p>
  * Custom {@link MetaMatcher} instances can also be provided as a map, indexed
@@ -69,13 +69,13 @@ import groovy.lang.GroovyClassLoader;
 public class MetaFilter {
 
     private static final String NO_FILTER = "";
-    private static final String GROOVY = "groovy:";
+	private static final String GROOVY = "groovy:";
 
-    public static final MetaFilter EMPTY = new MetaFilter();
+	public static final MetaFilter EMPTY = new MetaFilter();
 
     private final String filterAsString;
     private final EmbedderMonitor monitor;
-    private final Map<String, MetaMatcher> metaMatchers;
+	private final Map<String, MetaMatcher> metaMatchers;
     private final MetaMatcher filterMatcher;
 
     public MetaFilter() {
@@ -87,15 +87,15 @@ public class MetaFilter {
     }
 
     public MetaFilter(String filterAsString, EmbedderMonitor monitor) {
-        this(filterAsString, monitor, new HashMap<String, MetaMatcher>());
+    	this(filterAsString, monitor, new HashMap<String, MetaMatcher>());
     }
 
     public MetaFilter(String filterAsString, Map<String,MetaMatcher> metaMatchers) {
-        this(filterAsString, new PrintStreamEmbedderMonitor(), metaMatchers);
+    	this(filterAsString, new PrintStreamEmbedderMonitor(), metaMatchers);
     }
 
     public MetaFilter(String filterAsString, EmbedderMonitor monitor, Map<String,MetaMatcher> metaMatchers) {
-        this.filterAsString = filterAsString == null ? NO_FILTER : filterAsString;
+		this.filterAsString = filterAsString == null ? NO_FILTER : filterAsString;
         this.monitor = monitor;
         this.metaMatchers = metaMatchers;
         this.filterMatcher = createMetaMatcher(this.filterAsString, this.metaMatchers);
@@ -110,23 +110,23 @@ public class MetaFilter {
      * @return A MetaMatcher used to match the filter content
      */
     protected MetaMatcher createMetaMatcher(String filterAsString, Map<String, MetaMatcher> metaMatchers) {
-        for (String key : metaMatchers.keySet()) {
-            if (filterAsString.startsWith(key)) {
-                return metaMatchers.get(key);
-            }
-        }
+    	for ( String key : metaMatchers.keySet() ){
+    		if ( filterAsString.startsWith(key)){
+    			return metaMatchers.get(key);
+    		}
+    	}
         if (filterAsString.startsWith(GROOVY)) {
             return new GroovyMetaMatcher();
         }
         return new DefaultMetaMatcher();
     }
 
-    public boolean excluded(Meta meta) {
-        boolean excluded = !this.filterMatcher.match(meta);
-        if (excluded) {
-            monitor.metaExcluded(meta, this);
+    public boolean allow(Meta meta) {
+        boolean allowed = this.filterMatcher.match(meta);
+        if (!allowed) {
+            monitor.metaNotAllowed(meta, this);
         }
-        return excluded;
+        return allowed;
     }
 
     public MetaMatcher metaMatcher() {
@@ -169,14 +169,6 @@ public class MetaFilter {
             parse(exclude, "-");
         }
 
-        private void parse(Properties properties, String prefix) {
-            properties.clear();
-            for (String found : found(prefix)) {
-                Property property = new Property(StringUtils.removeStartIgnoreCase(found, prefix));
-                properties.setProperty(property.getName(), property.getValue());
-            }
-        }
-
         @Override
         public boolean match(Meta meta) {
             boolean matched;
@@ -192,27 +184,12 @@ public class MetaFilter {
             return matched;
         }
 
-        private boolean match(Properties properties, Meta meta) {
-            boolean matches = false;
-            for (Object key : properties.keySet()) {
-                String property = (String) properties.get(key);
-                for (String metaName : meta.getPropertyNames()) {
-                    if (key.equals(metaName)) {
-                        String value = meta.getProperty(metaName);
-                        if (StringUtils.isBlank(value)) {
-                            matches = true;
-                        } else if (property.contains("*")) {
-                            matches = value.matches(property.replace("*", ".*"));
-                        } else {
-                            matches = properties.get(key).equals(value);
-                        }
-                    }
-                    if (matches) {
-                        break;
-                    }
-                }
+        private void parse(Properties properties, String prefix) {
+            properties.clear();
+            for (String found : found(prefix)) {
+                Property property = new Property(StringUtils.removeStartIgnoreCase(found, prefix));
+                properties.setProperty(property.getName(), property.getValue());
             }
-            return matches;
         }
 
         private Set<String> found(String prefix) {
@@ -242,6 +219,29 @@ public class MetaFilter {
             return merged;
         }
 
+        private boolean match(Properties properties, Meta meta) {
+            boolean matches = false;
+            for (Object key : properties.keySet()) {
+                String property = (String) properties.get(key);
+                for (String metaName : meta.getPropertyNames()) {
+                    if (key.equals(metaName)) {
+                        String value = meta.getProperty(metaName);
+                        if (StringUtils.isBlank(value)) {
+                            matches = true;
+                        } else if (property.contains("*")) {
+                            matches = value.matches(property.replace("*", ".*"));
+                        } else {
+                            matches = properties.get(key).equals(value);
+                        }
+                    }
+                    if (matches) {
+                        break;
+                    }
+                }
+            }
+            return matches;
+        }
+
     }
 
     public class GroovyMetaMatcher implements MetaMatcher {
@@ -252,22 +252,22 @@ public class MetaFilter {
 
         @Override
         public void parse(String filterAsString) {
-            String groovyString = "public class GroovyMatcher {\n"
-                    + "public org.jbehave.core.model.Meta meta\n"
-                    + "  public boolean match() {\n"
-                    + "    return (" + filterAsString.substring(GROOVY.length()) + ")\n"
-                    + "  }\n"
-                    + "  def propertyMissing(String name) {\n"
-                    + "    if (!meta.hasProperty(name)) {\n"
-                    + "      return false\n"
-                    + "    }\n"
-                    + "    def v = meta.getProperty(name)\n"
-                    + "    if (v.equals('')) {\n"
-                    + "      return true\n"
-                    + "    }\n"
-                    + "    return v\n"
-                    + "  }\n"
-                    + "}";
+            String groovyString = "public class GroovyMatcher {\n" +
+                    "public org.jbehave.core.model.Meta meta\n" +
+                    "  public boolean match() {\n" +
+                    "    return (" + filterAsString.substring(GROOVY.length()) + ")\n" +
+                    "  }\n" +
+                    "  def propertyMissing(String name) {\n" +
+                    "    if (!meta.hasProperty(name)) {\n" +
+                    "      return false\n" +
+                    "    }\n" +
+                    "    def v = meta.getProperty(name)\n" +
+                    "    if (v.equals('')) {\n" +
+                    "      return true\n" +
+                    "    }\n" +
+                    "    return v\n" +
+                    "  }\n" +
+                    "}";
 
             GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader());
             groovyClass = loader.parseClass(groovyString);
@@ -297,8 +297,8 @@ public class MetaFilter {
         }
     }
 
-    public boolean isEmpty() {
-        return EMPTY == this;
-    }
+	public boolean isEmpty() {
+		return EMPTY == this;
+	}
 
 }

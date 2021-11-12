@@ -111,7 +111,7 @@ public class LoadFromConfluence implements ResourceLoader {
             for (Element child : element.children().select(tag)) {
                 cleanNodes(child, tag);
             }
-            element.replaceWith(new TextNode(element.text() + "<br/>"));
+            element.replaceWith(new TextNode(element.text() + "<br/>", ""));
         }
     }
 }

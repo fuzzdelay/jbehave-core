@@ -1,7 +1,5 @@
 package org.jbehave.core.steps;
 
-import static java.text.MessageFormat.format;
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
@@ -9,14 +7,20 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Configuration;
 
+import static java.text.MessageFormat.format;
+
+/**
+ * @author Valery Yatsynovich
+ */
 public abstract class AbstractCandidateSteps implements CandidateSteps {
     private final Configuration configuration;
 
-    protected AbstractCandidateSteps(Configuration configuration) {
+    public AbstractCandidateSteps(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    protected Configuration configuration() {
+    @Override
+    public Configuration configuration() {
         return configuration;
     }
 
@@ -28,8 +32,7 @@ public abstract class AbstractCandidateSteps implements CandidateSteps {
         }
     }
 
-    private Predicate<StepCandidate> isDuplicate(StepCandidate candidate, String candidateName,
-            String parameterPrefix) {
+    private Predicate<StepCandidate> isDuplicate(StepCandidate candidate, String candidateName, String parameterPrefix) {
         return c ->
                candidateName.startsWith(StringUtils.substringBefore(c.getName(), parameterPrefix))
             && c.matches(candidateName)
@@ -38,8 +41,8 @@ public abstract class AbstractCandidateSteps implements CandidateSteps {
 
     protected StepCandidate createCandidate(String stepPatternAsString, int priority, StepType stepType, Method method,
             Class<?> type, InjectableStepsFactory stepsFactory) {
-        StepCandidate candidate = new StepCandidate(stepPatternAsString, priority, stepType, method, type,
-                stepsFactory, configuration.stepsContext(), configuration.keywords(), configuration.stepPatternParser(),
+        StepCandidate candidate = new StepCandidate(
+                new stepCandidateParamObj(stepPatternAsString, priority, stepType, method, type, stepsFactory), configuration.stepsContext(), configuration.keywords(), configuration.stepPatternParser(),
                 configuration.parameterConverters(), configuration.parameterControls());
         candidate.useStepMonitor(configuration.stepMonitor());
         candidate.useParanamer(configuration.paranamer());

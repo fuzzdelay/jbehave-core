@@ -8,14 +8,11 @@ import java.util.List;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.io.StoryFinder;
-import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnit4StoryRunner.class)
 public class JRubyStories extends JUnitStories {
 
     @Override
@@ -25,7 +22,7 @@ public class JRubyStories extends JUnitStories {
     }
 
     @Override
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder()
                 .findPaths(codeLocationFromClass(this.getClass()), "**/*.story", "");
     }

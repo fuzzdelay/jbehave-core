@@ -7,17 +7,13 @@ import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 
 public class FreemarkerProcessor implements TemplateProcessor {
-    private ClassLoader templateLoadingFrom;
+    private Class<?> templateLoadingFrom;
         
     public FreemarkerProcessor() {
         this(FreemarkerProcessor.class);
     }
 
     public FreemarkerProcessor(Class<?> templateLoadingFrom) {
-        this(templateLoadingFrom.getClassLoader());
-    }
-
-    public FreemarkerProcessor(ClassLoader templateLoadingFrom) {
         this.templateLoadingFrom = templateLoadingFrom;
     }
 
@@ -33,7 +29,7 @@ public class FreemarkerProcessor implements TemplateProcessor {
 
     public Configuration configuration() {
         Configuration configuration = new Configuration();
-        configuration.setClassLoaderForTemplateLoading(templateLoadingFrom, "/");
+        configuration.setClassForTemplateLoading(templateLoadingFrom, "/");
         configuration.setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
         return configuration;
     }
@@ -41,10 +37,8 @@ public class FreemarkerProcessor implements TemplateProcessor {
     @SuppressWarnings("serial")
     public static class FreemarkerProcessingFailed extends RuntimeException {
 
-        public FreemarkerProcessingFailed(Configuration configuration, String resource, Map<String, Object> dataModel,
-                Exception cause) {
-            super("Freemarker failed to process template " + resource + " using configuration " + configuration
-                    + " and data model " + dataModel, cause);
+        public FreemarkerProcessingFailed(Configuration configuration, String resource, Map<String, Object> dataModel, Exception cause) {
+            super("Freemarker failed to process template " + resource + " using configuration "+configuration + " and data model "+dataModel, cause);
         }
         
     }

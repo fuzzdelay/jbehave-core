@@ -17,7 +17,7 @@ public class EmbedderControls {
     private boolean verboseFiltering = false;
     private String storyTimeouts = "300";
     private int threads = 1;
-    private boolean failOnStoryTimeout = false;
+	private boolean failOnStoryTimeout = false;
 
     public EmbedderControls() {
     }
@@ -42,7 +42,7 @@ public class EmbedderControls {
         return ignoreFailureInView;
     }
 
-    public boolean verboseFailures() {
+    public boolean verboseFailures(){
         return verboseFailures;
     }
 
@@ -54,12 +54,32 @@ public class EmbedderControls {
         return storyTimeouts;
     }
 
-    public boolean failOnStoryTimeout() {
-        return failOnStoryTimeout;
+    /**
+     * @deprecated use {@link #storyTimeouts()}
+     */
+    @Deprecated
+    public long storyTimeoutInSecs() {
+    	try {
+    		return Long.parseLong(storyTimeouts);
+    	} catch (NumberFormatException e ){
+            return 0;
+    	}
+    }
+    
+    /**
+     * @deprecated use {@link #storyTimeouts()}
+     */
+    @Deprecated
+    public String storyTimeoutInSecsByPath() {
+        return storyTimeouts();
     }
 
-    public int threads() {
-        return threads;
+	public boolean failOnStoryTimeout() {
+		return failOnStoryTimeout;
+	}
+
+	public int threads() {
+       return threads;
     }
 
     public EmbedderControls doBatch(boolean batch) {
@@ -87,18 +107,36 @@ public class EmbedderControls {
         return this;
     }
 
-    public EmbedderControls doVerboseFailures(boolean verboseFailures) {
+    public EmbedderControls doVerboseFailures(boolean verboseFailures){
         this.verboseFailures = verboseFailures;
         return this;        
     }
 
-    public EmbedderControls doVerboseFiltering(boolean verboseFiltering) {
+    public EmbedderControls doVerboseFiltering(boolean verboseFiltering){
         this.verboseFiltering = verboseFiltering;
         return this;        
     }
 
     public EmbedderControls useStoryTimeouts(String storyTimeouts) {
         this.storyTimeouts = storyTimeouts;
+        return this;
+    }
+
+    /**
+     * @deprecated use {@link #useStoryTimeouts(String)}
+     */
+    @Deprecated
+    public EmbedderControls useStoryTimeoutInSecs(long storyTimeoutInSecs) {
+    	useStoryTimeouts(Long.toString(storyTimeoutInSecs));
+        return this;
+    }
+
+    /**
+     * @deprecated use {@link #useStoryTimeouts(String)}
+     */
+    @Deprecated
+    public EmbedderControls useStoryTimeoutInSecsByPath(String storyTimeoutInSecsByPath) {
+    	useStoryTimeouts(storyTimeoutInSecsByPath);
         return this;
     }
 

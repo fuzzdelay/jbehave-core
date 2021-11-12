@@ -1,19 +1,5 @@
 package org.jbehave.core.reporters;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.IDE_CONSOLE;
-import static org.jbehave.core.reporters.Format.JSON;
-import static org.jbehave.core.reporters.Format.STATS;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -32,12 +18,29 @@ import org.jbehave.core.io.UnderscoredCamelCaseResolver;
 import org.jbehave.core.junit.JUnitStory;
 import org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToPackagedName;
 import org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToSimpleName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class StoryReporterBuilderBehaviour {
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.JSON;
+import static org.jbehave.core.reporters.Format.IDE_CONSOLE;
+import static org.jbehave.core.reporters.Format.STATS;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
+
+public class StoryReporterBuilderBehaviour {
 
     @Test
-    void shouldBuildWithStatsByDefault() {
+    public void shouldBuildWithStatsByDefault() {
         // Given
         StoryReporterBuilder builder = new StoryReporterBuilder();
         String storyPath = storyPath(MyStory.class);
@@ -55,7 +58,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomRelativeDirectory() {
+    public void shouldBuildWithCustomRelativeDirectory() {
         // Given
         StoryReporterBuilder builder = new StoryReporterBuilder();
         String storyPath = storyPath(MyStory.class);
@@ -70,7 +73,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomPathResolver() {
+    public void shouldBuildWithCustomPathResolver() {
         // Given
         StoryReporterBuilder builder = new StoryReporterBuilder();
         String storyPath = storyPath(MyStory.class);
@@ -85,7 +88,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithReportingOfFailureTrace() {
+    public void shouldBuildWithReportingOfFailureTrace() {
         // Given
         StoryReporterBuilder builder = new StoryReporterBuilder();
         String storyPath = storyPath(MyStory.class);
@@ -106,7 +109,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomCodeLocation() {
+    public void shouldBuildWithCustomCodeLocation() {
         // Given
         StoryReporterBuilder builder = new StoryReporterBuilder();
         String storyPath = storyPath(MyStory.class);
@@ -123,7 +126,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomViewResources() {
+    public void shouldBuildWithCustomViewResources() {
         // Given
         String storyPath = storyPath(MyStory.class);
         StoryReporterBuilder builder = new StoryReporterBuilder();
@@ -138,7 +141,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomKeywords() {
+    public void shouldBuildWithCustomKeywords() {
         // Given
         String storyPath = storyPath(MyStory.class);
         Keywords keywords = new LocalizedKeywords(new Locale("it"));
@@ -169,7 +172,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithReporterOfDifferentFormatsForSingleThreaded() {
+    public void shouldBuildWithReporterOfDifferentFormatsForSingleThreaded() {
 
         StoryReporterBuilder builder = new StoryReporterBuilder().withMultiThreading(false);
         shouldBuildWithReporterOfDifferentFormats(builder);
@@ -177,7 +180,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithReporterOfDifferentFormatsForMultiThreaded() {
+    public void shouldBuildWithReporterOfDifferentFormatsForMultiThreaded() {
 
         StoryReporterBuilder builder = new StoryReporterBuilder().withMultiThreading(true);
         shouldBuildWithReporterOfDifferentFormats(builder);
@@ -212,7 +215,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomReporterForAGivenFormat() {
+    public void shouldBuildWithCustomReporterForAGivenFormat() {
         // Given
         String storyPath = storyPath(MyStory.class);
         final FilePrintStreamFactory factory = new FilePrintStreamFactory(new StoryLocation(
@@ -244,7 +247,7 @@ class StoryReporterBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildWithCustomReportersAsProvidedFormat() {
+    public void shouldBuildWithCustomReportersAsProvidedFormat() {
         // Given
         String storyPath = storyPath(MyStory.class);
         FilePrintStreamFactory factory = new FilePrintStreamFactory(new StoryLocation(

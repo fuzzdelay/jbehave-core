@@ -1,14 +1,10 @@
 package org.jbehave.core.steps;
 
-import static java.text.MessageFormat.format;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.thoughtworks.paranamer.Paranamer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.AfterScenario.Outcome;
@@ -21,6 +17,10 @@ import org.jbehave.core.configuration.Keywords.StartingWordNotFound;
 import org.jbehave.core.parsers.StepMatcher;
 import org.jbehave.core.parsers.StepPatternParser;
 import org.jbehave.core.steps.context.StepsContext;
+
+import com.thoughtworks.paranamer.Paranamer;
+
+import static java.text.MessageFormat.format;
 
 /**
  * A StepCandidate is associated to a Java method annotated with {@link Given},
@@ -45,9 +45,8 @@ public class StepCandidate {
     private String[] composedSteps;
     private StepMonitor stepMonitor = new SilentStepMonitor();
 
-    public StepCandidate(StepCandidateParamObj stepCandidateParamObj, StepsContext stepsContext, Keywords keywords,
-                         StepPatternParser stepPatternParser, ParameterConverters parameterConverters,
-                         ParameterControls parameterControls) {
+    public StepCandidate(stepCandidateParamObj stepCandidateParamObj, StepsContext stepsContext, Keywords keywords,
+                         StepPatternParser stepPatternParser, ParameterConverters parameterConverters, ParameterControls parameterControls) {
         this.patternAsString = stepCandidateParamObj.getPatternAsString();
         this.priority = stepCandidateParamObj.getPriority();
         this.stepType = stepCandidateParamObj.getStepType();
@@ -167,7 +166,7 @@ public class StepCandidate {
                 }
             }
             stepMonitor.stepMatchesType(step, previousNonAndStep, matchesType, stepType, method, stepsType);
-            boolean matchesPattern = stepMatcher.matcher(stripStartingWord(step)).matches();
+            boolean matchesPattern = stepMatcher.matches(stripStartingWord(step));
             stepMonitor.stepMatchesPattern(step, matchesPattern, stepMatcher.pattern(), method, stepsType);
             // must match both type and pattern
             return matchesType && matchesPattern;
@@ -234,13 +233,21 @@ public class StepCandidate {
         if (keywords.isAndStep(composedStep)) {
             if (previousNonAndStep != null) {
                 stepType = keywords.stepTypeFor(previousNonAndStep);
-            } else {
+            }
+            else {
                 // cannot handle AND step with no previous step
                 return null;
             }
-        } else {
+        }
+        else {
             stepType = keywords.stepTypeFor(composedStep);
         }
+        StepCandidate candidate = getStepCandidate(composedStep, previousNonAndStep, allCandidates, stepType);
+        if (candidate != null) return candidate;
+        return null;
+    }
+
+    private StepCandidate getStepCandidate(String composedStep, String previousNonAndStep, List<StepCandidate> allCandidates, StepType stepType) {
         for (StepCandidate candidate : allCandidates) {
             if (stepType == candidate.getStepType() && (StringUtils.endsWith(composedStep,
                     candidate.getPatternAsString()) || candidate.matches(composedStep, previousNonAndStep))) {

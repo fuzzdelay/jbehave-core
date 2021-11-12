@@ -1,7 +1,7 @@
 package org.jbehave.core.embedder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -9,40 +9,45 @@ import org.jbehave.core.model.Story;
 
 public class FilteredStory {
 
-    private final boolean filterIgnored;
-    private final boolean storyExcluded;
-    private final List<Scenario> scenariosIncluded = new ArrayList<>();
+	private boolean alwaysAllowed;
+    private boolean storyAllowed;
+    private Map<Scenario, Boolean> scenariosAllowed;
 
-    public FilteredStory(MetaFilter filter, Story story, StoryControls storyControls) {
-        this(filter, story, storyControls, false);
+    public FilteredStory(MetaFilter filter, Story story, StoryControls storyControls){
+    	this(filter, story, storyControls, false);
     }
     
     public FilteredStory(MetaFilter filter, Story story, StoryControls storyControls, boolean givenStory) {
-        filterIgnored = givenStory && storyControls.ignoreMetaFiltersIfGivenStory();
+    	if (  givenStory && storyControls.ignoreMetaFiltersIfGivenStory() ){
+    		alwaysAllowed = true;
+    	}
         String storyMetaPrefix = storyControls.storyMetaPrefix();
         String scenarioMetaPrefix = storyControls.scenarioMetaPrefix();
         Meta storyMeta = story.getMeta().inheritFrom(story.asMeta(storyMetaPrefix));
-        storyExcluded = filter.excluded(storyMeta);
+        storyAllowed = filter.allow(storyMeta);
+        scenariosAllowed = new HashMap<>();
         for (Scenario scenario : story.getScenarios()) {
+            boolean scenarioAllowed;
             if (scenario.getExamplesTable().getRowCount() > 0 && metaByRow(scenario, storyControls)) {
-                // allow filtering on meta by row
-                scenariosIncluded.add(scenario);
+            	// allow filtering on meta by row 
+                scenarioAllowed = true;
             } else {
                 Meta scenarioMeta = scenario.getMeta().inheritFrom(
                         scenario.asMeta(scenarioMetaPrefix).inheritFrom(storyMeta));
-                if (!filter.excluded(scenarioMeta)) {
-                    scenariosIncluded.add(scenario);
-                }
+                scenarioAllowed = filter.allow(scenarioMeta);
             }
+            scenariosAllowed.put(scenario, scenarioAllowed);
         }
     }
 
-    public boolean excluded() {
-        return !filterIgnored && storyExcluded && scenariosIncluded.isEmpty();
+    public boolean allowed() {
+    	if ( alwaysAllowed ) return true;
+        return storyAllowed || scenariosAllowed.values().contains(true);
     }
 
-    public boolean excluded(Scenario scenario) {
-        return !filterIgnored && !scenariosIncluded.contains(scenario);
+    public boolean allowed(Scenario scenario) {
+    	if ( alwaysAllowed ) return true;
+        return scenariosAllowed.get(scenario);
     }
 
     private boolean metaByRow(Scenario scenario, StoryControls storyControls) {

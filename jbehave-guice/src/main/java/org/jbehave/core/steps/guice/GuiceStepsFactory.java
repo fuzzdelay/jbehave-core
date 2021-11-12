@@ -4,13 +4,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.Binding;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.steps.AbstractStepsFactory;
 import org.jbehave.core.steps.InjectableStepsFactory;
+
+import com.google.inject.Binding;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 
 /**
  * An {@link InjectableStepsFactory} that uses a Guice {@link Injector} for the
@@ -60,7 +60,7 @@ public class GuiceStepsFactory extends AbstractStepsFactory {
     public Object createInstanceOfType(Class<?> type) {
         List<Object> instances = new ArrayList<>();
         addInstances(injector, type, instances);
-        if (!instances.isEmpty()) {
+        if ( !instances.isEmpty() ){
             return instances.iterator().next();
         }
         return new StepsInstanceNotFound(type, this);

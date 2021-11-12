@@ -8,25 +8,14 @@ public class Timing {
     private long start;
     private long end;
 
-    public Timing() {
-    }
-
-    public Timing(Timer timer) {
-        this.start = timer.getStart();
-        this.end = timer.getEnd();
-        this.durationInMillis = timer.getDuration();
-    }
-
     public long getDurationInMillis() {
         return durationInMillis;
     }
 
-    public long getStart() {
-        return start;
-    }
-
-    public long getEnd() {
-        return end;
+    public void setTimings(Timer timer) {
+        this.start = timer.getStart();
+        this.end = timer.getEnd();
+        this.durationInMillis = timer.getDuration();
     }
 
     @Override

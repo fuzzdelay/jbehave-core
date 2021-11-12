@@ -2,11 +2,8 @@ package org.jbehave.examples.trader.i18n;
 
 import java.util.Locale;
 
-import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.jbehave.examples.trader.i18n.steps.DeSteps;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnit4StoryRunner.class)
 public class DeStories extends LocalizedStories {
     
     @Override

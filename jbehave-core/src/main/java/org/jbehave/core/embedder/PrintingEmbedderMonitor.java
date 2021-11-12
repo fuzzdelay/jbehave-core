@@ -48,7 +48,7 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
     }
 
     @Override
-    public void metaExcluded(Meta meta, MetaFilter filter) {
+    public void metaNotAllowed(Meta meta, MetaFilter filter) {
         print("%s excluded by filter '%s'", meta, filter.asString());
     }
 
@@ -74,18 +74,18 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
     }
 
     @Override
-    public void storiesExcluded(List<Story> excluded, MetaFilter filter, boolean verbose) {
+    public void storiesNotAllowed(List<Story> stories, MetaFilter filter, boolean verbose) {
         StringBuilder format = new StringBuilder("%d stories excluded by filter: %s%n");
         if (verbose) {
-            for (Story story : excluded) {
+            for (Story story : stories) {
                 format.append(story.getPath()).append("%n");
             }
         }
-        print(format.toString(), excluded.size(), filter.asString());
+        print(format.toString(), stories.size(), filter.asString());
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, MetaFilter filter) {
+    public void scenarioNotAllowed(Scenario scenario, MetaFilter filter) {
         print("Scenario '%s' excluded by filter: %s%n", scenario.getTitle(), filter.asString());
     }
 
@@ -114,12 +114,11 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
 
     @Override
     public void reportsViewGenerated(ReportsCount count) {
-        print("Reports view generated with %d stories (of which %d pending) containing %d scenarios (of which %d "
-                        + "pending)",
+        print("Reports view generated with %d stories (of which %d pending) containing %d scenarios (of which %d pending)",
                 count.getStories(), count.getStoriesPending(), count.getScenarios(), count.getScenariosPending());
-        if (count.getStoriesExcluded() > 0 || count.getScenariosExcluded() > 0) {
-            print("Meta filters excluded %d stories and  %d scenarios", count.getStoriesExcluded(),
-                    count.getScenariosExcluded());
+        if (count.getStoriesNotAllowed() > 0 || count.getScenariosNotAllowed() > 0) {
+            print("Meta filters excluded %d stories and  %d scenarios", count.getStoriesNotAllowed(),
+                    count.getScenariosNotAllowed());
         }
     }
 
@@ -150,6 +149,22 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
         print("Failed to generating maps view to '%s' using story maps '%s' and view properties '%s'", outputDirectory,
                 storyMaps, viewProperties);
         printStackTrace(cause);
+    }
+
+    @Override
+    public void generatingNavigatorView(File outputDirectory, Properties viewProperties) {
+        print("Generating navigator view to '%s' using view properties '%s'", outputDirectory, viewProperties);
+    }
+
+    @Override
+    public void navigatorViewGenerationFailed(File outputDirectory, Properties viewProperties, Throwable cause) {
+        print("Failed to generating navigator view to '%s' using view properties '%s'", outputDirectory, viewProperties);
+        printStackTrace(cause);
+    }
+
+    @Override
+    public void navigatorViewNotGenerated() {
+        print("Navigator view not generated, as the CrossReference has not been declared in the StoryReporterBuilder");
     }
 
     @Override
@@ -186,10 +201,9 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
     
     @Override
     public void invalidTimeoutFormat(String path) {
-        print("Failed to set specific story timeout for story %s because 'storyTimeoutInSecsByPath' has incorrect "
-                + "format", path);
-        print("'storyTimeoutInSecsByPath' must be a CSV of regex expressions matching story paths. E.g. \"*/long/*"
-                + ".story:5000,*/short/*.story:200\"");
+        print("Failed to set specific story timeout for story %s because 'storyTimeoutInSecsByPath' has incorrect format",
+                path);
+        print("'storyTimeoutInSecsByPath' must be a CSV of regex expressions matching story paths. E.g. \"*/long/*.story:5000,*/short/*.story:200\"");
     }
 
     @Override
@@ -197,7 +211,7 @@ public abstract class PrintingEmbedderMonitor extends NullEmbedderMonitor {
         print("Using timeout for story %s of %d secs.", path, timeout);
     }
 
-    @Override
+     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }

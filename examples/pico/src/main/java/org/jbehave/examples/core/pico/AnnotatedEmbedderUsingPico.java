@@ -1,11 +1,5 @@
 package org.jbehave.examples.core.pico;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -35,8 +29,15 @@ import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.picocontainer.MutablePicoContainer;
+
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
+import static org.jbehave.core.reporters.StoryReporterBuilder.Format.CONSOLE;
+import static org.jbehave.core.reporters.StoryReporterBuilder.Format.HTML;
+import static org.jbehave.core.reporters.StoryReporterBuilder.Format.TXT;
+import static org.jbehave.core.reporters.StoryReporterBuilder.Format.XML;
 
 /**
  * Run stories via annotated embedder configuration and steps using Pico. The
@@ -46,18 +47,17 @@ import org.picocontainer.MutablePicoContainer;
  */
 @RunWith(PicoAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingPico(modules = { ConfigurationModule.class, StepsModule.class })
 public class AnnotatedEmbedderUsingPico extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 
@@ -65,8 +65,7 @@ public class AnnotatedEmbedderUsingPico extends InjectableEmbedder {
 
         @Override
         public void configure(MutablePicoContainer container) {
-            container.addComponent(StoryControls.class,
-                    new StoryControls().doDryRun(false).doSkipScenariosAfterFailure(false));
+            container.addComponent(StoryControls.class, new StoryControls().doDryRun(false).doSkipScenariosAfterFailure(false));
             container.addComponent(StoryLoader.class, new LoadFromClasspath(this.getClass().getClassLoader()));
             container.addComponent(ParameterConverter.class, new DateConverter(new SimpleDateFormat("yyyy-MM-dd")));
             container.addComponent(new StoryReporterBuilder().withDefaultFormats().withFormats(CONSOLE, HTML, TXT, XML)

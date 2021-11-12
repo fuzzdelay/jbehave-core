@@ -1,12 +1,13 @@
 package org.jbehave.examples.core.urls;
 
-import static java.util.Arrays.asList;
-import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
-
 import java.util.List;
 
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.io.StoryFinder;
+import org.junit.Test;
+
+import static java.util.Arrays.asList;
+import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
 
 /**
  * Example of how to use one or more Embedders to embed the story running into
@@ -16,7 +17,7 @@ import org.jbehave.core.io.StoryFinder;
  */
 public class CoreStoryRunner {
 
-    @org.junit.Test
+    @Test
     public void runURLLoadedStoriesAsJUnit() {
         // Embedder defines the configuration and candidate steps
         Embedder embedder = new URLCoreEmbedder();

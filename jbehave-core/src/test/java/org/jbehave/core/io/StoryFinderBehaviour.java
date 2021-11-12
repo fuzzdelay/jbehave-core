@@ -1,7 +1,17 @@
 package org.jbehave.core.io;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.junit.Test;
+
 import static java.util.Arrays.asList;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -10,26 +20,18 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
-class StoryFinderBehaviour {
+public class StoryFinderBehaviour {
 
     private StoryFinder finder = new StoryFinder();
 
     @Test
-    void shouldFindNoPaths() {
+    public void shouldFindNoPaths() {
         List<String> storyPaths = new ArrayList<>(finder.findPaths("src/test/java", (String) null, null));
         assertThat(storyPaths.size(), equalTo(0));
     }
 
     @Test
-    void shouldFindPathsWithFiltersAsArrays() {
+    public void shouldFindPathsWithFiltersAsArrays() {
         List<String> storyPaths = new ArrayList<>(
                 finder.findPaths("src/test/java", new String[] { "**/stories/*_story" }, new String[] {}));
         assertThat(storyPaths.size(), equalTo(4));
@@ -40,7 +42,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindPathsWithFiltersAsCSV() {
+    public void shouldFindPathsWithFiltersAsCSV() {
         List<String> storyPaths = new ArrayList<>(
                 finder.findPaths("src/test/java", "**/stories/*_story,**/my_*", "**/*.txt,**/none*"));
         assertThat(storyPaths.size(), equalTo(4));
@@ -51,7 +53,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindPathsAndPrefixThem() {
+    public void shouldFindPathsAndPrefixThem() {
         List<String> storyPaths = new ArrayList<>(
                 finder.findPaths("src/test/java", asList("**/stories/*_story"), asList(""), "file:"));
         assertThat(storyPaths.size(), equalTo(4));
@@ -62,7 +64,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindPathsAndIgnorePrefixIfBlank() {
+    public void shouldFindPathsAndIgnorePrefixIfBlank() {
         List<String> storyPaths = new ArrayList<>(
                 finder.findPaths("src/test/java", asList("**/stories/*_story"), asList(""), ""));
         assertThat(storyPaths.size(), equalTo(4));
@@ -73,21 +75,21 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindPathsFromJarPath() {
+    public void shouldFindPathsFromJarPath() {
         String jarPath = "src/test/resources/stories.jar";
         assertThat(finder.findPaths(jarPath, "**/*.story", "**/*_search.story"),
                 equalTo((asList("etsy_browse.story", "etsy_cart.story"))));
     }
 
     @Test
-    void shouldFindPathsFromJarURL() {
+    public void shouldFindPathsFromJarURL() {
         URL jarURL = CodeLocations.codeLocationFromPath("src/test/resources/stories.jar");
         assertThat(finder.findPaths(jarURL, "**/*.story", "**/*_search.story"),
                 equalTo((asList("etsy_browse.story", "etsy_cart.story"))));
     }
 
     @Test
-    void shouldFindClassNamesAndTrasformThemIfMatchingExtension() {
+    public void shouldFindClassNamesAndTrasformThemIfMatchingExtension() {
         List<String> classNames = new ArrayList<>(
                 finder.findClassNames("src/test/java", asList("**/stories/*.java"), asList("")));
         assertThat(classNames.size(), equalTo(3));
@@ -97,7 +99,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindClassNamesButNotTransformThemIfNotMatchingExtension() {
+    public void shouldFindClassNamesButNotTransformThemIfNotMatchingExtension() {
         List<String> classNames = new ArrayList<>(
                 finder.findClassNames("src/test/java", asList("**/stories/*.groovy"), asList("")));
         assertThat(classNames.size(), equalTo(1));
@@ -107,7 +109,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindAndSortClassNamesWithCustomComparator() {
+    public void shouldFindAndSortClassNamesWithCustomComparator() {
         // comparator that sorts in reversed natural order
         final Comparator<String> comparator = new Comparator<String>() {
             @Override
@@ -123,7 +125,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldFindClassNamesAndTrasformThemIfMatchingCustomExtension() {
+    public void shouldFindClassNamesAndTrasformThemIfMatchingCustomExtension() {
         finder = new StoryFinder(".groovy");
         List<String> classNames = new ArrayList<>(
                 finder.findClassNames("src/test/java", asList("**/stories/*.groovy"), asList("")));
@@ -134,7 +136,7 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldNormalisePaths() {
+    public void shouldNormalisePaths() {
         assertThat(finder.normalise(asList("path/to/a.story", "/path/to/a.story")),
                 equalTo(asList("path/to/a.story", "/path/to/a.story")));
         assertThat(finder.normalise(asList("path\\to\\a.story", "\\path\\to\\a.story")),
@@ -142,12 +144,12 @@ class StoryFinderBehaviour {
     }
 
     @Test
-    void shouldIgnoreNullFiltersWhenFindingPaths() {
+    public void shouldIgnoreNullFiltersWhenFindingPaths() {
         assertThat(finder.findPaths("src/test/java", (List<String>) null, null).size(), greaterThan(0));
     }
 
     @Test
-    void shouldReturnEmptyListForInexistentBasedir() {
+    public void shouldReturnEmptyListForInexistentBasedir() {
         assertThat(finder.findPaths("/inexistent", asList(""), asList("")).size(), equalTo(0));
     }
 

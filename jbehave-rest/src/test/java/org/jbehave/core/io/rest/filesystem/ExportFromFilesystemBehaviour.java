@@ -14,12 +14,12 @@ import org.jbehave.core.io.rest.Resource;
 import org.jbehave.core.io.rest.ResourceExporter;
 import org.jbehave.core.io.rest.ResourceIndexer;
 import org.jbehave.core.io.rest.ResourceUploader;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class ExportFromFilesystemBehaviour {
+public class ExportFromFilesystemBehaviour {
 
     @Test
-    void canExportFromFilesystem() throws IOException {
+    public void canExportFromFilesystem() throws IOException {
 
         // Given
         ResourceIndexer indexer = mock(ResourceIndexer.class);
@@ -35,20 +35,19 @@ class ExportFromFilesystemBehaviour {
         File file2 = new File(sourcePath + "/Another_story" + sourceExt);
         write(text2, file2);
         Map<String, Resource> index = new HashMap<>();
-        Resource resource = new Resource(rootURI + "/A_story");
-        index.put("A_story", resource);
+        Resource aResource = new Resource(rootURI + "/A_story");
+		index.put("A_story", aResource);
         Resource anotherResource = new Resource(rootURI + "/Another_story");
-        index.put("Another_story", anotherResource);
+		index.put("Another_story", anotherResource);
         String includes = "**";
-        when(indexer.indexResources(rootURI, sourcePath, sourceSyntax, includes)).thenReturn(index);
+		when(indexer.indexResources(rootURI, sourcePath, sourceSyntax, includes)).thenReturn(index);
 
         // When
-        ResourceExporter exporter = new ExportFromFilesystem(indexer, uploader, sourcePath, sourceExt, sourceSyntax,
-                includes);
+        ResourceExporter exporter = new ExportFromFilesystem(indexer, uploader, sourcePath, sourceExt, sourceSyntax, includes);
         exporter.exportResources(rootURI);
 
         // Then
-        verify(uploader).uploadResource(resource);
+        verify(uploader).uploadResource(aResource);
         verify(uploader).uploadResource(anotherResource);
     }
 

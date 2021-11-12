@@ -1,11 +1,11 @@
 package org.jbehave.examples.core;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
+import org.jbehave.core.io.LoadFromClasspath;
+import org.jbehave.core.io.StoryFinder;
 
 import java.util.List;
 
-import org.jbehave.core.io.LoadFromClasspath;
-import org.jbehave.core.io.StoryFinder;
+import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
 
 /**
  * <p>
@@ -19,8 +19,7 @@ import org.jbehave.core.io.StoryFinder;
 public class FailingStories extends CoreStories {
 
     @Override
-    public List<String> storyPaths() {
-        return new StoryFinder().findPaths(codeLocationFromClass(CoreStories.class), "**/failing/*.story",
-                "**/given_relative_path*");
+    protected List<String> storyPaths() {
+        return new StoryFinder().findPaths(codeLocationFromClass(CoreStories.class), "**/failing/*.story","**/given_relative_path*");
     }
 }

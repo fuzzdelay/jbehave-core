@@ -1,16 +1,19 @@
 package org.jbehave.core.steps;
 
-import static org.mockito.Mockito.mock;
-
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-class ConcurrencyBehaviour {
+import static org.mockito.Mockito.mock;
+
+@RunWith(MockitoJUnitRunner.class)
+public class ConcurrencyBehaviour {
 
     @Test
-    void shouldAllowConcurrentAdditionOfParameterConvertersInThreadSafeMode() {
+    public void shouldAllowConcurrentAdditionOfParameterConvertersInThreadSafeMode() {
 
         final ParameterConverters parameterConverters = new ParameterConverters(new LoadFromClasspath(),
                 new ParameterControls(), new TableTransformers(), true);

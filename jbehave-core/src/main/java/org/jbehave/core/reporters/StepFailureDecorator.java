@@ -1,9 +1,8 @@
 package org.jbehave.core.reporters;
 
-import org.jbehave.core.failures.StepFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
-import org.jbehave.core.model.OutcomesTable;
-import org.jbehave.core.model.Story;
+import org.jbehave.core.failures.StepFailed;
+import org.jbehave.core.model.*;
 
 /**
  * <p>

@@ -3,7 +3,6 @@ package org.jbehave.core.steps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jbehave.core.annotations.ScenarioType;
@@ -12,6 +11,9 @@ import org.jbehave.core.io.ResourceLoader;
 import org.jbehave.core.model.Composite;
 import org.jbehave.core.parsers.CompositeParser;
 
+/**
+ * @author Valery Yatsynovich
+ */
 public class CompositeCandidateSteps extends AbstractCandidateSteps {
 
     private final Set<String> compositePaths;
@@ -53,32 +55,17 @@ public class CompositeCandidateSteps extends AbstractCandidateSteps {
     }
 
     @Override
-    public List<BeforeOrAfterStep> listBeforeStories() {
+    public List<BeforeOrAfterStep> listBeforeOrAfterStories() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<BeforeOrAfterStep> listAfterStories() {
+    public List<BeforeOrAfterStep> listBeforeOrAfterStory(boolean givenStory) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<BeforeOrAfterStep> listBeforeStory(boolean givenStory) {
+    public List<BeforeOrAfterStep> listBeforeOrAfterScenario(ScenarioType type) {
         return Collections.emptyList();
-    }
-
-    @Override
-    public List<BeforeOrAfterStep> listAfterStory(boolean givenStory) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public Map<ScenarioType, List<BeforeOrAfterStep>> listBeforeScenario() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public Map<ScenarioType, List<BeforeOrAfterStep>> listAfterScenario() {
-        return Collections.emptyMap();
     }
 }

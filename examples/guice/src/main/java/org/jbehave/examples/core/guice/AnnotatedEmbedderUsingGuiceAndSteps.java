@@ -1,7 +1,5 @@
 package org.jbehave.examples.core.guice;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-
 import java.util.List;
 
 import org.jbehave.core.InjectableEmbedder;
@@ -20,7 +18,10 @@ import org.jbehave.examples.core.steps.PendingSteps;
 import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
 
 /**
  * Run stories via annotated embedder configuration and steps using Guice. The
@@ -30,20 +31,19 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GuiceAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
-@UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PendingSteps.class, PriorityMatchingSteps.class, SandpitSteps.class })
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
+@UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class, PendingSteps.class, 
+        PriorityMatchingSteps.class, SandpitSteps.class })
 @UsingGuice(modules = { ConfigurationModule.class })
 public class AnnotatedEmbedderUsingGuiceAndSteps extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 

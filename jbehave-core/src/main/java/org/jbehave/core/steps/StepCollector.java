@@ -3,77 +3,129 @@ package org.jbehave.core.steps;
 import java.util.List;
 import java.util.Map;
 
-import org.jbehave.core.annotations.Scope;
+import org.jbehave.core.annotations.*;
 import org.jbehave.core.model.Lifecycle;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
+import org.jbehave.core.model.Story;
 
 /**
- * Represents the strategy for the collection of executable {@link Step}s from a story or scenario matching a list of
- * {@link StepCandidate}s. It also collects the steps to run at before/after stages.
+ * Represents the strategy for the collection of executable {@link Step}s from a
+ * story or scenario matching a list of {@link CandidateSteps}. It also collects the 
+ * steps to run at before/after stages.
  */
 public interface StepCollector {
 
-    enum Stage {
+    public enum Stage {
         BEFORE, AFTER
     }
 
     /**
-     * Creates steps to be executed either before or after stories.
-     *
-     * @param beforeOrAfterStoriesSteps the {@link BeforeOrAfterStep}s
-     * @return A List of the executable {@link Step}s
+     * Collects all of the {@link BeforeStories} or {@link AfterStories} steps to execute.
+     * 
+     * @param candidateSteps
+     * @param stage the {@link Stage} of execution
+     * @return A List of executable {@link Step}s 
      */
-    List<Step> collectBeforeOrAfterStoriesSteps(List<BeforeOrAfterStep> beforeOrAfterStoriesSteps);
+    List<Step> collectBeforeOrAfterStoriesSteps(List<CandidateSteps> candidateSteps, Stage stage);
 
     /**
-     * Creates steps to be executed either before or after story.
-     *
-     * @param beforeOrAfterStorySteps the {@link BeforeOrAfterStep}s
-     * @param storyMeta the story {@link Meta} parameters
-     * @return A List of the executable {@link Step}s
+     * Collects all of the {@link BeforeStory} or {@link AfterStory} steps to execute.
+     * 
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param story the {@link Story}.
+     * @param stage the {@link Stage} of execution
+     * @param givenStory whether {@link Story} is a given story
+     * @return A List of executable {@link Step}s 
      */
-    List<Step> collectBeforeOrAfterStorySteps(List<BeforeOrAfterStep> beforeOrAfterStorySteps, Meta storyMeta);
+    List<Step> collectBeforeOrAfterStorySteps(List<CandidateSteps> candidateSteps, Story story, Stage stage, boolean givenStory);
 
     /**
-     * Creates steps to be executed before scenario.
+     * Collects all of the {@link BeforeScenario} or {@link AfterScenario} steps to execute.
+     * 
      *
-     * @param beforeScenarioSteps the {@link BeforeOrAfterStep}s
+     * @param candidateSteps the {@link CandidateSteps}.
      * @param storyAndScenarioMeta the story and scenario {@link Meta} parameters
-     * @return A List of the executable {@link Step}s
+     * @param type the ScenarioType
+     * @return A List of executable {@link Step}s 
      */
-    List<Step> collectBeforeScenarioSteps(List<BeforeOrAfterStep> beforeScenarioSteps, Meta storyAndScenarioMeta);
+    List<Step> collectBeforeOrAfterScenarioSteps(List<CandidateSteps> candidateSteps, Meta storyAndScenarioMeta, Stage stage, ScenarioType type);
 
     /**
-     * Creates steps to be executed after scenario.
-     * @param afterScenarioSteps the {@link BeforeOrAfterStep}s
+     * @deprecated Use {@link #collectLifecycleSteps(List, Lifecycle, Meta, Scope, StepMonitor)}
+     *
+     * Collects all lifecycle steps to execute for default scope
+     *
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param lifecycle the {@link Lifecycle}
      * @param storyAndScenarioMeta the story and scenario {@link Meta} parameters
-     * @return A List of the executable {@link Step}s
+     * @param stage the {@link Stage} of execution
+     * @return A List of executable {@link Step}s
      */
-    List<Step> collectAfterScenarioSteps(List<BeforeOrAfterStep> afterScenarioSteps, Meta storyAndScenarioMeta);
+    @Deprecated
+    List<Step> collectLifecycleSteps(List<CandidateSteps> candidateSteps, Lifecycle lifecycle, Meta storyAndScenarioMeta, Stage stage);
+
+    /**
+     * @deprecated Use {@link #collectLifecycleSteps(List, Lifecycle, Meta, Scope, StepMonitor)}
+     *
+     * Collects all lifecycle steps to execute
+     *
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param lifecycle the {@link Lifecycle}
+     * @param storyAndScenarioMeta the story and scenario {@link Meta} parameters
+     * @param stage the {@link Stage} of execution
+     * @param scope the {@link Scope} of the lifecycle steps
+     * @return A List of executable {@link Step}s
+     */
+    @Deprecated
+    List<Step> collectLifecycleSteps(List<CandidateSteps> candidateSteps, Lifecycle lifecycle, Meta storyAndScenarioMeta, Stage stage, Scope scope);
+
+    /**
+     * @deprecated Use {@link #collectLifecycleSteps(List, Lifecycle, Meta, Scope, StepMonitor)}
+     *
+     * Collects all lifecycle steps to execute per {@link Stage} of execution
+     *
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param lifecycle the {@link Lifecycle}
+     * @param storyAndScenarioMeta the story and scenario {@link Meta} parameters
+     * @param scope the {@link Scope} of the lifecycle steps
+     * @return A List of executable {@link Step}s
+     */
+    @Deprecated
+    Map<Stage, List<Step>> collectLifecycleSteps(List<CandidateSteps> candidateSteps, Lifecycle lifecycle, Meta storyAndScenarioMeta, Scope scope);
 
     /**
      * Collects all lifecycle steps to execute per {@link Stage} of execution
      *
-     * @param stepCandidates the {@link StepCandidate}s
+     * @param candidateSteps the {@link CandidateSteps}.
      * @param lifecycle the {@link Lifecycle}
      * @param storyAndScenarioMeta the story and scenario {@link Meta} parameters
      * @param scope the {@link Scope} of the lifecycle steps
-     * @param stepMonitor the {@link StepMonitor}
+     * @param stepMonitor the {@link StepMonitor}.
      * @return A List of executable {@link Step}s
      */
-    Map<Stage, List<Step>> collectLifecycleSteps(List<StepCandidate> stepCandidates, Lifecycle lifecycle,
+    Map<Stage, List<Step>> collectLifecycleSteps(List<CandidateSteps> candidateSteps, Lifecycle lifecycle,
             Meta storyAndScenarioMeta, Scope scope, StepMonitor stepMonitor);
 
     /**
      * Collects all of the {@link Step}s to execute for a scenario.
-     *
-     * @param stepCandidates the {@link StepCandidate}
-     * @param scenario the {@link Scenario}
-     * @param parameters the parameters
-     * @param stepMonitor the {@link StepMonitor}
-     * @return A List of executable {@link Step}s
+     * 
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param scenario the {@link Scenario}.
+     * @param parameters the parameters.
+     * @return A List of executable {@link Step}s 
      */
-    List<Step> collectScenarioSteps(List<StepCandidate> stepCandidates, Scenario scenario,
-            Map<String, String> parameters, StepMonitor stepMonitor);
+    List<Step> collectScenarioSteps(List<CandidateSteps> candidateSteps, Scenario scenario, Map<String, String> parameters);
+
+    /**
+     * Collects all of the {@link Step}s to execute for a scenario.
+     * 
+     * @param candidateSteps the {@link CandidateSteps}.
+     * @param scenario the {@link Scenario}.
+     * @param parameters the parameters.
+     * @param stepMonitor the {@link StepMonitor}.
+     * @return A List of executable {@link Step}s 
+     */
+    List<Step> collectScenarioSteps(List<CandidateSteps> candidateSteps, Scenario scenario, Map<String, String> parameters, StepMonitor stepMonitor);
+
 }

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * Holds flags used to control story execution flow.
+ * Holds flags used by the StoryRunner to control story execution flow.
  */
 public class StoryControls {
 
@@ -13,8 +13,8 @@ public class StoryControls {
     private boolean resetStateBeforeScenario = true;
     private boolean skipScenariosAfterFailure = false;
     private boolean skipBeforeAndAfterScenarioStepsIfGivenStory = false;
-    private boolean ignoreMetaFiltersIfGivenStory = false;
-    private boolean metaByRow = false;
+	private boolean ignoreMetaFiltersIfGivenStory = false;
+	private boolean metaByRow = false;
     private String storyMetaPrefix = "";
     private String scenarioMetaPrefix = "";
     private boolean skipStoryIfGivenStoryFailed = false;
@@ -68,8 +68,8 @@ public class StoryControls {
     }
 
     public boolean ignoreMetaFiltersIfGivenStory() {
-        return currentStoryControls().ignoreMetaFiltersIfGivenStory;
-    }
+		return currentStoryControls().ignoreMetaFiltersIfGivenStory;
+	}
 
     public boolean metaByRow() {
         return currentStoryControls().metaByRow;
@@ -107,29 +107,28 @@ public class StoryControls {
         return this;
     }
 
-    public StoryControls doSkipBeforeAndAfterScenarioStepsIfGivenStory(
-            boolean skipBeforeAndAfterScenarioStepsIfGivenStory) {
+    public StoryControls doSkipBeforeAndAfterScenarioStepsIfGivenStory(boolean skipBeforeAndAfterScenarioStepsIfGivenStory) {
         this.skipBeforeAndAfterScenarioStepsIfGivenStory = skipBeforeAndAfterScenarioStepsIfGivenStory;
         return this;
     }
 
-    public StoryControls doIgnoreMetaFiltersIfGivenStory(
-            boolean ignoreMetaFiltersIfGivenStory) {
-        this.ignoreMetaFiltersIfGivenStory = ignoreMetaFiltersIfGivenStory;
-        return this;
-    }
+	public StoryControls doIgnoreMetaFiltersIfGivenStory(
+			boolean ignoreMetaFiltersIfGivenStory) {
+		this.ignoreMetaFiltersIfGivenStory = ignoreMetaFiltersIfGivenStory;
+		return this;
+	}
 
-    public StoryControls doMetaByRow(boolean metaByRow) {
-        this.metaByRow = metaByRow;
-        return this;
-    }
+	public StoryControls doMetaByRow(boolean metaByRow) {
+	    this.metaByRow = metaByRow;
+	    return this;
+	}
 
-    public StoryControls useStoryMetaPrefix(String storyMetaPrefix) {
+    public StoryControls useStoryMetaPrefix(String storyMetaPrefix){
         this.storyMetaPrefix = storyMetaPrefix;
         return this;        
     }
 
-    public StoryControls useScenarioMetaPrefix(String scenarioMetaPrefix) {
+    public StoryControls useScenarioMetaPrefix(String scenarioMetaPrefix){
         this.scenarioMetaPrefix = scenarioMetaPrefix;
         return this;        
     }

@@ -1,16 +1,17 @@
 package org.jbehave.core.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import org.junit.Test;
 
 import com.thoughtworks.paranamer.CachingParanamer;
 
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-class ParanamerConfigurationBehaviour {
+import static org.hamcrest.Matchers.instanceOf;
+
+public class ParanamerConfigurationBehaviour {
 
     @Test
-    void shouldUseCachingParanamer() {
+    public void shouldUseCachingParanamer() {
         assertThat(new ParanamerConfiguration().paranamer(), instanceOf(CachingParanamer.class));
     }
     

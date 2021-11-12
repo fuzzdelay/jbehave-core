@@ -1,12 +1,11 @@
 package org.jbehave.core.reporters;
 
-import static org.jbehave.core.reporters.PrintStreamOutput.Format.TXT;
-
 import java.io.PrintStream;
 import java.util.Properties;
-
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.i18n.LocalizedKeywords;
+
+import static org.jbehave.core.reporters.PrintStreamOutput.Format.TXT;
 
 /**
  * <p>
@@ -48,10 +47,9 @@ public class TxtOutput extends PrintStreamOutput {
 
     private static Properties defaultPatterns() {
         Properties patterns = new Properties();
-        patterns.setProperty("beforeStep", "");
         patterns.setProperty("dryRun", "{0}\n");
         patterns.setProperty("storyCancelled", "{0} ({1} {2} s)\n");
-        patterns.setProperty("beforeStory", "{1}\n({2})\n");
+        patterns.setProperty("beforeStory", "{0}\n({1})\n");
         patterns.setProperty("afterStory", "\n");
         patterns.setProperty("metaStart", "{0}\n");
         patterns.setProperty("metaProperty", "{0}{1} {2}\n");    
@@ -72,27 +70,11 @@ public class TxtOutput extends PrintStreamOutput {
         patterns.setProperty("lifecycleOutcomeEnd", "\n");
         patterns.setProperty("lifecycleMetaFilter", "{0} {1}\n");
         patterns.setProperty("lifecycleStep", "{0}\n");
-        patterns.setProperty("beforeBeforeStoriesSteps", "BeforeStories\n");
-        patterns.setProperty("afterBeforeStoriesSteps", "\n");
-        patterns.setProperty("beforeAfterStoriesSteps", "AfterStories\n");
-        patterns.setProperty("afterAfterStoriesSteps", "\n");
-        patterns.setProperty("beforeBeforeSystemStorySteps", "BeforeSystemStorySteps\n");
-        patterns.setProperty("afterBeforeSystemStorySteps", "\n");
-        patterns.setProperty("beforeAfterSystemStorySteps", "AfterSystemStorySteps\n");
-        patterns.setProperty("afterAfterSystemStorySteps", "\n");
-        patterns.setProperty("beforeBeforeUserStorySteps", "BeforeUserStorySteps\n");
-        patterns.setProperty("afterBeforeUserStorySteps", "\n");
-        patterns.setProperty("beforeAfterUserStorySteps", "AfterUserStorySteps\n");
-        patterns.setProperty("afterAfterUserStorySteps", "\n");
-        patterns.setProperty("beforeBeforeSystemScenarioSteps", "BeforeSystemScenarioSteps\n");
-        patterns.setProperty("afterBeforeSystemScenarioSteps", "\n");
-        patterns.setProperty("beforeAfterSystemScenarioSteps", "AfterSystemScenarioSteps\n");
-        patterns.setProperty("afterAfterSystemScenarioSteps", "\n");
-        patterns.setProperty("beforeBeforeUserScenarioSteps", "BeforeUserScenarioSteps\n");
-        patterns.setProperty("afterBeforeUserScenarioSteps", "\n");
-        patterns.setProperty("beforeAfterUserScenarioSteps", "AfterUserScenarioSteps\n");
-        patterns.setProperty("afterAfterUserScenarioSteps", "\n");
-        patterns.setProperty("beforeScenario", "{1} {2}\n");
+        patterns.setProperty("beforeBeforeStorySteps", "\n");
+        patterns.setProperty("afterBeforeStorySteps", "\n");
+        patterns.setProperty("beforeAfterStorySteps", "\n");
+        patterns.setProperty("afterAfterStorySteps", "\n");
+        patterns.setProperty("beforeScenario", "{0} {1}\n");
         patterns.setProperty("afterScenario", "\n");
         patterns.setProperty("afterScenarioWithFailure", "\n{0}\n");
         patterns.setProperty("givenStories", "{0} {1}\n");

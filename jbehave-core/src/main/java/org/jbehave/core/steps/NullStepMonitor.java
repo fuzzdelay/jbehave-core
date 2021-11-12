@@ -21,8 +21,20 @@ public class NullStepMonitor implements StepMonitor {
             Object stepsInstance) {
     }
 
+    /**
+     * @deprecated Use {@link #convertedValueOfType(String, Type, Object, Queue)}
+     */
+    @Override
+    public void convertedValueOfType(String value, Type type, Object converted, Class<?> converterClass) {
+    }
+
     @Override
     public void convertedValueOfType(String value, Type type, Object converted, Queue<Class<?>> converterClasses) {
+    }
+
+    @Override
+    @Deprecated
+    public void performing(String step, boolean dryRun) {
     }
 
     @Override

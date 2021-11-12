@@ -11,7 +11,7 @@ import static org.jbehave.core.reporters.Format.HTML;
 import static org.jbehave.core.reporters.Format.STATS;
 import static org.jbehave.core.reporters.Format.TXT;
 import static org.jbehave.core.reporters.Format.XML;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -22,13 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Scopes;
-import com.google.inject.multibindings.Multibinder;
 
 import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingSteps;
@@ -47,24 +40,33 @@ import org.jbehave.core.io.LoadFromURL;
 import org.jbehave.core.io.StoryLoader;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.parsers.RegexPrefixCapturingPatternParser;
 import org.jbehave.core.parsers.StepPatternParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.CandidateSteps;
+import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.DateConverter;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
-import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.Steps;
+import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.guice.GuiceStepsFactoryBehaviour.FooSteps;
 import org.jbehave.core.steps.guice.GuiceStepsFactoryBehaviour.FooStepsWithDependency;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class GuiceAnnotationBuilderBehaviour {
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Scopes;
+import com.google.inject.multibindings.Multibinder;
+
+public class GuiceAnnotationBuilderBehaviour {
 
     @Test
-    void shouldBuildConfigurationFromAnnotations() {
+    public void shouldBuildConfigurationFromAnnotations() {
         AnnotationBuilder builder = new GuiceAnnotationBuilder(AnnotatedUsingGuice.class);
         Configuration configuration = builder.buildConfiguration();
         assertThat(configuration.storyControls().dryRun(), is(true));
@@ -83,15 +85,13 @@ class GuiceAnnotationBuilderBehaviour {
         assertThat(configuration.storyReporterBuilder().outputDirectory().getName(), equalTo("my-output-directory"));
         assertThat(configuration.storyReporterBuilder().viewResources().getProperty("index"),
                 equalTo("my-reports-index.ftl"));
-        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"),
-                equalTo("true"));
+        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"), equalTo("true"));
         assertThat(configuration.storyReporterBuilder().reportFailureTrace(), is(true));
     }
 
     @Test
-    void shouldBuildConfigurationFromAnnotationsUsingConfigureAndGuiceConverters() {
-        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(
-                AnnotatedUsingConfigureAndGuiceConverters.class);
+    public void shouldBuildConfigurationFromAnnotationsUsingConfigureAndGuiceConverters() {
+        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingConfigureAndGuiceConverters.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatCustomObjectIsConverted(configuration.parameterConverters());
         assertThatDateIsConvertedWithFormat(configuration.parameterConverters(), new SimpleDateFormat("yyyy-MM-dd"));
@@ -99,9 +99,8 @@ class GuiceAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildConfigurationFromAnnotationsUsingInjectorWithoutParent() {
-        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(
-                AnnotatedUsingConfigureAndGuiceConverters.class) {
+    public void shouldBuildConfigurationFromAnnotationsUsingInjectorWithoutParent() {
+        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingConfigureAndGuiceConverters.class){
 
             @Override
             protected Injector createInjector(List<Module> modules) {
@@ -136,7 +135,7 @@ class GuiceAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
         AnnotationBuilder builderNotAnnotated = new GuiceAnnotationBuilder(NotAnnotated.class);
         assertThatConfigurationIs(builderNotAnnotated.buildConfiguration(), new MostUsefulConfiguration());
         AnnotationBuilder builderAnnotatedWithoutModules = new GuiceAnnotationBuilder(AnnotatedWithoutModules.class);
@@ -159,7 +158,7 @@ class GuiceAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingGuice() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingGuice() {
         AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingGuice.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class,
@@ -167,29 +166,28 @@ class GuiceAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuice() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuice() {
         AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingStepsAndGuice.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class);
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndInheritingGuiceFromParent() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndInheritingGuiceFromParent() {
         AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(InheritingAnnotatedUsingSteps.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class);
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuiceAndConverters() {
-        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(
-                AnnotatedUsingConfigureAndGuiceConverters.class);
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuiceAndConverters() {
+        AnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingConfigureAndGuiceConverters.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class);
     }
 
     @Test
-    void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
         AnnotationBuilder builderNotAnnotated = new GuiceAnnotationBuilder(NotAnnotated.class);
         assertThatStepsInstancesAre(builderNotAnnotated.buildCandidateSteps());
         AnnotationBuilder builderAnnotatedWithoutLocations = new GuiceAnnotationBuilder(AnnotatedWithoutModules.class);
@@ -204,16 +202,15 @@ class GuiceAnnotationBuilderBehaviour {
     }
     
     @Test
-    void shouldNotBuildContainerIfModuleNotInstantiable() {
+    public void shouldNotBuildContainerIfModuleNotInstantiable() {
         AnnotationMonitor annotationMonitor = mock(AnnotationMonitor.class);
-        AnnotationBuilder builderPrivateModule = new GuiceAnnotationBuilder(AnnotatedWithPrivateModule.class,
-                annotationMonitor);
+        AnnotationBuilder builderPrivateModule = new GuiceAnnotationBuilder(AnnotatedWithPrivateModule.class, annotationMonitor);
         assertThatStepsInstancesAre(builderPrivateModule.buildCandidateSteps());
         verify(annotationMonitor).elementCreationFailed(isA(Class.class), isA(Exception.class));
     }
 
     @Test
-    void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
+    public void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
         GuiceAnnotationBuilder builderAnnotated = new GuiceAnnotationBuilder(AnnotatedUsingStepsAndGuice.class);
         builderAnnotated.buildConfiguration();
         Injector injector = builderAnnotated.injector();
@@ -259,7 +256,7 @@ class GuiceAnnotationBuilderBehaviour {
     }
     
     @Configure()
-    @UsingGuice(modules = { PrivateModule.class })
+    @UsingGuice(modules = {PrivateModule.class} )
     private static class AnnotatedWithPrivateModule {
 
     }
@@ -285,7 +282,7 @@ class GuiceAnnotationBuilderBehaviour {
                             .withViewResources(viewResources).withFailureTrace(true));
             Multibinder<ParameterConverter> multiBinder = Multibinder.newSetBinder(binder(), ParameterConverter.class);
             multiBinder.addBinding().toInstance(
-                    new FunctionalParameterConverter<>(String.class, CustomObject.class, CustomObject::new));
+                    new FunctionalParameterConverter<>(CustomObject.class, CustomObject::new));
             multiBinder.addBinding().toInstance(new DateConverter(new SimpleDateFormat("yyyy-MM-dd")));
         }
 
@@ -294,7 +291,8 @@ class GuiceAnnotationBuilderBehaviour {
     public static class MyExampleTableConverter extends ParameterConverters.ExamplesTableConverter {
 
         public MyExampleTableConverter() {
-            super(new ExamplesTableFactory(new LoadFromClasspath(), new TableTransformers()));
+            super(new ExamplesTableFactory(new LoadFromClasspath(), new ParameterConverters(), new ParameterControls(),
+                    new TableParsers(), new TableTransformers()));
         }
 
     }

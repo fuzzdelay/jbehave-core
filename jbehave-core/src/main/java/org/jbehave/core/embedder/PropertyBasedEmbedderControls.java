@@ -59,9 +59,19 @@ public class PropertyBasedEmbedderControls extends EmbedderControls {
     }
 
     @Override
-    public boolean failOnStoryTimeout() {
-        return propertyAs(FAIL_ON_STORY_TIMEOUT, Boolean.class, super.failOnStoryTimeout()); 
+    public long storyTimeoutInSecs() {
+        return propertyAs(STORY_TIMEOUT_IN_SECS, Long.class, super.storyTimeoutInSecs()); 
     }
+    
+    @Override
+    public String storyTimeoutInSecsByPath() {
+        return propertyAs(STORY_TIMEOUT_IN_SECS_BY_PATH, String.class, super.storyTimeoutInSecsByPath()); 
+    }
+
+    @Override
+	public boolean failOnStoryTimeout() {
+        return propertyAs(FAIL_ON_STORY_TIMEOUT, Boolean.class, super.failOnStoryTimeout()); 
+	}
 
     @Override
     public int threads() {
@@ -71,7 +81,7 @@ public class PropertyBasedEmbedderControls extends EmbedderControls {
     @SuppressWarnings("unchecked")
     private <T> T propertyAs(String name, Class<T> type, T defaultValue) {
         String property = System.getProperty(name);
-        if (property == null) {
+        if ( property == null ){
             return defaultValue;
         }
         if (type == String.class) {
@@ -101,7 +111,8 @@ public class PropertyBasedEmbedderControls extends EmbedderControls {
         .append("ignoreFailureInView", ignoreFailureInView())
         .append("verboseFailures", verboseFailures())
         .append("verboseFiltering", verboseFiltering())
-        .append("storyTimeouts", storyTimeouts())
+        .append("storyTimeoutInSecs", storyTimeoutInSecs())
+        .append("storyTimeoutInSecsByPath", storyTimeoutInSecsByPath())
         .append("threads", threads())
         .toString();        
     }

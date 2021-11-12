@@ -19,6 +19,7 @@ import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -29,20 +30,19 @@ import org.junit.runner.RunWith;
  */
 @RunWith(SpringAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
+        PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
 @UsingSpring(resources = { "org/jbehave/examples/core/spring/configuration.xml" })
 public class AnnotatedEmbedderUsingSpringAndSteps extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 

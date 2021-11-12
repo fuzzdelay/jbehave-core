@@ -46,8 +46,8 @@ public class EmbedderMonitorDecorator implements EmbedderMonitor {
     }
 
     @Override
-    public void metaExcluded(Meta meta, MetaFilter filter) {
-        delegate.metaExcluded(meta, filter);
+    public void metaNotAllowed(Meta meta, MetaFilter filter) {
+        delegate.metaNotAllowed(meta, filter);
     }
 
     @Override
@@ -66,14 +66,19 @@ public class EmbedderMonitorDecorator implements EmbedderMonitor {
     }
 
     @Override
-    public void storiesExcluded(List<Story> excluded, MetaFilter filter, boolean verbose) {
-        delegate.storiesExcluded(excluded, filter, verbose);
+    public void storiesNotAllowed(List<Story> notAllowed, MetaFilter filter) {
+        delegate.storiesNotAllowed(notAllowed, filter);
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, MetaFilter filter) {
-        delegate.scenarioExcluded(scenario, filter);
-    }
+    public void storiesNotAllowed(List<Story> stories, MetaFilter filter, boolean verbose) {
+        delegate.storiesNotAllowed(stories, filter, verbose);
+     }
+
+	@Override
+    public void scenarioNotAllowed(Scenario scenario, MetaFilter filter) {
+		delegate.scenarioNotAllowed(scenario, filter);
+	}
 
     @Override
     public void batchFailed(BatchFailures failures) {
@@ -138,6 +143,21 @@ public class EmbedderMonitorDecorator implements EmbedderMonitor {
     }
 
     @Override
+    public void generatingNavigatorView(File outputDirectory, Properties viewResources) {
+        delegate.generatingNavigatorView(outputDirectory, viewResources);
+    }
+
+    @Override
+    public void navigatorViewGenerationFailed(File outputDirectory, Properties viewResources, Throwable cause) {
+        delegate.navigatorViewGenerationFailed(outputDirectory, viewResources, cause);
+    }
+
+    @Override
+    public void navigatorViewNotGenerated() {
+        delegate.navigatorViewNotGenerated();        
+    }
+
+    @Override
     public void processingSystemProperties(Properties properties) {
         delegate.processingSystemProperties(properties);
     }
@@ -167,14 +187,14 @@ public class EmbedderMonitorDecorator implements EmbedderMonitor {
         delegate.usingControls(embedderControls);        
     }
 
-    @Override
+	@Override
     public void invalidTimeoutFormat(String path) {
-        delegate.invalidTimeoutFormat(path);
-    }
+		delegate.invalidTimeoutFormat(path);
+	}
 
-    @Override
+	@Override
     public void usingTimeout(String path, long timeout) {
-        delegate.usingTimeout(path, timeout);
-    }
+		delegate.usingTimeout(path, timeout);
+	}
 
 }

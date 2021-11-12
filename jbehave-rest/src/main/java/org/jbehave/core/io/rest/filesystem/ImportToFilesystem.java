@@ -13,10 +13,11 @@ import org.jbehave.core.io.rest.ResourceImporter;
 import org.jbehave.core.io.rest.ResourceIndexer;
 
 /**
- * <p>Implementation that writes to filesystem the imported resources, using the target file path and extension
- * specified.</p>
+ * Implementation that writes to filesystem the imported resources, using the
+ * target file path and extension specified.
  * 
- * <p>The importer requires an instance of a {@link ResourceIndexer} and of a {@link ResourceLoader}.</p>
+ * The importer requires an instance of a {@link ResourceIndexer} and of a
+ * {@link ResourceLoader}.
  */
 public class ImportToFilesystem implements ResourceImporter {
 

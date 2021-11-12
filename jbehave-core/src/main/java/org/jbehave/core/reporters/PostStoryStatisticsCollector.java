@@ -1,7 +1,5 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -17,7 +15,8 @@ import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
-import org.jbehave.core.steps.Timing;
+
+import static java.util.Arrays.asList;
 
 /**
  * <p>
@@ -29,8 +28,8 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
 
     private final OutputStream output;
     private final Map<String, Integer> data = new HashMap<>();
-    private final List<String> events = asList("excluded", "pending", "scenariosExcluded",
-            "givenStoryScenariosExcluded", "steps", "stepsSuccessful", "stepsIgnorable", "comments", "stepsPending",
+    private final List<String> events = asList("notAllowed", "pending", "scenariosNotAllowed",
+            "givenStoryScenariosNotAllowed", "steps", "stepsSuccessful", "stepsIgnorable", "comments", "stepsPending",
             "stepsNotPerformed", "stepsFailed", "currentScenarioSteps", "currentScenarioStepsPending", "scenarios",
             "scenariosSuccessful", "scenariosPending", "scenariosFailed", "givenStories", "givenStoryScenarios",
             "givenStoryScenariosSuccessful", "givenStoryScenariosPending", "givenStoryScenariosFailed", "examples");
@@ -38,7 +37,7 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
     private Throwable cause;
     private OutcomesTable outcomesFailed;
     private int givenStories;
-    private boolean currentScenarioExcluded;
+    private boolean currentScenarioNotAllowed;
 
     public PostStoryStatisticsCollector(OutputStream output) {
         this.output = output;
@@ -111,9 +110,9 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
     }
 
     @Override
-    public void storyExcluded(Story story, String filter) {
+    public void storyNotAllowed(Story story, String filter) {
         resetData();
-        add("excluded");
+        add("notAllowed");
         writeData();
     }
 
@@ -127,7 +126,7 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
         boolean write = false;
         if (givenStory) {
             this.givenStories--;
-            if (has("stepsFailed")) {
+            if ( has("stepsFailed") ){
                 add("scenariosFailed");
                 write = true;
             }
@@ -137,7 +136,7 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
             }
             write = true;
         }
-        if (write) {
+        if ( write ) {
             writeData();
         }
     }
@@ -156,29 +155,29 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
     public void beforeScenario(Scenario scenario) {
         cause = null;
         outcomesFailed = null;
-        currentScenarioExcluded = false;
+        currentScenarioNotAllowed = false;
         reset("currentScenarioSteps");
         reset("currentScenarioStepsPending");
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, String filter) {
+    public void scenarioNotAllowed(Scenario scenario, String filter) {
         if (givenStories > 0) {
-            add("givenStoryScenariosExcluded");
+            add("givenStoryScenariosNotAllowed");
         } else {
-            add("scenariosExcluded");
-            currentScenarioExcluded = true;
+            add("scenariosNotAllowed");
+            currentScenarioNotAllowed = true;
         }
     }
 
     @Override
-    public void afterScenario(Timing timing) {
+    public void afterScenario() {
         if (givenStories > 0) {
             countScenarios("givenStoryScenarios");
         } else {
             countScenarios("scenarios");
         }
-        if (has("currentScenarioStepsPending") || (!has("currentScenarioSteps") && !currentScenarioExcluded)) {
+        if (has("currentScenarioStepsPending") || (!has("currentScenarioSteps") && !currentScenarioNotAllowed)) {
             if (givenStories > 0) {
                 add("givenStoryScenariosPending");
             } else {
@@ -189,7 +188,7 @@ public class PostStoryStatisticsCollector extends NullStoryReporter {
 
     private void countScenarios(String namespace) {
         add(namespace);
-        if (!currentScenarioExcluded) {
+        if (!currentScenarioNotAllowed){
             if (cause != null || outcomesFailed != null) {
                 add(namespace + "Failed");
             } else {

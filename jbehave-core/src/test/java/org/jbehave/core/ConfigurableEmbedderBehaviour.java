@@ -5,11 +5,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jbehave.core.configuration.Configuration;
@@ -18,13 +19,14 @@ import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.io.StoryPathResolver;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.junit.JUnitStory;
-import org.jbehave.core.steps.InjectableStepsFactory;
-import org.junit.jupiter.api.Test;
+import org.jbehave.core.steps.CandidateSteps;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-class ConfigurableEmbedderBehaviour {
+public class ConfigurableEmbedderBehaviour {
 
     @Test
-    void shouldRunASingleStory() {
+    public void shouldRunASingleStory() {
         // Given
         Embedder embedder = mock(Embedder.class);
         Configuration configuration = mock(Configuration.class);
@@ -34,40 +36,38 @@ class ConfigurableEmbedderBehaviour {
         Class<MyStory> storyClass = MyStory.class;
         String storyPath = "/path/to/story";
         when(pathResolver.resolve(storyClass)).thenReturn(storyPath);
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
+        CandidateSteps steps = mock(CandidateSteps.class);
 
         // When
-        MyStory story = new MyStory(configuration, stepsFactory);
+        MyStory story = new MyStory(configuration, steps);
         story.useEmbedder(embedder);
         story.run();
 
         // Then
-        verify(embedder, times(2)).useConfiguration(configuration);
-        verify(embedder, times(2)).useStepsFactory(stepsFactory);
+        verify(embedder).useConfiguration(configuration);
+        verify(embedder).useCandidateSteps(eq(asList(steps)));
         verify(embedder).runStoriesAsPaths(asList(storyPath));
     }
 
 
     @Test
-    void shouldRunMultipleStories() {
+    public void shouldRunMultipleStories() {
         // Given
         Embedder embedder = mock(Embedder.class);
         Configuration configuration = mock(Configuration.class);
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
+        CandidateSteps steps = mock(CandidateSteps.class);
 
         // When
-        MyStories stories = new MyStories(configuration, stepsFactory);
-        stories.useEmbedder(embedder);
-        stories.run();
+        MyStories story = new MyStories(configuration, steps);
+        story.useEmbedder(embedder);
+        story.run();
 
         // Then
-        verify(embedder).useConfiguration(configuration);
-        verify(embedder).useStepsFactory(stepsFactory);
         verify(embedder).runStoriesAsPaths(asList("org/jbehave/core/story1", "org/jbehave/core/story2"));
     }
 
-    @Test
-    void shouldAllowOverrideOfDefaultConfiguration() {
+	@Test
+    public void shouldAllowOverrideOfDefaultConfiguration() {
         // Given
         Embedder embedder = mock(Embedder.class);
         Configuration configuration = mock(Configuration.class);
@@ -77,10 +77,10 @@ class ConfigurableEmbedderBehaviour {
         Class<MyStory> storyClass = MyStory.class;
         String storyPath = "/path/to/story";
         when(pathResolver.resolve(storyClass)).thenReturn(storyPath);
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
+        CandidateSteps steps = mock(CandidateSteps.class);
         
         // When
-        MyStory story = new MyStory(new MostUsefulConfiguration(), stepsFactory);
+        MyStory story = new MyStory(new MostUsefulConfiguration(), steps);
         assertThat(story.configuration(), is(not(sameInstance(configuration))));
         story.useConfiguration(configuration);
         assertThat(story.configuration(), is(sameInstance(configuration)));
@@ -88,13 +88,13 @@ class ConfigurableEmbedderBehaviour {
         story.run();
 
         // Then
-        verify(embedder, times(2)).useConfiguration(configuration);
-        verify(embedder, times(2)).useStepsFactory(stepsFactory);
+        verify(embedder).useConfiguration(configuration);
+        verify(embedder).useCandidateSteps(Mockito.eq(Arrays.asList(steps)));
         verify(embedder).runStoriesAsPaths(asList(storyPath));
     }
 
-    @Test
-    void shouldAllowAdditionOfSteps() {
+	@Test
+    public void shouldAllowAdditionOfSteps() {
         // Given
         Embedder embedder = mock(Embedder.class);
         Configuration configuration = mock(Configuration.class);
@@ -104,10 +104,10 @@ class ConfigurableEmbedderBehaviour {
         Class<MyStory> storyClass = MyStory.class;
         String storyPath = "/path/to/story";
         when(pathResolver.resolve(storyClass)).thenReturn(storyPath);
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
+        CandidateSteps steps = mock(CandidateSteps.class);
         
         // When
-        MyStory story = new MyStory(configuration, stepsFactory);
+        MyStory story = new MyStory(configuration, steps);
         story.useEmbedder(embedder);
         story.run();
 
@@ -117,22 +117,22 @@ class ConfigurableEmbedderBehaviour {
 
     private class MyStory extends JUnitStory {
 
-        public MyStory(Configuration configuration, InjectableStepsFactory stepsFactory) {
+        public MyStory(Configuration configuration, CandidateSteps steps) {
             useConfiguration(configuration);
-            useStepsFactory(stepsFactory);
+            addSteps(steps);
         }
         
     }
 
     private class MyStories extends JUnitStories {
         
-        public MyStories(Configuration configuration, InjectableStepsFactory stepsFactory) {
+        public MyStories(Configuration configuration, CandidateSteps steps) {
             useConfiguration(configuration);
-            useStepsFactory(stepsFactory);
+            addSteps(steps);
         }
 
         @Override
-        public List<String> storyPaths() {
+        protected List<String> storyPaths() {
             return asList("org/jbehave/core/story1", "org/jbehave/core/story2");
         }
 

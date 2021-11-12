@@ -8,46 +8,58 @@ import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.components.io.fileselectors.IncludeExcludeFileSelector;
 import org.codehaus.plexus.util.StringUtils;
-import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
 /**
  * Mojo to unpack resources to view directory, whose location is derived from
- * the configured {@link StoryReporterBuilder} accessible from the {@link Embedder}.
+ * the configured StoryReporterBuilder accessible from the Embedder.
+ * 
+ * @goal unpack-view-resources
+ * @phase process-resources
+ * @requiresDependencyResolution test
  */
-@Mojo(name = "unpack-view-resources", defaultPhase = LifecyclePhase.PROCESS_RESOURCES,
-        requiresDependencyResolution = ResolutionScope.TEST)
 public class UnpackViewResources extends AbstractEmbedderMojo {
 
-    @Component
-    ArchiverManager archiverManager;
-
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
+    /**
+     * @parameter expression="${project}"
+     * @readonly
+     * @required
+     */
     MavenProject project;
 
-    @Parameter
+    /**
+     * @component
+     */
+    ArchiverManager archiverManager;
+
+    /**
+     * @parameter
+     */
     String[] resourceArtifactIds = new String[] { "jbehave-site-resources", "jbehave-core" };
 
-    @Parameter
+    /**
+     * @parameter
+     */
     String[] resourceTypes = new String[] { "zip" };
 
-    @Parameter
+    /**
+     * @parameter
+     */
     String resourceIncludes;
 
-    @Parameter
+    /**
+     * @parameter
+     */
     String resourcesExcludes;
 
-    @Parameter
+    /**
+     * @parameter
+     */
     File viewDirectory;
 
     @Override
@@ -59,7 +71,7 @@ public class UnpackViewResources extends AbstractEmbedderMojo {
     }
 
     private File viewDirectory() {
-        if (viewDirectory != null) {
+        if ( viewDirectory != null ){
             return viewDirectory;
         }
         StoryReporterBuilder storyReporterBuilder = newEmbedder().configuration().storyReporterBuilder();
@@ -108,8 +120,7 @@ public class UnpackViewResources extends AbstractEmbedderMojo {
             unArchiver.setDestDirectory(destination);
 
             if (StringUtils.isNotEmpty(excludes) || StringUtils.isNotEmpty(includes)) {
-                IncludeExcludeFileSelector[] selectors = new IncludeExcludeFileSelector[] {
-                    new IncludeExcludeFileSelector() };
+                IncludeExcludeFileSelector[] selectors = new IncludeExcludeFileSelector[] { new IncludeExcludeFileSelector() };
                 if (StringUtils.isNotEmpty(excludes)) {
                     selectors[0].setExcludes(excludes.split(","));
                 }

@@ -2,11 +2,7 @@ package org.jbehave.core.configuration;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.Set;
-
-import com.thoughtworks.paranamer.NullParanamer;
-import com.thoughtworks.paranamer.Paranamer;
 
 import org.jbehave.core.Embeddable;
 import org.jbehave.core.embedder.Embedder;
@@ -50,6 +46,9 @@ import org.jbehave.core.steps.StepCollector;
 import org.jbehave.core.steps.StepFinder;
 import org.jbehave.core.steps.StepMonitor;
 import org.jbehave.core.steps.context.StepsContext;
+
+import com.thoughtworks.paranamer.NullParanamer;
+import com.thoughtworks.paranamer.Paranamer;
 
 /**
  * <p>
@@ -211,11 +210,6 @@ public abstract class Configuration {
      */
     protected Comparator<Story> storyExecutionComparator;
 
-    /**
-     * Enables parallelization of story level examples
-     */
-    private boolean parallelStoryExamplesEnabled;
-
     public Configuration() {
     }
 
@@ -239,7 +233,7 @@ public abstract class Configuration {
 
     public StoryParser storyParser() {
         if (storyParser == null) {
-            storyParser = new RegexStoryParser(examplesTableFactory());
+            storyParser = new RegexStoryParser(keywords(), examplesTableFactory());
         }
         return storyParser;
     }
@@ -260,7 +254,7 @@ public abstract class Configuration {
 
     public Comparator<Story> storyExecutionComparator() {
         if (storyExecutionComparator == null) {
-            storyExecutionComparator = Comparator.comparing(Story::getPath, Comparator.naturalOrder());
+        	storyExecutionComparator = Comparator.comparing(Story::getPath, Comparator.naturalOrder());
         }
         return storyExecutionComparator;
     }
@@ -294,6 +288,10 @@ public abstract class Configuration {
         return pendingStepStrategy;
     }
 
+    /**
+     * @deprecated Use {@link StoryReporterBuilder}
+     */
+    @Deprecated
     public StoryReporter defaultStoryReporter() {
         if (defaultStoryReporter == null) {
             defaultStoryReporter = new ConsoleOutput();
@@ -313,11 +311,12 @@ public abstract class Configuration {
     }
 
     public StepsContext stepsContext() {
-        if (stepsContext == null) {
+        if ( stepsContext == null ){
             stepsContext = new StepsContext();
         }
         return stepsContext;
     }
+
 
     public StepCollector stepCollector() {
         if (stepCollector == null) {
@@ -378,7 +377,7 @@ public abstract class Configuration {
 
     public TableParsers tableParsers() {
         if (tableParsers == null) {
-            tableParsers = new TableParsers(keywords(), parameterConverters(), Optional.empty());
+            tableParsers = new TableParsers();
         }
         return tableParsers;
     }
@@ -421,7 +420,7 @@ public abstract class Configuration {
         return this;
     }
 
-    public Configuration useStoryControls(StoryControls storyControls) {
+    public Configuration useStoryControls(StoryControls storyControls){
         this.storyControls = storyControls;
         return this;
     }
@@ -534,14 +533,6 @@ public abstract class Configuration {
     public Configuration useCompositePaths(Set<String> compositePaths) {
         this.compositePaths = compositePaths;
         return this;
-    }
-
-    public boolean isParallelStoryExamplesEnabled() {
-        return parallelStoryExamplesEnabled;
-    }
-
-    public void setParallelStoryExamplesEnabled(boolean parallelStoryExamplesEnabled) {
-        this.parallelStoryExamplesEnabled = parallelStoryExamplesEnabled;
     }
 
     public Configuration useStepsContext(StepsContext stepsContext) {

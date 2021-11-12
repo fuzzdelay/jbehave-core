@@ -52,11 +52,21 @@ public class UnmodifiableEmbedderControls extends EmbedderControls {
     }
     
     @Override
-    public boolean failOnStoryTimeout() {
-        return delegate.failOnStoryTimeout();
+    public long storyTimeoutInSecs() {
+        return delegate.storyTimeoutInSecs();
     }
-
+    
     @Override
+    public String storyTimeoutInSecsByPath() {
+        return delegate.storyTimeoutInSecsByPath();
+    }
+    
+    @Override
+	public boolean failOnStoryTimeout() {
+        return delegate.failOnStoryTimeout();
+	}
+
+	@Override
     public int threads() {
         return delegate.threads();
     }
@@ -93,6 +103,16 @@ public class UnmodifiableEmbedderControls extends EmbedderControls {
 
     @Override
     public EmbedderControls doVerboseFiltering(boolean verboseFiltering) {
+        throw notAllowed();
+    }
+
+    @Override
+    public EmbedderControls useStoryTimeoutInSecs(long storyTimeoutInSecs) {
+        throw notAllowed();
+    }
+    
+    @Override
+    public EmbedderControls useStoryTimeoutInSecsByPath(String storyTimeoutInSecsByPath) {
         throw notAllowed();
     }
 

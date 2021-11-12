@@ -1,8 +1,5 @@
 package org.jbehave.examples.core.urls;
 
-import static java.util.Arrays.asList;
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-
 import java.util.List;
 
 import org.jbehave.core.configuration.Configuration;
@@ -11,6 +8,9 @@ import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToSimpleName;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.examples.core.CoreStories;
+
+import static java.util.Arrays.asList;
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
 
 /**
  * <p>
@@ -37,7 +37,7 @@ public class CoreStoriesUsingURLs extends CoreStories {
     }
 
     @Override
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         // Specify story paths as URLs
         String codeLocation = codeLocationFromPath("../core/src/main/java").getFile();
         return new StoryFinder().findPaths(codeLocation, asList("**/trader_is_alerted_of_status.story",

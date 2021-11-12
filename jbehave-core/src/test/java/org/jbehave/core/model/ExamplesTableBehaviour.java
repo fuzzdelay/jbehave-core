@@ -1,16 +1,20 @@
 package org.jbehave.core.model;
 
-import static java.util.Arrays.asList;
-import static org.codehaus.plexus.util.StringUtils.isBlank;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.jbehave.core.annotations.AsParameters;
+import org.jbehave.core.annotations.Parameter;
+import org.jbehave.core.io.LoadFromClasspath;
+import org.jbehave.core.model.ExamplesTable.*;
+import org.jbehave.core.model.TableTransformers.TableTransformer;
+import org.jbehave.core.steps.ConvertedParameters.ValueNotFound;
+import org.jbehave.core.steps.ParameterControls;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.MethodReturningConverter;
+import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
+import org.jbehave.core.steps.Parameters;
+import org.junit.Test;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -21,36 +25,12 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Stream;
+import java.util.*;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.jbehave.core.annotations.AsParameters;
-import org.jbehave.core.annotations.Parameter;
-import org.jbehave.core.i18n.LocalizedKeywords;
-import org.jbehave.core.io.LoadFromClasspath;
-import org.jbehave.core.model.ExamplesTable.ColumnNotFound;
-import org.jbehave.core.model.ExamplesTable.RowNotFound;
-import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.TableTransformers.TableTransformer;
-import org.jbehave.core.steps.ConvertedParameters.ValueNotFound;
-import org.jbehave.core.steps.ParameterControls;
-import org.jbehave.core.steps.ParameterConverters;
-import org.jbehave.core.steps.ParameterConverters.MethodReturningConverter;
-import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
-import org.jbehave.core.steps.Parameters;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import static java.util.Arrays.asList;
+import static org.codehaus.plexus.util.StringUtils.isBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class ExamplesTableBehaviour {
 
@@ -70,66 +50,48 @@ public class ExamplesTableBehaviour {
             + "|-- Another comment --|\n" + "|21|22|\n";
 
     @Test
-    void shouldParseTableWithDefaultSeparators() {
+    public void shouldParseTableWithDefaultSeparators() {
         ExamplesTable table = new ExamplesTable(tableAsString);
         ensureColumnOrderIsPreserved(table);
         assertThat(table.asString(), equalTo(tableAsString));
     }
 
     @Test
-    void shouldCreateEmptyTable() {
-        ExamplesTable table = ExamplesTable.empty();
-        assertThat(table.asString(), equalTo(""));
-        assertFalse(table == ExamplesTable.empty());
-    }
-
-    @Test
-    void shouldGetColumn() {
-        ExamplesTable table = new ExamplesTable(tableAsString);
-        assertThat(table.getColumn("one"), equalTo(asList("11", "21")));
-        assertThat(table.getColumn("two"), equalTo(asList("12", "22")));
-    }
-
-    @Test
-    void shouldFailIfColumnDoesNotExist() {
-        ExamplesTable table = new ExamplesTable(tableAsString);
-        ColumnNotFound exception = assertThrows(ColumnNotFound.class, () -> table.getColumn("three"));
-        assertThat(exception.getMessage(), equalTo("The 'three' column does not exist"));
-    }
-
-    @Test
-    void shouldParseTableWithDifferentSeparators() {
+    public void shouldParseTableWithDifferentSeparators() {
         String headerSeparator = "||";
         String valueSeparator = "|";
-        String ignorableSeparator = "!--";
-        String properties = String.format("{headerSeparator=%s,valueSeparator=%s,ignorableSeparator=%s}%n",
-                headerSeparator, valueSeparator, ignorableSeparator);
-        String tableWithCustomSeparator = properties + wikiTableAsString;
-        ExamplesTable table = new ExamplesTable(tableWithCustomSeparator);
+        String tableWithCustomSeparator = wikiTableAsString;
+        TableTransformers tableTransformers = new TableTransformers();
+        ParameterControls parameterControls = new ParameterControls();
+        ParameterConverters parameterConverters = new ParameterConverters(new LoadFromClasspath(), parameterControls,
+                tableTransformers, true);
+        ExamplesTable table = new ExamplesTable(tableWithCustomSeparator, headerSeparator, valueSeparator,
+                parameterConverters, parameterControls, new TableParsers(), tableTransformers);
         assertThat(table.getHeaderSeparator(), equalTo(headerSeparator));
         assertThat(table.getValueSeparator(), equalTo(valueSeparator));
-
         ensureColumnOrderIsPreserved(table);
         assertThat(table.asString(), equalTo(tableWithCustomSeparator));
     }
 
     @Test
-    void shouldParseTableWithDifferentCustomSeparators() {
+    public void shouldParseTableWithDifferentCustomSeparators() {
         String headerSeparator = "!!";
         String valueSeparator = "!";
-        String ignorableSeparator = "!--";
-        String properties = String.format("{headerSeparator=%s,valueSeparator=%s,ignorableSeparator=%s}%n",
-                headerSeparator, valueSeparator, ignorableSeparator);
-        String tableWithCustomSeparator = properties + wikiTableAsString.replace("|", "!");
-        ExamplesTable table = new ExamplesTable(tableWithCustomSeparator);
+        String tableWithCustomSeparator = wikiTableAsString.replace("|", "!");
+        TableTransformers tableTransformers = new TableTransformers();
+        ParameterControls parameterControls = new ParameterControls();
+        ParameterConverters parameterConverters = new ParameterConverters(new LoadFromClasspath(), parameterControls,
+                tableTransformers, true);
+        ExamplesTable table = new ExamplesTable(tableWithCustomSeparator, headerSeparator, valueSeparator,
+                parameterConverters, parameterControls, new TableParsers(), tableTransformers);
         assertThat(table.getHeaderSeparator(), equalTo(headerSeparator));
         assertThat(table.getValueSeparator(), equalTo(valueSeparator));
         ensureColumnOrderIsPreserved(table);
-        assertThat(table.asString(), equalTo(properties + "!!one!!two!!\n!11!12!\n!21!22!\n"));
+        assertThat(table.asString(), equalTo("!!one!!two!!\n!11!12!\n!21!22!\n"));
     }
 
     @Test
-    void shouldTrimTableBeforeParsing() {
+    public void shouldTrimTableBeforeParsing() {
         String untrimmedTableAsString = "\n    \n" + tableAsString + "\n    \n";
         ExamplesTable table = new ExamplesTable(untrimmedTableAsString);
         ensureColumnOrderIsPreserved(table);
@@ -137,9 +99,8 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithCommentsInValues() {
-        String tableWithEmptyValues = "{commentSeparator=#}\n|one #comment|two|\n"
-                + " |11 #comment|12 #comment|\n |21|22|\n";
+    public void shouldParseTableWithCommentsInValues() {
+        String tableWithEmptyValues = "{commentSeparator=#}\n|one #comment|two|\n |11 #comment|12 #comment|\n |21|22|\n";
         ExamplesTable table = new ExamplesTable(tableWithEmptyValues);
         assertThat(table.getRowCount(), equalTo(2));
         for (Parameters row : table.getRowsAsParameters()) {
@@ -153,9 +114,8 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithUntrimmedCommentsInValues() {
-        String tableWithEmptyValues = "{commentSeparator=#, trim=false}\n|one #comment|two|\n"
-                + " |11 #comment|12 #comment|\n |21|22|\n";
+    public void shouldParseTableWithUntrimmedCommentsInValues() {
+        String tableWithEmptyValues = "{commentSeparator=#, trim=false}\n|one #comment|two|\n |11 #comment|12 #comment|\n |21|22|\n";
         ExamplesTable table = new ExamplesTable(tableWithEmptyValues);
         assertThat(table.getRowCount(), equalTo(2));
         for (Parameters row : table.getRowsAsParameters()) {
@@ -169,7 +129,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseEmptyTable() {
+    public void shouldParseEmptyTable() {
         String tableAsString = "";
         ExamplesTable table = new ExamplesTable(tableAsString);
         assertThat(table.getHeaders().size(), equalTo(0));
@@ -179,7 +139,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithBlankValues() {
+    public void shouldParseTableWithBlankValues() {
         String tableWithEmptyValues = "|one|two|\n |||\n | ||\n || |\n";
         ExamplesTable table = new ExamplesTable(tableWithEmptyValues);
         assertThat(table.getRowCount(), equalTo(3));
@@ -194,7 +154,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithoutLeftBoundarySeparator() {
+    public void shouldParseTableWithoutLeftBoundarySeparator() {
         String tableAsString = "one|two|\n 11|12|\n 21|22|\n";
         ExamplesTable table = new ExamplesTable(tableAsString);
         ensureColumnOrderIsPreserved(table);
@@ -202,7 +162,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithoutRightBoundarySeparator() {
+    public void shouldParseTableWithoutRightBoundarySeparator() {
         String tableAsString = "|one|two\n |11|12\n |21|22\n";
         ExamplesTable table = new ExamplesTable(tableAsString);
         ensureColumnOrderIsPreserved(table);
@@ -210,7 +170,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithoutAnyBoundarySeparators() {
+    public void shouldParseTableWithoutAnyBoundarySeparators() {
         String tableAsString = "one|two\n 11|12\n 21|22\n";
         ExamplesTable table = new ExamplesTable(tableAsString);
         ensureColumnOrderIsPreserved(table);
@@ -218,7 +178,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTablePreservingWhitespace() {
+    public void shouldParseTablePreservingWhitespace() {
         String tableWithProperties = "{trim=false}\n" + tableWithSpacesAsString;
         ExamplesTable table = new ExamplesTable(tableWithProperties);
         Properties properties = table.getProperties();
@@ -228,7 +188,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithSeparatorsSpecifiedViaProperties() {
+    public void shouldParseTableWithSeparatorsSpecifiedViaProperties() {
         String tableWithProperties = "{ignorableSeparator=!--,headerSeparator=!,valueSeparator=!}\n"
                 + tableWithCommentsAsString.replace("|", "!");
         ExamplesTable table = new ExamplesTable(tableWithProperties);
@@ -240,7 +200,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableAsLandscape() {
+    public void shouldParseTableAsLandscape() {
         String tableWithProperties = "{transformer=FROM_LANDSCAPE}\n" + landscapeTableAsString;
         ExamplesTableFactory factory = createFactory();
         ExamplesTable table = factory.createExamplesTable(tableWithProperties);
@@ -250,7 +210,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithCustomTransformerSpecifiedViaProperties() {
+    public void shouldParseTableWithCustomTransformerSpecifiedViaProperties() {
         String tableWithProperties = "{transformer=myTransformer, trim=false}\n" + tableWithCommentsAsString;
         TableTransformers tableTransformers = new TableTransformers();
         tableTransformers.useTransformer("myTransformer", new TableTransformer() {
@@ -261,17 +221,17 @@ public class ExamplesTableBehaviour {
             }
 
         });
-        ExamplesTable table = new ExamplesTableFactory(new LoadFromClasspath(), tableTransformers).createExamplesTable(
-                tableWithProperties);
+        ExamplesTable table = new ExamplesTableFactory(new LoadFromClasspath(), tableTransformers)
+                .createExamplesTable(tableWithProperties);
         Properties properties = table.getProperties();
         assertThat(properties.getProperty("transformer"), equalTo("myTransformer"));
         ensureWhitespaceIsPreserved(table);
     }
 
     @Test
-    void shouldParseTableWithCustomNestedTransformers() {
-        String tableWithProperties = "{transformer=myTransformer, trim=false, "
-                + "table=\\{transformer=NESTED_TRANSFORMER\\, parameter=value\\}}\n" + tableWithCommentsAsString;
+    public void shouldParseTableWithCustomNestedTransformers() {
+        String tableWithProperties = "{transformer=myTransformer, trim=false, " +
+                "table=\\{transformer=NESTED_TRANSFORMER\\, parameter=value\\}}\n" + tableWithCommentsAsString;
         TableTransformers tableTransformers = new TableTransformers();
         tableTransformers.useTransformer("myTransformer", new TableTransformer() {
 
@@ -281,8 +241,8 @@ public class ExamplesTableBehaviour {
             }
 
         });
-        ExamplesTable table = new ExamplesTableFactory(new LoadFromClasspath(), tableTransformers).createExamplesTable(
-                tableWithProperties);
+        ExamplesTable table = new ExamplesTableFactory(new LoadFromClasspath(), tableTransformers)
+                .createExamplesTable(tableWithProperties);
         Properties properties = table.getProperties();
         assertThat(properties.getProperty("transformer"), equalTo("myTransformer"));
         assertThat(properties.getProperty("table"), equalTo("{transformer=NESTED_TRANSFORMER, parameter=value}"));
@@ -290,7 +250,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldParseTableWithSequenceOfTransformers() {
+    public void shouldParseTableWithSequenceOfTransformers() {
         String tableWithProperties =
                         "{transformer=REPLACING, replacing=33, replacement=22}\n"
                       + "{transformer=MODIFYING_PROPERTIES}\n"
@@ -346,7 +306,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldConvertParameterValuesOfTableRow() throws Exception {
+    public void shouldConvertParameterValuesOfTableRow() throws Exception {
         // Given
         ExamplesTableFactory factory = createFactory(new MethodReturningConverter(methodFor("convertDate"), this));
 
@@ -364,7 +324,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldConvertParameterValuesOfTableRowWithDefaults() throws Exception {
+    public void shouldConvertParameterValuesOfTableRowWithDefaults() throws Exception {
         // Given
         ExamplesTableFactory factory = createFactory(new MethodReturningConverter(methodFor("convertDate"), this));
 
@@ -401,51 +361,69 @@ public class ExamplesTableBehaviour {
 
     }
 
-    static Stream<Arguments> tablesWithNamedParameters() {
-        return Stream.of(
-                arguments("|Name|Value|\n|name1|<value>|", "value1", "value1"),
-                arguments("|Name|Value|\n|name1|foo-<value>-bar|", "value1", "foo-value1-bar"),
-                arguments("|Name|Value|\n|name1|<value>|", "value having the \\ backslash and the $ dollar character",
-                        "value having the \\ backslash and the $ dollar character")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("tablesWithNamedParameters")
-    void shouldReplaceNamedParameterValuesInRows(String tableAsString, String namedParameter, String expectedValue) {
+    @Test
+    public void shouldReplaceNamedParameterValues() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
         // When
+        String tableAsString = "|Name|Value|\n|name1|<value>|";
         Map<String, String> namedParameters = new HashMap<>();
-        namedParameters.put("value", namedParameter);
+        namedParameters.put("value", "value1");
         ExamplesTable table = factory.createExamplesTable(tableAsString).withNamedParameters(namedParameters);
 
         // Then
         Parameters firstRow = table.getRowsAsParameters(true).get(0);
         Map<String, String> firstRowValues = firstRow.values();
         assertThat(firstRowValues.containsKey("Value"), is(true));
-        assertThat(firstRow.valueAs("Value", String.class), is(expectedValue));
+        assertThat(firstRow.<String>valueAs("Value", String.class), is("value1"));
     }
 
-    @ParameterizedTest
-    @MethodSource("tablesWithNamedParameters")
-    void shouldReplaceNamedParameterValuesInColumns(String tableAsString, String namedParameter, String expectedValue) {
+    @Test
+    public void shouldReplaceNamedParameterValuesInValuePart() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
         // When
+        String tableAsString = "|Name|Value|\n|name1|foo-<value>-bar|";
         Map<String, String> namedParameters = new HashMap<>();
-        namedParameters.put("value", namedParameter);
+        namedParameters.put("value", "value1");
         ExamplesTable table = factory.createExamplesTable(tableAsString).withNamedParameters(namedParameters);
 
         // Then
-        List<String> column = table.getColumn("Value", true);
-        assertThat(column.get(0), is(expectedValue));
+        Parameters firstRow = table.getRowsAsParameters(true).get(0);
+        Map<String, String> firstRowValues = firstRow.values();
+        assertThat(firstRowValues.containsKey("Value"), is(true));
+        assertThat(firstRow.<String>valueAs("Value", String.class), is("foo-value1-bar"));
+    }
+
+    /**
+     * The values given named parameter values as strings should not suffer any modification after are replaced in table.
+     *
+     * @see {@link String#replaceAll(String, String)} to see why are not present in values the '\' and '$' characters.
+     */
+    @Test
+    public void shouldKeepExactValueInReplacedNamedParameterValues() {
+        // Given
+        ExamplesTableFactory factory = createFactory();
+        String problematicNamedParameterValueCharacters = "value having the \\ backslash and the $ dollar character";
+
+        // When
+        String tableAsString = "|Name|Value|\n|name|<value>|";
+        Map<String, String> namedParameters = new HashMap<>();
+        namedParameters.put("value", problematicNamedParameterValueCharacters);
+        ExamplesTable table = factory.createExamplesTable(tableAsString).withNamedParameters(namedParameters);
+
+        // Then
+        Parameters firstRow = table.getRowsAsParameters(true).get(0);
+        Map<String, String> firstRowValues = firstRow.values();
+        assertThat(firstRowValues.containsKey("Value"), is(true));
+        assertThat(firstRow.<String>valueAs("Value", String.class), is(problematicNamedParameterValueCharacters));
+
     }
 
     @Test
-    void shouldMapParametersToType() {
+    public void shouldMapParametersToType() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -466,7 +444,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldMapParametersToTypeWithFieldMappings() {
+    public void shouldMapParametersToTypeWithFieldMappings() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -490,7 +468,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldMapParametersToTypeWithAnnotatedFields() {
+    public void shouldMapParametersToTypeWithAnnotatedFields() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -499,8 +477,7 @@ public class ExamplesTableBehaviour {
         ExamplesTable examplesTable = factory.createExamplesTable(tableAsString);
 
         // Then
-        for (MyParametersWithAnnotatedFields parameters : examplesTable.getRowsAs(
-                MyParametersWithAnnotatedFields.class)) {
+        for (MyParametersWithAnnotatedFields parameters : examplesTable.getRowsAs(MyParametersWithAnnotatedFields.class)) {
             assertThat(parameters.string, equalTo("11"));
             assertThat(parameters.integer, equalTo(22));
             assertThat(parameters.stringList, equalTo(asList("1", "1")));
@@ -509,7 +486,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldThrowExceptionIfValuesOrRowsAreNotFound() {
+    public void shouldThrowExceptionIfValuesOrRowsAreNotFound() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -536,7 +513,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldAllowAdditionAndModificationOfRowValues() {
+    public void shouldAllowAdditionAndModificationOfRowValues() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -564,7 +541,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldAllowBuildingOfTableFromContent() {
+    public void shouldAllowBuildingOfTableFromContent() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -581,7 +558,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldAllowBuildingOfTableFromEmptyContent() {
+    public void shouldAllowBuildingOfTableFromEmptyContent() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -595,7 +572,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldAllowOutputToPrintStream() {
+    public void shouldAllowOutputToPrintStream() {
         // Given
         ExamplesTableFactory factory = createFactory();
 
@@ -611,7 +588,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldIgnoreEmptyLines() {
+    public void shouldIgnoreEmptyLines() {
         // ignore blank line
         String tableWithEmptyLine = "|one|two|\n|a|b|\n\n|c|d|\n";
         ExamplesTable table = new ExamplesTable(tableWithEmptyLine);
@@ -620,7 +597,7 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldIgnoreAllCommentLines() {
+    public void shouldIgnoreAllCommentLines() {
         // ignore comment lines
         ExamplesTable table = new ExamplesTable(tableWithCommentsAsString);
         ensureColumnOrderIsPreserved(table);
@@ -628,16 +605,9 @@ public class ExamplesTableBehaviour {
     }
 
     @Test
-    void shouldHandleWrongNumberOfColumns() {
+    public void shouldHandleWrongNumberOfColumns() {
         assertTableAsString("|a|b|\n|a|\n", "|a|b|\n|a||\n");
         assertTableAsString("|a|b|\n|a|b|c|\n", "|a|b|\n|a|b|\n");
-    }
-
-    @Test
-    void shouldHaveEmptyTableAsImmutable() {
-        ExamplesTable table = ExamplesTable.EMPTY;
-        assertThat(table.asString(), equalTo(""));
-        assertThat(table, instanceOf(ImmutableExamplesTable.class));
     }
 
     private ExamplesTableFactory createFactory(ParameterConverter... converters) {
@@ -647,13 +617,12 @@ public class ExamplesTableBehaviour {
 
     private ExamplesTableFactory createFactory(TableTransformers tableTransformers, ParameterConverter... converters) {
         LoadFromClasspath resourceLoader = new LoadFromClasspath();
+        TableParsers tableParsers = new TableParsers();
         ParameterControls parameterControls = new ParameterControls();
         ParameterConverters parameterConverters = new ParameterConverters(resourceLoader, parameterControls,
                 tableTransformers, true);
-        LocalizedKeywords keywords = new LocalizedKeywords();
-        TableParsers tableParsers = new TableParsers(keywords, parameterConverters);
         parameterConverters.addConverters(converters);
-        return new ExamplesTableFactory(keywords, resourceLoader, parameterConverters, parameterControls, tableParsers,
+        return new ExamplesTableFactory(resourceLoader, parameterConverters, parameterControls, tableParsers,
                 tableTransformers);
     }
 
@@ -675,7 +644,7 @@ public class ExamplesTableBehaviour {
         return null;
     }
 
-    public abstract static class AbstractRootMyParameters {
+    public static abstract class AbstractRootMyParameters {
         private String rootParentString;
 
         public String getRootParentString() {
@@ -683,7 +652,7 @@ public class ExamplesTableBehaviour {
         }
     }
 
-    public abstract static class AbstractMyParameters extends AbstractRootMyParameters {
+    public static abstract class AbstractMyParameters extends AbstractRootMyParameters {
         private String parentString;
 
         public String getParentString() {

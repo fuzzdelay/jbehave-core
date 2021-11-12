@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbehave.core.annotations.Given;
-import org.jbehave.core.annotations.Then;
 
 /**
  * <p>
@@ -106,7 +104,7 @@ public class StepFinder {
      *            the list {@link CandidateSteps} instances
      * @return A List of {@link StepCandidate}
      */
-    private List<StepCandidate> collectCandidates(List<CandidateSteps> candidateSteps) {
+    public List<StepCandidate> collectCandidates(List<CandidateSteps> candidateSteps) {
         List<StepCandidate> collected = new ArrayList<>();
         for (CandidateSteps steps : candidateSteps) {
             collected.addAll(steps.listCandidates());
@@ -181,7 +179,7 @@ public class StepFinder {
                 }
 
                 private String scoringPattern(StepCandidate candidate) {
-                    return candidate.getPatternAsString().replaceAll("\\s\\$\\w+\\s", " ").replaceAll("\\$\\w + ", "");
+                    return candidate.getPatternAsString().replaceAll("\\s\\$\\w+\\s", " ").replaceAll("\\$\\w+", "");
                 }
 
                 private String trimStartingWord(String stepAsString) {
@@ -194,9 +192,8 @@ public class StepFinder {
 
         private class LevenshteinDistance {
 
-            @SuppressWarnings("checkstyle:LocalVariableName")
             public int calculate(String s, String t) {
-                int[][] d; // matrix
+                int d[][]; // matrix
                 int n; // length of s
                 int m; // length of t
                 int i; // iterates through s

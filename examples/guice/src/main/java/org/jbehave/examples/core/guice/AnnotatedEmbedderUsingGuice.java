@@ -1,16 +1,7 @@
 package org.jbehave.examples.core.guice;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
 
 import org.jbehave.core.InjectableEmbedder;
 import org.jbehave.core.annotations.Configure;
@@ -36,7 +27,17 @@ import org.jbehave.examples.core.steps.PendingSteps;
 import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
+
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
 
 /**
  * Run stories via annotated embedder configuration and steps using Guice. The
@@ -46,18 +47,17 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GuiceAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingGuice(modules = { ConfigurationModule.class, StepsModule.class })
 public class AnnotatedEmbedderUsingGuice extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 
@@ -66,8 +66,7 @@ public class AnnotatedEmbedderUsingGuice extends InjectableEmbedder {
 
         @Override
         protected void configure() {
-            bind(StoryControls.class).toInstance(
-                    new StoryControls().doDryRun(false).doSkipScenariosAfterFailure(false));
+            bind(StoryControls.class).toInstance(new StoryControls().doDryRun(false).doSkipScenariosAfterFailure(false));
             bind(StoryLoader.class).toInstance(new LoadFromClasspath(this.getClass().getClassLoader()));
             bind(ParameterConverter.class).toInstance(new DateConverter(new SimpleDateFormat("yyyy-MM-dd")));
             bind(StoryReporterBuilder.class).toInstance(

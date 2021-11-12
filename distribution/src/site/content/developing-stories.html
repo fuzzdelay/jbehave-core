@@ -22,7 +22,7 @@ implementation. Also, it should be given a name that is expressive of
 the functionality that is being verified, i.e. <b>trader_is_alerted_of_status.story</b>.
 </p>
 <p>The scenario should use a syntax compatible with the <a
-    href="grammar.html">Grammar</a>.</p>
+	href="grammar.html">Grammar</a>.</p>
 
 
 <span class="followup">A story is a collection of scenarios, each
@@ -46,7 +46,7 @@ functionality of the system.</span>
 <h2 id="mapping">Mapping Textual Scenario Steps to Java Methods via annotations</h2>
 
 <p>JBehave maps textual steps to Java methods via <a
-    href="javadoc/core/org/jbehave/core/steps/CandidateSteps.html">CandidateSteps</a>.
+	href="javadoc/core/org/jbehave/core/steps/CandidateSteps.html">CandidateSteps</a>.
 The scenario writer need only provide annotated methods that match, by
 regex patterns, the textual steps.</p>
 
@@ -80,9 +80,9 @@ or implement other class/interface as required by the model of the
 application under test. </span>
 
 <p>To create instances of <a
-    href="javadoc/core/org/jbehave/core/steps/CandidateSteps.html">CandidateSteps</a>
+	href="javadoc/core/org/jbehave/core/steps/CandidateSteps.html">CandidateSteps</a>
 we use an instance of <a
-    href="javadoc/core/org/jbehave/core/steps/InjectableStepsFactory.html">InjectableStepsFactory</a>
+	href="javadoc/core/org/jbehave/core/steps/InjectableStepsFactory.html">InjectableStepsFactory</a>
 </p>
 <pre class="brush: java">
     Configuration configuration = ... // optional configuration
@@ -93,7 +93,7 @@ annotations</a>, each holding a regex pattern as value. The pattern is used
 to match the method in the Steps class with the appropriate parameters.
 The simplest default behaviour identifies arguments in the candidate
 step by the words prefixed by the <b>$</b> character. More advanced <a
-    href="parameter-injection.html">parameter injection</a> mechanisms are
+	href="parameter-injection.html">parameter injection</a> mechanisms are
 also supported by JBehave.</p>
 <p>JBehave execute all the matched steps in the order in which they
 are found in the scenario. It is up to the implementor of the Steps
@@ -105,11 +105,11 @@ dependency.</p>
 <h2 id="configuring">Configuring Java Embeddable classes</h2>
 
 <p>At the heart of the JBehave running of stories lies the <a
-    href="javadoc/core/org/jbehave/core/embedder/Embedder.html">Embedder</a>,
+	href="javadoc/core/org/jbehave/core/embedder/Embedder.html">Embedder</a>,
 which provides an entry point to all of JBehave's functionality that is
 embeddable into other launchers, such as IDEs or CLIs. JBehave
 complements the Embedder with an <a
-    href="javadoc/core/org/jbehave/core/Embeddable.html">Embeddable</a>
+	href="javadoc/core/org/jbehave/core/Embeddable.html">Embeddable</a>
 which represents a runnable facade to the Embedder.</p>
 
 <span class="followup">JBehave allows many different ways to
@@ -118,12 +118,12 @@ configure Embeddable Java classes that allow the parsing and running of textual 
 <p>JBehave provides two main Embeddable implementations:</p>
 
 <ul>
-    <li><a
-        href="javadoc/core/org/jbehave/core/ConfigurableEmbedder.html">ConfigurableEmbedder</a>:
-    allows the specification of the Configuration and CandidateSteps.</li>
-    <li><a
-        href="javadoc/core/org/jbehave/core/InjectableEmbedder.html">InjectableEmbedder</a>:
-    allows the injection of a fully specified Embedder.</li>
+	<li><a
+		href="javadoc/core/org/jbehave/core/ConfigurableEmbedder.html">ConfigurableEmbedder</a>:
+	allows the specification of the Configuration and CandidateSteps.</li>
+	<li><a
+		href="javadoc/core/org/jbehave/core/InjectableEmbedder.html">InjectableEmbedder</a>:
+	allows the injection of a fully specified Embedder.</li>
 </ul>
 
 <h3>JUnit-enabled Embeddables</h3>
@@ -132,30 +132,28 @@ configure Embeddable Java classes that allow the parsing and running of textual 
 via several Embeddables implementations:</p>
 
 <ul>
-    <li><a href="javadoc/core/org/jbehave/core/junit/JUnitStory.html">JUnitStory</a>:
-    provides a one-to-one mapping with the textual story via the <a
-        href="javadoc/core/org/jbehave/core/io/StoryPathResolver.html">StoryPathResolver</a>.
-    </li>
-    <li><a
-        href="javadoc/core/org/jbehave/core/junit/JUnitStories.html">JUnitStories</a>:
-    provides a many-to-one mapping with the textual story paths explicitly
-    specified by overriding the <b>storyPaths()</b> method.</li>
+	<li><a href="javadoc/core/org/jbehave/core/junit/JUnitStory.html">JUnitStory</a>:
+	provides a one-to-one mapping with the textual story via the <a
+		href="javadoc/core/org/jbehave/core/io/StoryPathResolver.html">StoryPathResolver</a>.
+	</li>
+	<li><a
+		href="javadoc/core/org/jbehave/core/junit/JUnitStories.html">JUnitStories</a>:
+	provides a many-to-one mapping with the textual story paths explicitly
+	specified by overriding the <b>storyPaths()</b> method.</li>
 </ul>
-
-<p><a href="javadoc/core/org/jbehave/core/junit/JUnitReportingRunner.html">JUnitReportingRunner</a> can be used
-    to visualize the structure and the successes/failures</p>
 
 <p>In the case of one-to-one mapping, our abstract base TraderStory
 would look like:</p>
 <script type="syntaxhighlighter" class="brush: java">
 <![CDATA[
-@RunWith(JUnitReportingRunner.class)
 public abstract class TraderStory extends JUnitStory {
+
+    private final CrossReference xref = new CrossReference();
 
     public TraderStory() {
         configuredEmbedder().embedderControls().doGenerateViewAfterStories(true).doIgnoreFailureInStories(true)
                 .doIgnoreFailureInView(true).useThreads(2).useStoryTimeoutInSecs(60);
-        // Uncomment to set meta filter, which can also be set via Maven
+        // Uncomment to set meta filter, which can also be set via Ant or Maven
         // configuredEmbedder().useMetaFilters(Arrays.asList("+theme parametrisation"));
     }
 
@@ -184,8 +182,11 @@ public abstract class TraderStory extends JUnitStory {
                                 .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
                                 .withDefaultFormats().withPathResolver(new ResolveToPackagedName())
                                 .withViewResources(viewResources).withFormats(CONSOLE, TXT, HTML, XML)
-                                .withFailureTrace(true).withFailureTraceCompression(true))
-                .useParameterConverters(parameterConverters));
+                                .withFailureTrace(true).withFailureTraceCompression(true).withCrossReference(xref))
+                .useParameterConverters(parameterConverters)
+                // use '%' instead of '$' to identify parameters
+                .useStepPatternParser(new RegexPrefixCapturingPatternParser("%")) 
+                .useStepMonitor(xref.getStepMonitor());
     }
 
     @Override
@@ -207,8 +208,9 @@ story in same package.</p>
 
 <script type="syntaxhighlighter" class="brush: java">
 <![CDATA[
-@RunWith(JUnitReportingRunner.class)
 public class TraderStories extends JUnitStories {
+
+    private final CrossReference xref = new CrossReference();
 
     public TraderStories() {
         configuredEmbedder().embedderControls().doGenerateViewAfterStories(true).doIgnoreFailureInStories(false)
@@ -238,8 +240,13 @@ public class TraderStories extends JUnitStories {
                 .withViewResources(viewResources)
                 .withFormats(CONSOLE, TXT, HTML_TEMPLATE, XML_TEMPLATE)
                 .withFailureTrace(true)
-                .withFailureTraceCompression(true))
-            .useParameterConverters(parameterConverters));
+                .withFailureTraceCompression(true)                
+                .withCrossReference(xref)) 
+            .useParameterConverters(parameterConverters)                     
+            // use '%' instead of '$' to identify parameters
+            .useStepPatternParser(new RegexPrefixCapturingPatternParser(
+                            "%")) 
+            .useStepMonitor(xref.getStepMonitor());                               
     }
 
     @Override
@@ -261,25 +268,10 @@ public class TraderStories extends JUnitStories {
 ]]>
 </script>
 
-<p>Usually, this is everything you have to do. If you want to, you can use a little helper method to configure
-    the configured Embedder so that it works nicely together with the <a href="javadoc/core/org/jbehave/core/junit/JUnitReportingRunner.html">JUnitReportingRunner</a>.</p>
-
-<script type="syntaxhighlighter" class="brush: java">
-<![CDATA[
-JUnitReportingRunner.recommendedControls(configuredEmbedder());
-]]>
-</script>
-
-<p>This tells JBehave to don't throw any exceptions when generating views or otherwise wrapping the execution up.
-    This would confuse JUnit considerably, rendering the AfterStories Suite incomplete.</p>
-<p>Once you are all set, you use the regular Run As -> JUnit Test command in Eclipse or similar command in
-    IntelliJ IDEA. The JUnit view should appear and display something like this:</p>
-<img src="images/Images.006.png" />
-
 <h3>JUnit AnnotatedEmbedderRunner</h3>
 
 <p>JBehave also provides an implementation of JUnit's Runner, <a
-    href="javadoc/core/org/jbehave/core/junit/AnnotatedEmbedderRunner.html">AnnotatedEmbedderRunner</a>,
+	href="javadoc/core/org/jbehave/core/junit/AnnotatedEmbedderRunner.html">AnnotatedEmbedderRunner</a>,
 which is runnable via JUnit's <b>@RunWith</b> annotation:</p>
 
 <script type="syntaxhighlighter" class="brush: java">
@@ -357,7 +349,7 @@ public class AnnotatedEmbedderWithSpringJUnit4ClassRunner {
 <span class="followup">JBehave provides fully annotatation-based
 support for specifying <a href="configuration.html">configuration</a>
 and <a href="dependency-injection.html">dependency injection</a>. The <a
-    href="running-stories.html">running stories</a> will go into more
+	href="running-stories.html">running stories</a> will go into more
 details of the different ways to run stories. Or if you want to learn
 more about JBehave's step matching mechanism, you'll want to explore the
 concept of <a href="candidate-steps.html">candidate steps</a> in more

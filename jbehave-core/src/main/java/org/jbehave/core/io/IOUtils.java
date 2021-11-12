@@ -15,8 +15,9 @@ public class IOUtils {
     public static String toString(InputStream input, Charset charset, boolean close) throws IOException {
         try {
             return org.apache.commons.io.IOUtils.toString(input, charset.name());
-        } finally {
-            if (close) {
+        }
+        finally {
+            if ( close ) {
                 input.close();
             }
         }
@@ -28,8 +29,8 @@ public class IOUtils {
      * @param input the InputStream
      * @param close the boolean to close the input afterwards
      * @return A String with the content 
-     * @throws IOException if an I/O error occurs.
-     * @see org.apache.commons.io.IOUtils#toString(InputStream, Charset)
+     * @throws IOException
+     * @see {@link org.apache.commons.io.IOUtils#toString(InputStream)}
      */
     public static String toString(InputStream input, boolean close) throws IOException {
         return toString(input, StandardCharsets.UTF_8, close);
@@ -41,14 +42,15 @@ public class IOUtils {
      * @param input the Reader
      * @param close the boolean to close the input afterwards
      * @return A String with the content 
-     * @throws IOException if an I/O error occurs.
-     * @see org.apache.commons.io.IOUtils#toString(Reader)
+     * @throws IOException
+     * @see {@link org.apache.commons.io.IOUtils#toString(Reader)}
      */
     public static String toString(Reader input, boolean close) throws IOException {
         try {
             return org.apache.commons.io.IOUtils.toString(input);
-        } finally {
-            if (close) {
+        }
+        finally {
+            if ( close ) {
                 input.close();
             }
         }

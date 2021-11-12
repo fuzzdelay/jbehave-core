@@ -28,6 +28,7 @@ import org.jbehave.core.configuration.AnnotationBuilder;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.configuration.weld.WeldBootstrap;
 import org.jbehave.core.configuration.weld.ConfigurationProducer.CustomObject;
 import org.jbehave.core.failures.SilentlyAbsorbingFailure;
 import org.jbehave.core.i18n.LocalizedKeywords;
@@ -36,13 +37,13 @@ import org.jbehave.core.parsers.RegexPrefixCapturingPatternParser;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.Steps;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 
-class WeldAnnotationBuilderBehaviour {
+public class WeldAnnotationBuilderBehaviour {
 
     @Test
-    void shouldBuildConfigurationFromAnnotations() {
+    public void shouldBuildConfigurationFromAnnotations() {
         AnnotationBuilder builder = createBuilder(AnnotatedUsingWeld.class);
         Configuration configuration = builder.buildConfiguration();
 
@@ -62,14 +63,13 @@ class WeldAnnotationBuilderBehaviour {
         assertThat(configuration.storyReporterBuilder().outputDirectory().getName(), equalTo("my-output-directory"));
         assertThat(configuration.storyReporterBuilder().viewResources().getProperty("index"),
                 equalTo("my-reports-index.ftl"));
-        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"),
-                equalTo("true"));
+        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"), equalTo("true"));
         assertThat(configuration.storyReporterBuilder().reportFailureTrace(), is(true));
         
     }
     
     @Test
-    void shouldBuildConfigurationFromAnnotationsUsingConfigureAndConverters() {
+    public void shouldBuildConfigurationFromAnnotationsUsingConfigureAndConverters() {
         
         AnnotationBuilder builderAnnotated = createBuilder(AnnotatedUsingConfigureAndConverters.class);
         
@@ -79,14 +79,14 @@ class WeldAnnotationBuilderBehaviour {
     }
     
     @Test
-    void shouldBuildDefaultConfigurationIfAnnotationNotPresent() {
+    public void shouldBuildDefaultConfigurationIfAnnotationNotPresent() {
 
         AnnotationBuilder builderNotAnnotated = createBuilder(NotAnnotated.class);
         assertThatConfigurationIs(builderNotAnnotated.buildConfiguration(), new MostUsefulConfiguration());
     }
     
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingWeld() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingWeld() {
         AnnotationBuilder builderAnnotated = createBuilder(AnnotatedUsingWeld.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         
@@ -94,16 +94,15 @@ class WeldAnnotationBuilderBehaviour {
     }
     
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndWeldSteps() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndWeldSteps() {
         AnnotationBuilder builderAnnotated = createBuilder(AnnotatedUsingWeldWithSteps.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
-
-        assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), WeldStepBean.class,
-                FooSteps.class);
+        
+        assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration),WeldStepBean.class, FooSteps.class);
     }
     
     @Test
-    void shouldBuildOnlyWeldStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildOnlyWeldStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
         AnnotationBuilder builderNotAnnotated = createBuilder(NotAnnotated.class);
         Configuration configuration = builderNotAnnotated.buildConfiguration();
         
@@ -111,7 +110,7 @@ class WeldAnnotationBuilderBehaviour {
     }
     
     @Test
-    void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
+    public void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
 
         AnnotationBuilder builderAnnotated = createBuilder(AnnotatedUsingWeld.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
@@ -170,7 +169,7 @@ class WeldAnnotationBuilderBehaviour {
     
     @Configure
     @UsingWeld
-    @UsingSteps(instances = { FooSteps.class })
+    @UsingSteps(instances={FooSteps.class})
     public static class AnnotatedUsingWeldWithSteps {
 
     }
@@ -189,15 +188,13 @@ class WeldAnnotationBuilderBehaviour {
     public static class WeldStepBean {
         
         @Given("this is a step")
-        public void simpleStep() {
-        }
+        public void simpleStep() {}
     }
     
     public static class FooSteps {
         
         @Given("this is another step")
-        public void simpleStep2() {
-        }
+        public void simpleStep2() {}
     }
 
 }

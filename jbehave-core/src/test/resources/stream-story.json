@@ -1,5 +1,4 @@
 {
-  "id": "story-id",
   "path": "\/path\/to\/story",
   "title": "An interesting story & special chars",
   "dryRun": "DRY RUN",
@@ -83,13 +82,7 @@
       ]
     }
   },
-  "beforeSystemStorySteps": [
-    {
-      "outcome": "successful",
-      "value": "Given a before story step"
-    }
-  ],
-  "beforeUserStorySteps": [
+  "beforeStorySteps": [
     {
       "outcome": "successful",
       "value": "Given a before story step"
@@ -98,20 +91,7 @@
   "scenarios": [
     {
       "keyword": "Scenario:",
-      "id": "scenario-id",
       "title": "I ask for a loan",
-      "beforeSystemScenarioSteps": [
-        {
-          "outcome": "successful",
-          "value": "Given a scenario step"
-        }
-      ],
-      "beforeUserScenarioSteps": [
-        {
-          "outcome": "successful",
-          "value": "Given a scenario step"
-        }
-      ],
       "givenStories": {
         "keyword": "GivenStories:",
         "givenStories": [
@@ -137,34 +117,6 @@
         {
           "outcome": "comment",
           "value": "!-- A comment"
-        },
-        {
-          "steps": [
-            {
-              "outcome": "successful",
-              "value": "When I perform inner step"
-            },
-            {
-              "steps": [
-                {
-                  "outcome": "successful",
-                  "value": "When I perform inner step"
-                },
-                {
-                  "outcome": "successful",
-                  "value": "When I perform inner step"
-                }
-              ],
-              "outcome": "successful",
-              "value": "When I perform composite step"
-            },
-            {
-              "outcome": "successful",
-              "value": "When I perform inner step"
-            }
-          ],
-          "outcome": "successful",
-          "value": "When I perform composite step"
         },
         {
           "outcome": "successful",
@@ -249,25 +201,10 @@
             ]
           }
         }
-      ],
-      "afterUserScenarioSteps": [
-        {
-          "outcome": "successful",
-          "value": "Given a scenario step"
-        }
-      ],
-      "afterSystemScenarioSteps": [
-        {
-          "outcome": "successful",
-          "value": "Given a scenario step"
-        }
-      ],
-      "start": 1,
-      "end": 2
+      ]
     },
     {
       "keyword": "Scenario:",
-      "id": "scenario-id",
       "title": "Parametrised Scenario",
       "examples": {
         "keyword": "Examples:",
@@ -298,18 +235,6 @@
               "money": "$30",
               "to": "Mauro"
             },
-            "beforeSystemScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
-            "beforeUserScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
             "steps": [
               {
                 "outcome": "successful",
@@ -319,18 +244,6 @@
                 "outcome": "successful",
                 "value": "Then I give it to Mauro"
               }
-            ],
-            "afterUserScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
-            "afterSystemScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
             ]
           },
           {
@@ -339,18 +252,6 @@
               "money": "$50",
               "to": "Paul"
             },
-            "beforeSystemScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
-            "beforeUserScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
             "steps": [
               {
                 "outcome": "successful",
@@ -365,33 +266,13 @@
                 "keyword": "PENDING",
                 "value": "Then I should have a balance of $30"
               }
-            ],
-            "afterUserScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
-            ],
-            "afterSystemScenarioSteps": [
-              {
-                "outcome": "successful",
-                "value": "Given a scenario step"
-              }
             ]
           }
         ]
-      },
-      "start": 1,
-      "end": 2
+      }
     }
   ],
-  "afterUserStorySteps": [
-    {
-      "outcome": "successful",
-      "value": "Given an after story step"
-    }
-  ],
-  "afterSystemStorySteps": [
+  "afterStorySteps": [
     {
       "outcome": "successful",
       "value": "Given an after story step"

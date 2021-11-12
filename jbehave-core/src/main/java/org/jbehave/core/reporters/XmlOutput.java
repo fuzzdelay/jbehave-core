@@ -1,12 +1,12 @@
 package org.jbehave.core.reporters;
 
-import static org.jbehave.core.reporters.PrintStreamOutput.Format.XML;
-
 import java.io.PrintStream;
 import java.util.Properties;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.i18n.LocalizedKeywords;
+
+import static org.jbehave.core.reporters.PrintStreamOutput.Format.XML;
 
 /**
  * <p>
@@ -46,12 +46,10 @@ public class XmlOutput extends PrintStreamOutput {
         super(XML, output, defaultXmlPatterns(), outputPatterns, keywords, reportFailureTrace, compressFailureTrace);
     }
 
-    @SuppressWarnings("checkstyle:LineLength")
     private static Properties defaultXmlPatterns() {
         Properties patterns = new Properties();
-        patterns.setProperty("beforeStep", "");
         patterns.setProperty("dryRun", "<dryRun>{0}</dryRun>\n");        
-        patterns.setProperty("beforeStory", "<story id=\"{0}\" path=\"{2}\" title=\"{1}\">\n");
+        patterns.setProperty("beforeStory", "<story path=\"{1}\" title=\"{0}\">\n");
         patterns.setProperty("storyCancelled", "<cancelled keyword=\"{0}\" durationKeyword=\"{1}\" durationInSecs=\"{2}\"/>\n");
         patterns.setProperty("afterStory", "</story>\n");
         patterns.setProperty("pendingMethod", "<pendingMethod>{0}</pendingMethod>\n");        
@@ -76,30 +74,12 @@ public class XmlOutput extends PrintStreamOutput {
         patterns.setProperty("lifecycleOutcome", "<outcome>{0} {1}</outcome>\n");
         patterns.setProperty("lifecycleMetaFilter", "<metaFilter>{0} {1}</metaFilter>\n");
         patterns.setProperty("lifecycleStep", "<step>{0}</step>\n");
-        patterns.setProperty("beforeBeforeStoriesSteps", "<beforeStoriesSteps>\n");
-        patterns.setProperty("afterBeforeStoriesSteps", "</beforeStoriesSteps>\n");
-        patterns.setProperty("beforeAfterStoriesSteps", "<afterStoriesSteps>\n");
-        patterns.setProperty("afterAfterStoriesSteps", "</afterStoriesSteps>\n");
-        patterns.setProperty("beforeBeforeSystemStorySteps", "<beforeSystemStorySteps>\n");
-        patterns.setProperty("afterBeforeSystemStorySteps", "</beforeSystemStorySteps>\n");
-        patterns.setProperty("beforeAfterSystemStorySteps", "<afterSystemStorySteps>\n");
-        patterns.setProperty("afterAfterSystemStorySteps", "</afterSystemStorySteps>\n");
-        patterns.setProperty("beforeBeforeUserStorySteps", "<beforeUserStorySteps>\n");
-        patterns.setProperty("afterBeforeUserStorySteps", "</beforeUserStorySteps>\n");
-        patterns.setProperty("beforeAfterUserStorySteps", "<afterUserStorySteps>\n");
-        patterns.setProperty("afterAfterUserStorySteps", "</afterUserStorySteps>\n");
-        patterns.setProperty("beforeBeforeSystemScenarioSteps", "<beforeSystemScenarioSteps>\n");
-        patterns.setProperty("afterBeforeSystemScenarioSteps", "</beforeSystemScenarioSteps>\n");
-        patterns.setProperty("beforeAfterSystemScenarioSteps", "<afterSystemScenarioSteps>\n");
-        patterns.setProperty("afterAfterSystemScenarioSteps", "</afterSystemScenarioSteps>\n");
-        patterns.setProperty("beforeBeforeUserScenarioSteps", "<beforeUserScenarioSteps>\n");
-        patterns.setProperty("afterBeforeUserScenarioSteps", "</beforeUserScenarioSteps>\n");
-        patterns.setProperty("beforeAfterUserScenarioSteps", "<afterUserScenarioSteps>\n");
-        patterns.setProperty("afterAfterUserScenarioSteps", "</afterUserScenarioSteps>\n");
-        patterns.setProperty("beforeScenarioSteps", "<steps>\n");
-        patterns.setProperty("afterScenarioSteps", "</steps>\n");
-        patterns.setProperty("beforeScenario", "<scenario id=\"{0}\" keyword=\"{1}\" title=\"{2}\">\n");
-        patterns.setProperty("scenarioExcluded", "<excluded pattern=\"{0}\"/>\n");
+        patterns.setProperty("beforeBeforeStorySteps", "<beforeStorySteps>\n");
+        patterns.setProperty("afterBeforeStorySteps", "</beforeStorySteps>\n");
+        patterns.setProperty("beforeAfterStorySteps", "<afterStorySteps>\n");
+        patterns.setProperty("afterAfterStorySteps", "</afterStorySteps>\n");
+        patterns.setProperty("beforeScenario", "<scenario keyword=\"{0}\" title=\"{1}\">\n");
+        patterns.setProperty("scenarioNotAllowed", "<notAllowed pattern=\"{0}\"/>\n");        
         patterns.setProperty("afterScenario", "</scenario>\n");
         patterns.setProperty("afterScenarioWithFailure", "<failure>{0}</failure>\n</scenario>\n");
         patterns.setProperty("givenStories", "<givenStories keyword=\"{0}\" paths=\"{1}\"/>\n");
@@ -140,10 +120,7 @@ public class XmlOutput extends PrintStreamOutput {
         patterns.setProperty("example", "\n<example keyword=\"{0}\">{1}</example>\n");
         patterns.setProperty("parameterValueStart", "<parameter>");
         patterns.setProperty("parameterValueEnd", "</parameter>");
-        patterns.setProperty("parameterValueNewline", "\n");
-        patterns.setProperty("numericParameter", "<timing phase=\"{0}\">{1}</timing>\n");
-        patterns.setProperty("beforeComposedSteps", "<steps>\n");
-        patterns.setProperty("afterComposedSteps", "</steps>\n");
+        patterns.setProperty("parameterValueNewline", "\n");        
         return patterns;
     }
 }

@@ -5,11 +5,12 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jbehave.core.annotations.AfterScenario;
-import org.jbehave.core.annotations.AfterScenario.Outcome;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStory;
+import org.jbehave.core.annotations.AfterScenario.Outcome;
 import org.jbehave.core.model.Meta;
+import org.jbehave.core.steps.StepCollector.Stage;
 
 /**
  * A BeforeOrAfterStep is associated to a Java method annotated with
@@ -20,29 +21,29 @@ import org.jbehave.core.model.Meta;
  */
 public class BeforeOrAfterStep {
 
+    private final Stage stage;
     private final Method method;
-    private final int order;
     private final StepCreator stepCreator;
     private final Outcome outcome;
     private StepMonitor stepMonitor = new SilentStepMonitor();
 
-    public BeforeOrAfterStep(Method method, int order, StepCreator stepCreator) {
-        this(method, order, Outcome.ANY, stepCreator);
+    public BeforeOrAfterStep(Stage stage, Method method, StepCreator stepCreator) {
+        this(stage, method, Outcome.ANY, stepCreator);
     }
 
-    public BeforeOrAfterStep(Method method, int order, Outcome outcome, StepCreator stepCreator) {
+    public BeforeOrAfterStep(Stage stage, Method method, Outcome outcome, StepCreator stepCreator) {
+        this.stage = stage;
         this.method = method;
-        this.order = order;
         this.outcome = outcome;
         this.stepCreator = stepCreator;
     }
 
-    public Method getMethod() {
-        return method;
+    public Stage getStage() {
+        return stage;
     }
 
-    public int getOrder() {
-        return order;
+    public Method getMethod() {
+        return method;
     }
 
     public Step createStep() {
@@ -64,7 +65,7 @@ public class BeforeOrAfterStep {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(method).append(order).append(outcome)
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(stage).append(method).append(outcome)
                 .append(stepMonitor).toString();
     }
 }

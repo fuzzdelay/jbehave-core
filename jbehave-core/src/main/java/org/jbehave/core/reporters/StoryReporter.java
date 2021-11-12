@@ -6,14 +6,13 @@ import java.util.Map;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.GivenStories;
 import org.jbehave.core.model.Lifecycle;
+import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Narrative;
 import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
-import org.jbehave.core.steps.Timing;
 
 /**
  * Allows the runner to report the state of running stories
@@ -23,11 +22,7 @@ import org.jbehave.core.steps.Timing;
  */
 public interface StoryReporter {
 
-    void beforeStoriesSteps(Stage stage);
-
-    void afterStoriesSteps(Stage stage);
-
-    void storyExcluded(Story story, String filter);
+    void storyNotAllowed(Story story, String filter);
 
     void storyCancelled(Story story, StoryDuration storyDuration);
 
@@ -35,31 +30,39 @@ public interface StoryReporter {
 
     void afterStory(boolean givenOrRestartingStory);
 
-    void beforeScenarios();
-
-    void afterScenarios();
-
     void narrative(Narrative narrative);
 
-    void lifecycle(Lifecycle lifecycle);
+    void lifecyle(Lifecycle lifecycle);
 
-    void beforeStorySteps(Stage stage, Lifecycle.ExecutionType type);
+    void beforeStorySteps(Stage stage);
 
-    void afterStorySteps(Stage stage, Lifecycle.ExecutionType type);
+    void afterStorySteps(Stage stage);
 
-    void beforeScenarioSteps(Stage stage, Lifecycle.ExecutionType type);
+    void beforeScenarioSteps(Stage stage);
 
-    void afterScenarioSteps(Stage stage, Lifecycle.ExecutionType type);
+    void afterScenarioSteps(Stage stage);
 
-    void beforeComposedSteps();
-
-    void afterComposedSteps();
-
-    void scenarioExcluded(Scenario scenario, String filter);
+    void scenarioNotAllowed(Scenario scenario, String filter);
 
     void beforeScenario(Scenario scenario);
 
-    void afterScenario(Timing timing);
+    /**
+     * @deprecated use {@link #beforeScenario(Scenario)}
+     *
+     * @param scenarioTitle Scenario title
+     */
+    @Deprecated
+    void beforeScenario(String scenarioTitle);
+
+    /**
+     * @deprecated use {@link #beforeScenario(Scenario)}
+     *
+     * @param meta Scenario meta
+     */
+    @Deprecated
+    void scenarioMeta(Meta meta);
+
+    void afterScenario();
 
     void beforeGivenStories();
 
@@ -71,11 +74,19 @@ public interface StoryReporter {
 
     void beforeExamples(List<String> steps, ExamplesTable table);
 
+    /**
+     * @deprecated use {@link #example(Map, int)}
+     *
+     * @param tableRow Example table row
+     */
+    @Deprecated
+    void example(Map<String, String> tableRow);
+
     void example(Map<String, String> tableRow, int exampleIndex);
 
     void afterExamples();
 
-    void beforeStep(Step step);
+    void beforeStep(String step);
     
     void successful(String step);
 

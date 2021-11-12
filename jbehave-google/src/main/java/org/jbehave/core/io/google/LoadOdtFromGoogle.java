@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.jbehave.core.io.odf.LoadOdtFromURL;
+
 import com.google.gdata.client.DocumentQuery;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.MediaContent;
@@ -14,8 +16,6 @@ import com.google.gdata.data.docs.DocumentListFeed;
 import com.google.gdata.data.media.MediaSource;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
-
-import org.jbehave.core.io.odf.LoadOdtFromURL;
 
 public class LoadOdtFromGoogle extends LoadOdtFromURL {
 

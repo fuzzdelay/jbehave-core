@@ -11,7 +11,7 @@ public class ScalaStepsFactory extends AbstractStepsFactory {
 
     private final ScalaContext context;
 
-    public ScalaStepsFactory(Configuration configuration, ScalaContext context) {
+    public ScalaStepsFactory(Configuration configuration, ScalaContext context){
         super(configuration);
         this.context = context;
     }
@@ -19,7 +19,7 @@ public class ScalaStepsFactory extends AbstractStepsFactory {
     @Override
     protected List<Class<?>> stepsTypes() {
         List<Class<?>> types = new ArrayList<>();
-        for (Object object : context.getInstances()) {
+        for (Object object : context.getInstances() ){
             if (hasAnnotatedMethods(object.getClass())) {
                 types.add(object.getClass());
             }

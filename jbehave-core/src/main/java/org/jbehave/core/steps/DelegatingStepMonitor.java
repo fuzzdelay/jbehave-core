@@ -34,6 +34,16 @@ public class DelegatingStepMonitor implements StepMonitor {
         this(asList(delegates));
     }
 
+    /**
+     * @deprecated Use {@link #convertedValueOfType(String, Type, Object, Queue)}
+     */
+    @Override
+    public void convertedValueOfType(String value, Type type, Object converted, Class<?> converterClass) {
+        for (StepMonitor monitor : delegates) {
+            monitor.convertedValueOfType(value, type, converted, converterClass);
+        }
+    }
+
     @Override
     public void convertedValueOfType(String value, Type type, Object converted, Queue<Class<?>> converterClasses) {
         for (StepMonitor monitor : delegates) {
@@ -42,16 +52,14 @@ public class DelegatingStepMonitor implements StepMonitor {
     }
 
     @Override
-    public void stepMatchesType(String stepAsString, String previousAsString, boolean matchesType, StepType stepType,
-            Method method, Object stepsInstance) {
+    public void stepMatchesType(String stepAsString, String previousAsString, boolean matchesType, StepType stepType, Method method, Object stepsInstance) {
         for (StepMonitor monitor : delegates) {
             monitor.stepMatchesType(stepAsString, previousAsString, matchesType, stepType, method, stepsInstance);
         }
     }
 
     @Override
-    public void stepMatchesPattern(String step, boolean matches, StepPattern stepPattern, Method method,
-            Object stepsInstance) {
+    public void stepMatchesPattern(String step, boolean matches, StepPattern stepPattern, Method method, Object stepsInstance) {
         for (StepMonitor monitor : delegates) {
             monitor.stepMatchesPattern(step, matches, stepPattern, method, stepsInstance);
         }
@@ -61,6 +69,14 @@ public class DelegatingStepMonitor implements StepMonitor {
     public void foundParameter(String parameter, int position) {
         for (StepMonitor monitor : delegates) {
             monitor.foundParameter(parameter, position);
+        }
+    }
+
+    @Override
+    @Deprecated
+    public void performing(String step, boolean dryRun) {
+        for (StepMonitor monitor : delegates) {
+            monitor.performing(step, dryRun);
         }
     }
 

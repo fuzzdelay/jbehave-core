@@ -7,16 +7,16 @@ import static org.hamcrest.Matchers.equalTo;
 
 import java.net.URL;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class StoryLocationBehaviour {
+public class StoryLocationBehaviour {
 
     @Test
-    void shouldAllowClasspathResources() {
+    public void shouldAllowClasspathResources() {
         URL codeLocation = CodeLocations.codeLocationFromClass(this.getClass());
         String storyPath = "org/jbehave/core/io/stories/my_pending_story";
-        StoryLocation storyLocation = new StoryLocation(codeLocation, storyPath);
-        assertThat(storyLocation.getCodeLocation(), equalTo(codeLocation));
+		StoryLocation storyLocation = new StoryLocation(codeLocation, storyPath);
+		assertThat(storyLocation.getCodeLocation(), equalTo(codeLocation));
         assertThat(storyLocation.getStoryPath(), equalTo(storyPath));
         assertThat(storyLocation.getURL(), equalTo(codeLocation.toExternalForm() + storyPath));
         assertThat(storyLocation.getPath(), equalTo(storyPath));
@@ -24,7 +24,7 @@ class StoryLocationBehaviour {
     }
 
     @Test
-    void shouldAllowURLResources() {
+    public void shouldAllowURLResources() {
         assertThatStoryLocationAllowsStoryPathAsURL(CodeLocations.codeLocationFromPath("src/test/java/"));
         assertThatStoryLocationAllowsStoryPathAsURL(CodeLocations.codeLocationFromURL("http://company.com/stories/"));
     }

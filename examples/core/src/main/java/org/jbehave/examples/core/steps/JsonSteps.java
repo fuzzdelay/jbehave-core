@@ -1,8 +1,5 @@
 package org.jbehave.examples.core.steps;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -12,15 +9,18 @@ import org.jbehave.core.annotations.AsJson;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 public class JsonSteps {
 
-    private JsonDto jsonDto;
+    private AJsonDto aJsonDto;
     private AnotherJsonDto anotherJsonDto;
-    private List<JsonDto> listOfJsonDtos;
+    private List<AJsonDto> listOfJsonDtos;
 
-    @Given("a json $jsonDto")
-    public void givenAJson(final JsonDto jsonDto) {
-        this.jsonDto = jsonDto;
+    @Given("a json $aJson")
+    public void givenAJson(final AJsonDto aJson) {
+        this.aJsonDto = aJson;
     }
 
     @Given("another json $anotherJson")
@@ -29,13 +29,13 @@ public class JsonSteps {
     }
 
     @Given("a list of jsons $listOfJsons")
-    public void givenAListOfJsons(final List<JsonDto> listOfJsons) {
+    public void givenAListOfJsons(final List<AJsonDto> listOfJsons) {
         this.listOfJsonDtos = listOfJsons;
     }
 
     @Then("the String value is $value")
     public void thenStringValueIs(final String value) {
-        assertThat(value, equalTo(this.jsonDto.getString()));
+        assertThat(value, equalTo(this.aJsonDto.getString()));
     }
 
     @Then("the Double value is $value")
@@ -50,7 +50,7 @@ public class JsonSteps {
 
     @Then("the Integer value is $value")
     public void checkIntegerValue(final Integer value) {
-        assertThat(value, equalTo(this.jsonDto.getInteger()));
+        assertThat(value, equalTo(this.aJsonDto.getInteger()));
     }
 
     @Then("the Boolean value is $value")
@@ -65,7 +65,7 @@ public class JsonSteps {
 
     @Then("the BigDecimal value is $value")
     public void checkBigDecimalValue(final BigDecimal value) {
-        assertThat(value, equalTo(this.jsonDto.getBigDecimal()));
+        assertThat(value, equalTo(this.aJsonDto.getBigDecimal()));
     }
 
     @Then("the $index{-st|-nd} BigDecimal value in list is $value")
@@ -74,22 +74,22 @@ public class JsonSteps {
     }
 
     @AsJson
-    public static class JsonDto {
+    public static class AJsonDto {
 
-        private String string;
-        private Integer integer;
-        private BigDecimal bigDecimal;
+        private String aString;
+        private Integer anInteger;
+        private BigDecimal aBigDecimal;
 
         public String getString() {
-            return string;
+            return aString;
         }
 
         public Integer getInteger() {
-            return integer;
+            return anInteger;
         }
 
         public BigDecimal getBigDecimal() {
-            return bigDecimal;
+            return aBigDecimal;
         }
 
         @Override
@@ -101,15 +101,15 @@ public class JsonSteps {
     @AsJson
     public static class AnotherJsonDto {
 
-        private Double doubleVar;
-        private Boolean booleanVar;
+        private Double aDouble;
+        private Boolean aBoolean;
 
         public Double getDouble() {
-            return doubleVar;
+            return aDouble;
         }
 
         public Boolean getBoolean() {
-            return booleanVar;
+            return aBoolean;
         }
 
         @Override

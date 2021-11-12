@@ -4,16 +4,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.jbehave.core.steps.JBehaveMatchers.step;
 import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_END;
 import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_START;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.beans.IntrospectionException;
@@ -23,13 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.BiFunction;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import com.thoughtworks.paranamer.BytecodeReadingParanamer;
-import com.thoughtworks.paranamer.CachingParanamer;
 
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.configuration.Keywords;
@@ -46,59 +36,60 @@ import org.jbehave.core.steps.AbstractStepResult.Comment;
 import org.jbehave.core.steps.AbstractStepResult.Failed;
 import org.jbehave.core.steps.AbstractStepResult.Ignorable;
 import org.jbehave.core.steps.AbstractStepResult.Pending;
+import org.jbehave.core.steps.AbstractStepResult.Silent;
 import org.jbehave.core.steps.AbstractStepResult.Skipped;
 import org.jbehave.core.steps.AbstractStepResult.Successful;
-import org.jbehave.core.steps.StepCreator.ParameterNotFound;
-import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.context.StepsContext;
 import org.jbehave.core.steps.context.StepsContext.ObjectAlreadyStoredException;
 import org.jbehave.core.steps.context.StepsContext.ObjectNotStoredException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.jbehave.core.steps.StepCreator.ParameterNotFound;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Matchers;
 
-class StepCreatorBehaviour {
+import com.thoughtworks.paranamer.BytecodeReadingParanamer;
+import com.thoughtworks.paranamer.CachingParanamer;
+
+public class StepCreatorBehaviour {
 
     private ParameterConverters parameterConverters = mock(ParameterConverters.class);
 
-    private final StepsContext stepsContext = new StepsContext();
+    private StepsContext stepsContext = new StepsContext();
 
-    @BeforeEach
+    @Before
     public void setUp() {
         when(parameterConverters.convert("shopping cart", String.class)).thenReturn("shopping cart");
         when(parameterConverters.convert("book", String.class)).thenReturn("book");
-        when(parameterConverters.newInstanceAdding(any())).thenReturn(parameterConverters);
+        when(parameterConverters.newInstanceAdding(Matchers.<ParameterConverters.ParameterConverter> anyObject()))
+                .thenReturn(parameterConverters);
     }
 
     @Test
-    void shouldHandleTargetInvocationFailureInBeforeOrAfterStep() throws IntrospectionException {
+    public void shouldHandleTargetInvocationFailureInBeforeOrAfterStep() throws IntrospectionException {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         MostUsefulConfiguration configuration = new MostUsefulConfiguration();
         InjectableStepsFactory stepsFactory = new InstanceStepsFactory(configuration, stepsInstance);
-        StepCreator stepCreator = new StepCreator(stepsInstance.getClass(), stepsFactory, stepsContext,
-                configuration.parameterConverters(), new ParameterControls(), null, new SilentStepMonitor());
-        StoryReporter reporter = mock(StoryReporter.class);
+        StepCreator stepCreator = new StepCreator(stepsInstance.getClass(), stepsFactory,
+                stepsContext, configuration.parameterConverters(), new ParameterControls(), null, new SilentStepMonitor());
 
         // When
-        String name = "aFailingBeforeScenarioMethod";
-        Method method = SomeSteps.methodFor(name);
-        StepResult stepResult = stepCreator.createBeforeOrAfterStep(method, Meta.EMPTY).perform(reporter, null);
+        Method method = SomeSteps.methodFor("aFailingBeforeScenarioMethod");
+        StepResult stepResult = stepCreator.createBeforeOrAfterStep(method, Meta.EMPTY).perform(null, null);
 
         // Then
         assertThat(stepResult, instanceOf(Failed.class));
         assertThat(stepResult.getFailure(), instanceOf(UUIDExceptionWrapper.class));
         Throwable cause = stepResult.getFailure().getCause();
         assertThat(cause, instanceOf(BeforeOrAfterFailed.class));
-        assertThat(cause.getMessage(),
-                equalTo("Method aFailingBeforeScenarioMethod (annotated with @BeforeScenario in class"
-                        + " org.jbehave.core.steps.SomeSteps) failed: java.lang.RuntimeException"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
+        assertThat(
+                cause.getMessage(),
+                org.hamcrest.Matchers
+                        .equalTo("Method aFailingBeforeScenarioMethod (annotated with @BeforeScenario in class org.jbehave.core.steps.SomeSteps) failed: java.lang.RuntimeException"));
     }
 
     @Test
-    void shouldHandleTargetInvocationFailureInParametrisedStep() throws IntrospectionException {
+    public void shouldHandleTargetInvocationFailureInParametrisedStep() throws IntrospectionException {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         InjectableStepsFactory stepsFactory = new InstanceStepsFactory(new MostUsefulConfiguration(), stepsInstance);
@@ -114,11 +105,11 @@ class StepCreatorBehaviour {
 
         // Then
         assertThat(stepResult, instanceOf(Failed.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldHandleFailureInParametrisedStep() {
+    public void shouldHandleFailureInParametrisedStep() {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         InjectableStepsFactory stepsFactory = new InstanceStepsFactory(new MostUsefulConfiguration(), stepsInstance);
@@ -134,11 +125,11 @@ class StepCreatorBehaviour {
 
         // Then
         assertThat(stepResult, instanceOf(Failed.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
-    @Test
-    void shouldFailIfMatchedParametersAreNotFound() {
+    @Test(expected = ParameterNotFound.class)
+    public void shouldFailIfMatchedParametersAreNotFound() {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepMatcher stepMatcher = mock(StepMatcher.class);
@@ -149,71 +140,49 @@ class StepCreatorBehaviour {
 
         // When
         when(stepMatcher.parameterNames()).thenReturn(new String[] {});
-        Matcher matcher = Pattern.compile("foo").matcher("bar");
-        assertThrows(ParameterNotFound.class, () -> stepCreator.matchedParameter(matcher, "unknown"));
+        stepCreator.matchedParameter("unknown");
+
         // Then .. fail as expected
     }
 
-    static Stream<BiFunction<Step, StoryReporter, StepResult>> executors() {
-        return Stream.of(
-                (step, storyReporter) -> step.perform(storyReporter, null),
-                (step, storyReporter) -> step.doNotPerform(storyReporter, null)
-        );
-    }
-
-    @MethodSource("executors")
-    @ParameterizedTest
-    void shouldCreatePendingAsStepResults(BiFunction<Step, StoryReporter, StepResult> executor) {
-        // Given
-        StoryReporter storyReporter = mock(StoryReporter.class);
-
+    @Test
+    public void shouldCreatePendingAsStepResults() {
         // When
         String stepAsString = "When I'm pending";
         Step pendingStep = StepCreator.createPendingStep(stepAsString, null);
 
         // Then
         assertThat(pendingStep.asString(new Keywords()), equalTo(stepAsString));
-        assertThat(executor.apply(pendingStep, storyReporter), instanceOf(Pending.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.PENDING, stepAsString);
-        verifyNoMoreInteractions(storyReporter);
+        assertThat(pendingStep.perform(null, null), instanceOf(Pending.class));
+        assertThat(pendingStep.doNotPerform(null, null), instanceOf(Pending.class));
     }
 
-    @MethodSource("executors")
-    @ParameterizedTest
-    void shouldCreateIgnorableAsStepResults(BiFunction<Step, StoryReporter, StepResult> executor) {
-        // Given
-        StoryReporter storyReporter = mock(StoryReporter.class);
-
+    @Test
+    public void shouldCreateIgnorableAsStepResults() {
         // When
         String stepAsString = "!-- Then ignore me";
         Step ignorableStep = StepCreator.createIgnorableStep(stepAsString);
 
         // Then
         assertThat(ignorableStep.asString(new Keywords()), equalTo(stepAsString));
-        assertThat(executor.apply(ignorableStep, storyReporter), instanceOf(Ignorable.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.IGNORABLE, stepAsString);
-        verifyNoMoreInteractions(storyReporter);
+        assertThat(ignorableStep.perform(null, null), instanceOf(Ignorable.class));
+        assertThat(ignorableStep.doNotPerform(null, null), instanceOf(Ignorable.class));
     }
 
-    @MethodSource("executors")
-    @ParameterizedTest
-    void shouldCreateCommentAsStepResults(BiFunction<Step, StoryReporter, StepResult> executor) {
-        // Given
-        StoryReporter storyReporter = mock(StoryReporter.class);
-
+    @Test
+    public void shouldCreateCommentAsStepResults() {
         // When
         String stepAsString = "!-- A comment";
         Step comment = StepCreator.createComment(stepAsString);
 
         // Then
         assertThat(comment.asString(new Keywords()), equalTo(stepAsString));
-        assertThat(executor.apply(comment, storyReporter), instanceOf(Comment.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.COMMENT, stepAsString);
-        verifyNoMoreInteractions(storyReporter);
+        assertThat(comment.perform(null, null), instanceOf(Comment.class));
+        assertThat(comment.doNotPerform(null, null), instanceOf(Comment.class));
     }
 
     @Test
-    void shouldCreateParametrisedStepWithParsedParametersValues() throws Exception {
+    public void shouldCreateParametrisedStepWithParsedParametersValues() throws Exception {
         assertThatParametrisedStepHasMarkedParsedParametersValues("shopping cart", "book");
         assertThatParametrisedStepHasMarkedParsedParametersValues("bookreading", "book");
         assertThatParametrisedStepHasMarkedParsedParametersValues("book", "bookreading");
@@ -223,8 +192,7 @@ class StepCreatorBehaviour {
             String secondParameterValue) throws IntrospectionException {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
-        StepMatcher stepMatcher = new RegexStepMatcher(StepType.WHEN, "I use parameters $theme and $variant",
-                Pattern.compile("When I use parameters (.*) and (.*)"), new String[] { "theme", "variant" });
+        StepMatcher stepMatcher = new RegexStepMatcher(StepType.WHEN, "I use parameters $theme and $variant", Pattern.compile("When I use parameters (.*) and (.*)"), new String[]{"theme", "variant"});
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, new ParameterControls());
         Map<String, String> parameters = new HashMap<>();
         StoryReporter storyReporter = mock(StoryReporter.class);
@@ -239,11 +207,11 @@ class StepCreatorBehaviour {
         String expected = "When I use parameters " + PARAMETER_VALUE_START + firstParameterValue + PARAMETER_VALUE_END
                 + " and " + PARAMETER_VALUE_START + secondParameterValue + PARAMETER_VALUE_END;
         assertThat(stepResult.parametrisedStep(), equalTo(expected));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldCreateParametrisedStepWithNamedParametersValues() throws Exception {
+    public void shouldCreateParametrisedStepWithNamedParametersValues() throws Exception {
         assertThatParametrisedStepHasMarkedNamedParameterValues("shopping cart", "book");
         assertThatParametrisedStepHasMarkedNamedParameterValues("bookreading", "book");
         assertThatParametrisedStepHasMarkedNamedParameterValues("book", "bookreading");
@@ -254,8 +222,7 @@ class StepCreatorBehaviour {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepMatcher stepMatcher = mock(StepMatcher.class);
-        StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher,
-                new ParameterControls().useDelimiterNamedParameters(false));
+        StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, new ParameterControls().useDelimiterNamedParameters(false));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("theme", firstParameterValue);
         parameters.put("variant", secondParameterValue);
@@ -263,13 +230,11 @@ class StepCreatorBehaviour {
 
         // When
         when(stepMatcher.parameterNames()).thenReturn(parameters.keySet().toArray(new String[parameters.size()]));
-        String stepWithoutStartingWord = "I use parameters " + firstParameterValue + " and " + secondParameterValue;
-        Matcher matcher = Pattern.compile("I use parameters (.*) and (.*)").matcher(
-                stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn(parameters.get(firstParameterValue));
+        when(stepMatcher.parameter(2)).thenReturn(parameters.get(secondParameterValue));
         String stepAsString = "When I use parameters <theme> and <variant>";
         StepResult stepResult = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithANamedParameter"),
-                stepAsString, stepWithoutStartingWord, parameters, Collections.emptyList()).perform(
+                stepAsString, "I use parameters <theme> and <variant>", parameters, Collections.emptyList()).perform(
                 storyReporter, null);
 
         // Then
@@ -277,106 +242,94 @@ class StepCreatorBehaviour {
         String expected = "When I use parameters " + PARAMETER_VALUE_START + firstParameterValue + PARAMETER_VALUE_END
                 + " and " + PARAMETER_VALUE_START + secondParameterValue + PARAMETER_VALUE_END;
         assertThat(stepResult.parametrisedStep(), equalTo(expected));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldInvokeBeforeOrAfterStepMethodWithExpectedParametersFromMeta() throws Exception {
+    public void shouldInvokeBeforeOrAfterStepMethodWithExpectedParametersFromMeta() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         Properties properties = new Properties();
         properties.put("theme", "shopping cart");
         properties.put("variant", "book");
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aMethodWithANamedParameter";
-        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor(name),
+        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor("aMethodWithANamedParameter"),
                 new Meta(properties));
-        StepResult stepResult = stepWithMeta.perform(reporter, null);
+        StepResult stepResult = stepWithMeta.perform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat(stepsInstance.args, instanceOf(Map.class));
 
         @SuppressWarnings("unchecked")
         Map<String, String> methodArgs = (Map<String, String>) stepsInstance.args;
         assertThat(methodArgs.get("variant"), is("book"));
         assertThat(methodArgs.get("theme"), is("shopping cart"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldInvokeBeforeOrAfterStepMethodWithMetaUsingParanamer() throws Exception {
+    public void shouldInvokeBeforeOrAfterStepMethodWithMetaUsingParanamer() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         stepCreator.useParanamer(new CachingParanamer(new BytecodeReadingParanamer()));
         Properties properties = new Properties();
         properties.put("theme", "shopping cart");
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aMethodWithoutNamedAnnotation";
-        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor(name),
+        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor("aMethodWithoutNamedAnnotation"),
                 new Meta(properties));
-        StepResult stepResult = stepWithMeta.perform(reporter, null);
+        StepResult stepResult = stepWithMeta.perform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat((String) stepsInstance.args, is("shopping cart"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldHandleFailureInBeforeOrAfterStepWithMeta() throws Exception {
+    public void shouldHandleFailureInBeforeOrAfterStepWithMeta() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aFailingMethod";
-        Method method = SomeSteps.methodFor(name);
-        StepResult stepResult = stepCreator.createBeforeOrAfterStep(method, Meta.EMPTY).perform(reporter, null);
+        Method method = SomeSteps.methodFor("aFailingMethod");
+        StepResult stepResult = stepCreator.createBeforeOrAfterStep(method, Meta.EMPTY).perform(null, null);
 
         // Then
         assertThat(stepResult, instanceOf(Failed.class));
         assertThat(stepResult.getFailure(), instanceOf(UUIDExceptionWrapper.class));
         assertThat(stepResult.getFailure().getCause(), instanceOf(BeforeOrAfterFailed.class));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldInvokeAfterStepUponAnyOutcomeMethodWithExpectedParametersFromMeta() throws Exception {
+    public void shouldInvokeAfterStepUponAnyOutcomeMethodWithExpectedParametersFromMeta() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         Properties properties = new Properties();
         properties.put("theme", "shopping cart");
         properties.put("variant", "book");
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aMethodWithANamedParameter";
-        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor(name),
+        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor("aMethodWithANamedParameter"),
                 AfterScenario.Outcome.ANY, new Meta(properties));
-        StepResult stepResult = stepWithMeta.perform(reporter, null);
+        StepResult stepResult = stepWithMeta.perform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat(stepsInstance.args, instanceOf(Map.class));
 
         @SuppressWarnings("unchecked")
         Map<String, String> methodArgs = (Map<String, String>) stepsInstance.args;
         assertThat(methodArgs.get("variant"), is("book"));
         assertThat(methodArgs.get("theme"), is("shopping cart"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldNotInvokeAfterStepUponSuccessOutcomeMethodIfFailureOccurred() throws Exception {
+    public void shouldNotInvokeAfterStepUponSuccessOutcomeMethodIfFailureOccurred() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
@@ -391,34 +344,31 @@ class StepCreatorBehaviour {
     }
 
     @Test
-    void shouldInvokeAfterStepUponSuccessOutcomeMethodIfNoFailureOccurred() throws Exception {
+    public void shouldInvokeAfterStepUponSuccessOutcomeMethodIfNoFailureOccurred() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         Properties properties = new Properties();
         properties.put("theme", "shopping cart");
         properties.put("variant", "book");
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aMethodWithANamedParameter";
-        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor(name),
+        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor("aMethodWithANamedParameter"),
                 AfterScenario.Outcome.SUCCESS, new Meta(properties));
-        StepResult stepResult = stepWithMeta.perform(reporter, null);
+        StepResult stepResult = stepWithMeta.perform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat(stepsInstance.args, instanceOf(Map.class));
 
         @SuppressWarnings("unchecked")
         Map<String, String> methodArgs = (Map<String, String>) stepsInstance.args;
         assertThat(methodArgs.get("variant"), is("book"));
         assertThat(methodArgs.get("theme"), is("shopping cart"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldNotInvokeAfterStepUponFailureOutcomeMethodIfNoFailureOccurred() throws Exception {
+    public void shouldNotInvokeAfterStepUponFailureOutcomeMethodIfNoFailureOccurred() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
@@ -433,95 +383,85 @@ class StepCreatorBehaviour {
     }
 
     @Test
-    void shouldInvokeAfterStepUponFailureOutcomeMethodIfFailureOccurred() throws Exception {
+    public void shouldInvokeAfterStepUponFailureOutcomeMethodIfFailureOccurred() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         Properties properties = new Properties();
         properties.put("theme", "shopping cart");
         properties.put("variant", "book");
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "aMethodWithANamedParameter";
-        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor(name),
+        Step stepWithMeta = stepCreator.createAfterStepUponOutcome(SomeSteps.methodFor("aMethodWithANamedParameter"),
                 AfterScenario.Outcome.FAILURE, new Meta(properties));
-        StepResult stepResult = stepWithMeta.doNotPerform(reporter, null);
+        StepResult stepResult = stepWithMeta.doNotPerform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat(stepsInstance.args, instanceOf(Map.class));
 
         @SuppressWarnings("unchecked")
         Map<String, String> methodArgs = (Map<String, String>) stepsInstance.args;
         assertThat(methodArgs.get("variant"), is("book"));
         assertThat(methodArgs.get("theme"), is("shopping cart"));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldInvokeBeforeOrAfterStepMethodWithExpectedConvertedParametersFromMeta() throws Exception {
+    public void shouldInvokeBeforeOrAfterStepMethodWithExpectedConvertedParametersFromMeta() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
         stepCreator.useParanamer(new CachingParanamer(new BytecodeReadingParanamer()));
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        Date date = new Date();
-        when(parameterConverters.convert(anyString(), eq(Date.class))).thenReturn(date);
-        String name = "aMethodWithDate";
-        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor(name), new Meta());
-        StepResult stepResult = stepWithMeta.perform(reporter, null);
+        Date aDate = new Date();
+        when(parameterConverters.convert(anyString(), eq(Date.class))).thenReturn(aDate);
+        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor("aMethodWithDate"), new Meta());
+        StepResult stepResult = stepWithMeta.perform(null, null);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
-        assertThat((Date) stepsInstance.args, is(date));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
+        assertThat(stepResult, instanceOf(Silent.class));
+        assertThat((Date) stepsInstance.args, is(aDate));
     }
 
     @Test
-    void shouldInjectExceptionThatHappenedIfTargetMethodExpectsIt() throws Exception {
+    public void shouldInjectExceptionThatHappenedIfTargetMethodExpectsIt() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         parameterConverters = new ParameterConverters(new LoadFromClasspath(), new TableTransformers());
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "methodThatExpectsUuidExceptionWrapper";
-        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor(name), mock(Meta.class));
+        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(
+                SomeSteps.methodFor("aMethodThatExpectsUUIDExceptionWrapper"), mock(Meta.class));
         UUIDExceptionWrapper occurredFailure = new UUIDExceptionWrapper();
-        StepResult stepResult = stepWithMeta.perform(reporter, occurredFailure);
+        StepResult stepResult = stepWithMeta.perform(null, occurredFailure);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat((UUIDExceptionWrapper) stepsInstance.args, is(occurredFailure));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldInjectNoFailureIfNoExceptionHappenedAndTargetMethodExpectsIt() throws Exception {
+    public void shouldInjectNoFailureIfNoExceptionHappenedAndTargetMethodExpectsIt() throws Exception {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         parameterConverters = new ParameterConverters(new LoadFromClasspath(), new TableTransformers());
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, mock(StepMatcher.class), new ParameterControls());
-        StoryReporter reporter = mock(StoryReporter.class);
 
         // When
-        String name = "methodThatExpectsUuidExceptionWrapper";
-        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(SomeSteps.methodFor(name), mock(Meta.class));
+        Step stepWithMeta = stepCreator.createBeforeOrAfterStep(
+                SomeSteps.methodFor("aMethodThatExpectsUUIDExceptionWrapper"), mock(Meta.class));
         UUIDExceptionWrapper occurredFailure = new UUIDExceptionWrapper();
-        StepResult stepResult = stepWithMeta.perform(reporter, occurredFailure);
+        StepResult stepResult = stepWithMeta.perform(null, occurredFailure);
 
         // Then
-        assertThat(stepResult, instanceOf(Successful.class));
+        assertThat(stepResult, instanceOf(Silent.class));
         assertThat((UUIDExceptionWrapper) stepsInstance.args, is(occurredFailure));
-        verifyBeforeStep(reporter, StepExecutionType.EXECUTABLE, name);
     }
 
     @Test
-    void shouldMatchParametersByDelimitedNameWithNoNamedAnnotations() throws Exception {
+    public void shouldMatchParametersByDelimitedNameWithNoNamedAnnotations() throws Exception {
 
         // Given
         SomeSteps stepsInstance = new SomeSteps();
@@ -531,49 +471,46 @@ class StepCreatorBehaviour {
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, parameterControls);
         Map<String, String> params = Collections.singletonMap("param", "value");
         when(stepMatcher.parameterNames()).thenReturn(params.keySet().toArray(new String[params.size()]));
-        String stepWithoutStartingWord = "a parameter <param> is set";
-        Matcher matcher = Pattern.compile("a parameter (.*) is set").matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn("<param>");
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         String stepAsString = "When a parameter <param> is set";
         Step step = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithoutNamedAnnotation"),
-                stepAsString, stepWithoutStartingWord, params, Collections.emptyList());
+                stepAsString, "a parameter <param> is set", params, Collections.emptyList());
         step.perform(storyReporter, null);
 
         // Then
         assertThat((String) stepsInstance.args, equalTo("value"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldNotConvertParametersForCompositeSteps() {
+    public void shouldNotConvertParametersForCompositeSteps() {
         // Given
         SomeSteps stepsInstance = new SomeSteps();
         StepMatcher stepMatcher = mock(StepMatcher.class);
         when(stepMatcher.parameterNames()).thenReturn(new String[] {"name", "num"});
-        String stepWithoutStartingWord = "a composite step with parameter value and number 1";
-        Matcher matcher = Pattern.compile("a composite step with parameter (.*) and number (.*)").matcher(
-                stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn("value");
+        when(stepMatcher.parameter(2)).thenReturn("1");
         ParameterControls parameterControls = new ParameterControls().useDelimiterNamedParameters(true);
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, parameterControls);
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         String stepAsString = "Given a composite step with parameter $name and number $num";
+        String stepWithoutStartingWord = "a composite step with parameter $name and number $num";
         Step compositeStep = stepCreator.createParametrisedStep(null, stepAsString, stepWithoutStartingWord,
                 Collections.emptyMap(), Collections.emptyList());
         StepResult result = compositeStep.perform(storyReporter, null);
 
         // Then
         assertThat(result.parametrisedStep(), equalTo(stepAsString));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldMatchParametersByDelimitedNameInKebabCase() throws Exception {
+    public void shouldMatchParametersByDelimitedNameInKebabCase() throws Exception {
 
         // Given
         SomeSteps stepsInstance = new SomeSteps();
@@ -583,25 +520,23 @@ class StepCreatorBehaviour {
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, parameterControls);
         Map<String, String> params = Collections.singletonMap("pa-ram", "value");
         when(stepMatcher.parameterNames()).thenReturn(params.keySet().toArray(new String[params.size()]));
-        String stepWithoutStartingWord = "a parameter <pa-ram> is set";
-        Matcher matcher = Pattern.compile("a parameter (.*) is set").matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn("<pa-ram>");
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         String stepAsString = "When a parameter <pa-ram> is set";
         Step step = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithoutNamedAnnotation"),
-                stepAsString, stepWithoutStartingWord, params, Collections.emptyList());
+                stepAsString, "a parameter <pa-ram> is set", params, Collections.emptyList());
         step.perform(storyReporter, null);
 
         // Then
         assertThat((String) stepsInstance.args, equalTo("value"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    void shouldMatchParametersByDelimitedNameWithDistinctNamedAnnotations() throws Exception {
+    public void shouldMatchParametersByDelimitedNameWithDistinctNamedAnnotations() throws Exception {
 
         // Given
         SomeSteps stepsInstance = new SomeSteps();
@@ -611,62 +546,28 @@ class StepCreatorBehaviour {
         StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, parameterControls);
         Map<String, String> params = new HashMap<>();
         params.put("t", "distinct theme");
-        params.put("v", "distinct variant <with non variable inside>");
+        params.put("v", "distinct variant");
         when(stepMatcher.parameterNames()).thenReturn(params.keySet().toArray(new String[params.size()]));
-        String stepWithoutStartingWord = "I use parameters <t> and <v>";
-        Matcher matcher = Pattern.compile("I use parameters (.*) and (.*)").matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn("<t>");
+        when(stepMatcher.parameter(2)).thenReturn("<v>");
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         String stepAsString = "When I use parameters <t> and <v>";
         Step step = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithANamedParameter"), stepAsString,
-                stepWithoutStartingWord, params, Collections.emptyList());
+                "I use parameters <t> and <v>", params, Collections.emptyList());
         step.perform(storyReporter, null);
 
         // Then
         Map<String, String> results = (Map<String, String>) stepsInstance.args;
         assertThat(results.get("theme"), equalTo("distinct theme"));
-        assertThat(results.get("variant"), equalTo("distinct variant <with non variable inside>"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        assertThat(results.get("variant"), equalTo("distinct variant"));
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    void shouldMatchParametersByDelimitedNameWithDistinctNamedAnnotationsWithStoryExampleVariable() throws Exception {
-
-        // Given
-        SomeSteps stepsInstance = new SomeSteps();
-        parameterConverters = new ParameterConverters();
-        StepMatcher stepMatcher = mock(StepMatcher.class);
-        ParameterControls parameterControls = new ParameterControls().useDelimiterNamedParameters(true);
-        StepCreator stepCreator = stepCreatorUsing(stepsInstance, stepMatcher, parameterControls);
-        Map<String, String> params = new HashMap<>();
-        params.put("t", "distinct theme");
-        params.put("v", "distinct variant <with_story_variable_inside>");
-        params.put("with_story_variable_inside", "with story variable value");
-        when(stepMatcher.parameterNames()).thenReturn(new String[]{"theme", "variant"});
-        String stepWithoutStartingWord = "I use parameters <t> and <v>";
-        Matcher matcher = Pattern.compile("I use parameters (.*) and (.*)").matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
-        StoryReporter storyReporter = mock(StoryReporter.class);
-
-        // When
-        String stepAsString = "When I use parameters <t> and <v>";
-        Step step = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithANamedParameter"), stepAsString,
-                stepWithoutStartingWord, params, Collections.emptyList());
-        step.perform(storyReporter, null);
-
-        // Then
-        Map<String, String> results = (Map<String, String>) stepsInstance.args;
-        assertThat(results.get("theme"), equalTo("distinct theme"));
-        assertThat(results.get("variant"), equalTo("distinct variant with story variable value"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void shouldMatchParametersByNamedAnnotationsIfConfiguredToNotUseDelimiterNamedParamters() throws Exception {
+    public void shouldMatchParametersByNamedAnnotationsIfConfiguredToNotUseDelimiterNamedParamters() throws Exception {
 
         // Given
         SomeSteps stepsInstance = new SomeSteps();
@@ -678,38 +579,37 @@ class StepCreatorBehaviour {
         params.put("theme", "a theme");
         params.put("variant", "a variant");
         when(stepMatcher.parameterNames()).thenReturn(params.keySet().toArray(new String[params.size()]));
-        String stepWithoutStartingWord = "I use parameters <t> and <v>";
-        Matcher matcher = Pattern.compile("I use parameters (.*) and (.*)").matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
+        when(stepMatcher.parameter(1)).thenReturn("<t>");
+        when(stepMatcher.parameter(2)).thenReturn("<v>");
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         String stepAsString = "When I use parameters <t> and <v>";
         Step step = stepCreator.createParametrisedStep(SomeSteps.methodFor("aMethodWithANamedParameter"), stepAsString,
-                stepWithoutStartingWord, params, Collections.emptyList());
+                "I use parameters <t> and <v>", params, Collections.emptyList());
         step.perform(storyReporter, null);
 
         // Then
         Map<String, String> results = (Map<String, String>) stepsInstance.args;
         assertThat(results.get("theme"), equalTo("a theme"));
         assertThat(results.get("variant"), equalTo("a variant"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldStoreAndReadObjectsInContext() throws IntrospectionException {
+    public void shouldStoreAndReadObjectsInContext() throws IntrospectionException {
         Method methodStoring = SomeSteps.methodFor("aMethodStoringAString");
         shouldStoreAndReadObjects(methodStoring, true);
     }
 
     @Test
-    void shouldStoreInScenarioAndReadObjectsInContext() throws IntrospectionException {
+    public void shouldStoreInScenarioAndReadObjectsInContext() throws IntrospectionException {
         Method methodStoring = SomeSteps.methodFor("aMethodStoringAStringInScenario");
         shouldStoreAndReadObjects(methodStoring, true);
     }
 
     @Test
-    void shouldStoreInStoryAndReadObjectsInContext() throws IntrospectionException {
+    public void shouldStoreInStoryAndReadObjectsInContext() throws IntrospectionException {
         Method methodStoring = SomeSteps.methodFor("aMethodStoringAStringInStory");
         shouldStoreAndReadObjects(methodStoring, true);
     }
@@ -741,12 +641,12 @@ class StepCreatorBehaviour {
         assertThat(stepResultRead, instanceOf(Successful.class));
         assertThat(stepsInstance.args, instanceOf(String.class));
         assertThat((String) stepsInstance.args, is("someValue"));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, readStepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
+        verify(storyReporter).beforeStep(readStepAsString);
     }
 
     @Test
-    void shouldHandleObjectNotStoredFailure() throws IntrospectionException {
+    public void shouldHandleObjectNotStoredFailure() throws IntrospectionException {
         // Given
         setupContext();
         SomeSteps stepsInstance = new SomeSteps();
@@ -767,17 +667,17 @@ class StepCreatorBehaviour {
         assertThat(stepResult, instanceOf(Failed.class));
         Throwable cause = stepResult.getFailure().getCause();
         assertThat(cause, instanceOf(ObjectNotStoredException.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
+        verify(storyReporter).beforeStep(stepAsString);
     }
 
     @Test
-    void shouldHandleObjectAlreadyStoredFailureInSameLevel() throws IntrospectionException {
+    public void shouldHandleObjectAlreadyStoredFailureInSameLevel() throws IntrospectionException {
         Method method = SomeSteps.methodFor("aMethodStoringAString");
         shouldHandleObjectAlreadyStoredFailure(method);
     }
 
     @Test
-    void shouldHandleObjectAlreadyStoredFailureInDifferentLevel() throws IntrospectionException {
+    public void shouldHandleObjectAlreadyStoredFailureInDifferentLevel() throws IntrospectionException {
         Method method = SomeSteps.methodFor("aMethodStoringAStringInStory");
         shouldHandleObjectAlreadyStoredFailure(method);
     }
@@ -787,22 +687,18 @@ class StepCreatorBehaviour {
         setupContext();
         SomeSteps stepsInstance = new SomeSteps();
         InjectableStepsFactory stepsFactory = new InstanceStepsFactory(new MostUsefulConfiguration(), stepsInstance);
-        StepMatcher stepMatcher = mock(StepMatcher.class);
         StepCreator stepCreator = new StepCreator(stepsInstance.getClass(), stepsFactory, stepsContext, null,
-                new ParameterControls(), stepMatcher, new SilentStepMonitor());
+                new ParameterControls(), mock(StepMatcher.class), new SilentStepMonitor());
         StoryReporter storyReporter = mock(StoryReporter.class);
 
         // When
         Method method = SomeSteps.methodFor("aMethodStoringAString");
         String stepAsString = "When I store in context";
-        String stepWithoutStartingWord = "I store in context";
-        Matcher matcher = Pattern.compile(stepWithoutStartingWord).matcher(stepWithoutStartingWord);
-        when(stepMatcher.matcher(stepWithoutStartingWord)).thenReturn(matcher);
-        StepResult stepResult = stepCreator.createParametrisedStep(method, stepAsString, stepWithoutStartingWord,
+        StepResult stepResult = stepCreator.createParametrisedStep(method, stepAsString, "I store in context",
                 new HashMap<>(), Collections.emptyList()).perform(storyReporter, null);
         String stepAsString2 = "And I store in context";
         StepResult stepResultSecondWrite = stepCreator.createParametrisedStep(duplicateStoreMethod, stepAsString2,
-                stepWithoutStartingWord, new HashMap<>(), Collections.emptyList())
+                "I store in context", new HashMap<>(), Collections.emptyList())
                 .perform(storyReporter, null);
 
         // Then
@@ -810,12 +706,12 @@ class StepCreatorBehaviour {
         assertThat(stepResultSecondWrite, instanceOf(Failed.class));
         Throwable cause = stepResultSecondWrite.getFailure().getCause();
         assertThat(cause, instanceOf(ObjectAlreadyStoredException.class));
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString);
-        verifyBeforeStep(storyReporter, StepExecutionType.EXECUTABLE, stepAsString2);
+        verify(storyReporter).beforeStep(stepAsString);
+        verify(storyReporter).beforeStep(stepAsString2);
     }
 
     @Test
-    void shouldResetKeysBetweenExamples() throws IntrospectionException {
+    public void shouldResetKeysBetweenExamples() throws IntrospectionException {
         setupContext();
         Method methodStoring = SomeSteps.methodFor("aMethodStoringAString");
 
@@ -829,12 +725,7 @@ class StepCreatorBehaviour {
         shouldStoreAndReadObjects(methodStoring, false);
     }
 
-    private void verifyBeforeStep(StoryReporter storyReporter, StepExecutionType type, String stepAsString) {
-        verify(storyReporter).beforeStep(step(type, stepAsString));
-    }
-
-    private StepCreator stepCreatorUsing(SomeSteps stepsInstance, StepMatcher stepMatcher,
-            ParameterControls parameterControls) {
+    private StepCreator stepCreatorUsing(SomeSteps stepsInstance, StepMatcher stepMatcher, ParameterControls parameterControls) {
         InjectableStepsFactory stepsFactory = new InstanceStepsFactory(new MostUsefulConfiguration(), stepsInstance);
         return new StepCreator(stepsInstance.getClass(), stepsFactory, stepsContext, parameterConverters,
                 parameterControls, stepMatcher, new SilentStepMonitor());

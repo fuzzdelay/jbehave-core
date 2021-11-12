@@ -2,63 +2,62 @@ package org.jbehave.io;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
 import org.jbehave.io.ResourceFinder.ResourceNotFoundException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class ResourceFinderBehaviour {
+public class ResourceFinderBehaviour {
 
     @Test
-    void canFindResourceInClasspath() throws IOException {
+    public void canFindResourceInClasspath() throws IOException {
         ResourceFinder finder = new ResourceFinder();
-        assertThat(finder.resourceAsString("org/jbehave/io/resource.txt"), is("A test resource"));
+        assertEquals("A test resource", finder.resourceAsString("org/jbehave/io/resource.txt"));
     }
 
     @Test
-    void canFindResourceFromRootDirectoryInClasspath() throws IOException {
+    public void canFindResourceFromRootDirectoryInClasspath() throws IOException {
         ResourceFinder finder = new ResourceFinder("classpath:org/jbehave");
-        assertThat(finder.resourceAsString("io/resource.txt"), is("A test resource"));
+        assertEquals("A test resource", finder.resourceAsString("io/resource.txt"));
     }
 
     @Test
-    void canChangeRootDirectory() throws IOException {
+    public void canChangeRootDirectory() throws IOException {
         ResourceFinder finder = new ResourceFinder();
         finder.useRootDirectory("classpath:org/jbehave/io");
-        assertThat(finder.resourceAsString("resource.txt"), is("A test resource"));
+        assertEquals("A test resource", finder.resourceAsString("resource.txt"));
     }
 
     @Test
-    void canFindResourceInFilesystem() throws IOException {
+    public void canFindResourceInFilesystem() throws IOException {
         ResourceFinder finder = new ResourceFinder();
-        assertThat(finder.resourceAsString("src/test/java/org/jbehave/io/resource.txt"), is("A test resource"));
+        assertEquals("A test resource", finder.resourceAsString("src/test/java/org/jbehave/io/resource.txt"));
     }
 
     @Test
-    void canFindResourceFromRootDirectoryInFilesystem() throws IOException {
+    public void canFindResourceFromRootDirectoryInFilesystem() throws IOException {
         ResourceFinder finder = new ResourceFinder("src/test/java/org/jbehave");
-        assertThat(finder.resourceAsString("io/resource.txt"), is("A test resource"));
+        assertEquals("A test resource", finder.resourceAsString("io/resource.txt"));
     }
 
     @Test
-    void canFindResourceInJarsInClasspath() {
+    public void canFindResourceInJarsInClasspath() {
         ResourceFinder finder = new ResourceFinder();
         assertThat(finder.resourceAsString("ftl/jbehave-reports.ftl").length(), greaterThan(0));
     }
 
-    @Test
-    void cannotFindResourceFromInexistentClasspathDirectory() {
-        ResourceFinder finder = new ResourceFinder("classpath:unexistent");
-        assertThrows(ResourceNotFoundException.class, () -> finder.resourceAsString("resource.txt"));
+    @Test(expected = ResourceNotFoundException.class)
+    public void cannotFindResourceFromInexistentClasspathDirectory() throws IOException {
+        ResourceFinder finder = new ResourceFinder("classpath:inexistent");
+        finder.resourceAsString("resource.txt");
     }
 
-    @Test
-    void cannotFindResourceFromInexistentFileDirectory() {
-        ResourceFinder finder = new ResourceFinder("/unexistent");
-        assertThrows(ResourceNotFoundException.class, () -> finder.resourceAsString("resource.txt"));
+    @Test(expected = ResourceNotFoundException.class)
+    public void cannotFindResourceFromInexistentFileDirectory() throws IOException {
+        ResourceFinder finder = new ResourceFinder("/inexistent");
+        finder.resourceAsString("resource.txt");
     }
 
 }

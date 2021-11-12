@@ -1,16 +1,23 @@
 package org.jbehave.core.io;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
 import static org.hamcrest.Matchers.is;
 
-import org.junit.jupiter.api.Test;
+public class RelativePathCalculatorBehaviour {
 
-class RelativePathCalculatorBehaviour {
+    private RelativePathCalculator calculator;
 
-    private RelativePathCalculator calculator = new RelativePathCalculator();
+    @Before
+    public void setUp() {
+        calculator = new RelativePathCalculator();
+    }
 
     @Test
-    void shouldReturnAbsolutePaths() {
+    public void shouldReturnAbsolutePaths() {
         assertThat(calculator.calculate("", "/file.story"), is("file.story"));
         assertThat(calculator.calculate("a/path/", "/file.story"), is("file.story"));
         assertThat(calculator.calculate("/", "/file.story"), is("file.story"));
@@ -18,7 +25,7 @@ class RelativePathCalculatorBehaviour {
     }
 
     @Test
-    void shouldReturnPathsRelativeToFiles() {
+    public void shouldReturnPathsRelativeToFiles() {
         assertThat(calculator.calculate("a.txt", "file.story"), is("file.story"));
         assertThat(calculator.calculate("a/path/a.txt", "file.story"), is("a/path/file.story"));
     }

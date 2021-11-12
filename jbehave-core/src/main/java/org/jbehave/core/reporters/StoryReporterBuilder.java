@@ -1,7 +1,5 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,6 +16,8 @@ import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.io.StoryLocation;
 import org.jbehave.core.reporters.FilePrintStreamFactory.FileConfiguration;
 import org.jbehave.core.reporters.FilePrintStreamFactory.FilePathResolver;
+
+import static java.util.Arrays.asList;
 
 /**
  * <p>
@@ -106,8 +106,8 @@ import org.jbehave.core.reporters.FilePrintStreamFactory.FilePathResolver;
  * non-default parameters, such as the custom output patterns:
  * 
  * <pre>
- * new StoryReporterBuilder() {
- *   public StoryReporter reporterFor(String storyPath, Format format) {
+ * new StoryReporterBuilder(){
+ *   public StoryReporter reporterFor(String storyPath, Format format){
  *       FilePrintStreamFactory factory = new FilePrintStreamFactory(new StoryLocation(storyPath, codeLocation));
  *       switch (format) {
  *           case TXT:
@@ -125,7 +125,24 @@ import org.jbehave.core.reporters.FilePrintStreamFactory.FilePathResolver;
  */
 public class StoryReporterBuilder {
 
-    private List<Format> formats = new ArrayList<>();
+    public enum Format {
+        CONSOLE(org.jbehave.core.reporters.Format.CONSOLE),
+        IDE_CONSOLE(org.jbehave.core.reporters.Format.IDE_CONSOLE),
+        TXT(org.jbehave.core.reporters.Format.TXT),
+        HTML(org.jbehave.core.reporters.Format.HTML),
+        XML(org.jbehave.core.reporters.Format.XML),
+        JSON(org.jbehave.core.reporters.Format.JSON),
+        STATS(org.jbehave.core.reporters.Format.STATS);
+
+        private org.jbehave.core.reporters.Format realFormat;
+
+        Format(org.jbehave.core.reporters.Format realFormat) {
+            this.realFormat = realFormat;
+        }
+
+    }
+
+    private List<org.jbehave.core.reporters.Format> formats = new ArrayList<>();
     protected String relativeDirectory;
     protected FilePathResolver pathResolver;
     protected URL codeLocation;
@@ -134,6 +151,7 @@ public class StoryReporterBuilder {
     protected boolean compressFailureTrace = false;
     protected Keywords keywords;
     protected SGRCodes codes;
+    protected CrossReference crossReference;
     protected SurefireReporter surefireReporter;
     protected boolean multiThreading;
     protected Configuration configuration;
@@ -201,8 +219,8 @@ public class StoryReporterBuilder {
         return keywords;
     }
 
-    public SGRCodes codes() {
-        if (codes == null) {
+    public SGRCodes codes(){
+        if ( codes == null ){
             return new SGRCodes();
         }
         return codes;
@@ -248,6 +266,19 @@ public class StoryReporterBuilder {
         return this;
     }
 
+    public CrossReference crossReference() {
+        return crossReference;
+    }
+
+    public boolean hasCrossReference() {
+        return crossReference != null;
+    }
+
+    public StoryReporterBuilder withCrossReference(CrossReference crossReference) {
+        this.crossReference = crossReference;
+        return this;
+    }
+
     public SurefireReporter surefireReporter() {
         return surefireReporter;
     }
@@ -265,7 +296,22 @@ public class StoryReporterBuilder {
         return withFormats(Format.STATS);
     }
 
+    /**
+     * @deprecated Use {@link #withFormats(org.jbehave.core.reporters.Format...
+     *             formats)}
+     */
+    @Deprecated
     public StoryReporterBuilder withFormats(Format... formats) {
+        List<org.jbehave.core.reporters.Format> formatz = new ArrayList<>();
+        for (Format format : formats) {
+            formatz.add(format.realFormat);
+        }
+        this.formats.addAll(formatz);
+        return this;
+    }
+
+    public StoryReporterBuilder withFormats(
+            org.jbehave.core.reporters.Format... formats) {
         this.formats.addAll(asList(formats));
         return this;
     }
@@ -329,8 +375,12 @@ public class StoryReporterBuilder {
         return reporters;
     }
 
-
     public StoryReporter reporterFor(String storyPath, Format format) {
+        return reporterFor(storyPath, format.realFormat);
+    }
+
+    public StoryReporter reporterFor(String storyPath,
+            org.jbehave.core.reporters.Format format) {
         FilePrintStreamFactory factory = filePrintStreamFactory(storyPath);
         return format.createStoryReporter(factory, this);
     }

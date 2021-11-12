@@ -18,7 +18,6 @@ public class Lifecycle {
 
     public static final Lifecycle EMPTY = new Lifecycle();
 
-    private ExamplesTable examplesTable;
     private List<Steps> before;
     private List<Steps> after;
     
@@ -26,16 +25,7 @@ public class Lifecycle {
         this(Arrays.<Steps>asList(), Arrays.<Steps>asList());
     }
 
-    public Lifecycle(ExamplesTable examplesTable) {
-        this(examplesTable, Arrays.<Steps>asList(), Arrays.<Steps>asList());
-    }
-
     public Lifecycle(List<Steps> before, List<Steps> after) {
-        this(ExamplesTable.EMPTY, before, after);
-    }
-
-    public Lifecycle(ExamplesTable examplesTable, List<Steps> before, List<Steps> after) {
-        this.examplesTable = examplesTable;
         this.before = before;
         this.after = after;
     }
@@ -48,14 +38,12 @@ public class Lifecycle {
         return scopes;
     }
 
-    public ExamplesTable getExamplesTable() {
-        return examplesTable;
-    }
-
     public boolean hasBeforeSteps() {
         return !unwrap(before).isEmpty();
     }
 
+    /** @deprecated Use #getBeforeSteps(Scope) */
+    @Deprecated
     public List<String> getBeforeSteps() {
         return getBeforeSteps(Scope.SCENARIO);
     }
@@ -64,20 +52,35 @@ public class Lifecycle {
         return unwrap(filter(this.before, scope));
     }
 
-    public List<Steps> getBefore() {
-        return before;
-    }
-
     public boolean hasAfterSteps() {
         return !unwrap(this.after).isEmpty();
     }
 
+    /** @deprecated Use #getAfterSteps(Scope) */
+    @Deprecated
     public List<String> getAfterSteps() {
         return getAfterSteps(Scope.SCENARIO);
     }
 
     public List<String> getAfterSteps(Scope scope) {
         return unwrap(filter(this.after, scope));
+    }
+
+    public Set<Outcome> getOutcomes(){
+        Set<Outcome> outcomes = new LinkedHashSet<>();
+        for ( Steps steps : after ){
+            outcomes.add(steps.outcome);
+        }
+        return outcomes;
+    }
+
+    public MetaFilter getMetaFilter(Outcome outcome){
+        for ( Steps steps : after ){
+            if ( outcome.equals(steps.outcome) && isNotBlank(steps.metaFilter) ){
+                return new MetaFilter(steps.metaFilter);
+            }
+        }
+        return MetaFilter.EMPTY;
     }
 
     public List<String> getAfterSteps(Outcome outcome) {
@@ -96,32 +99,15 @@ public class Lifecycle {
         MetaFilter filter = getMetaFilter(outcome);
         List<Steps> afterSteps = new ArrayList<>();
         for (Steps steps : after) {
-            if (outcome == steps.outcome && (meta.equals(Meta.EMPTY) || !filter.excluded(meta))) {
-                afterSteps.add(stepsByScope(steps, scope));
-            }
+            extractedAfterStepsConditional(scope, outcome, meta, filter, afterSteps, steps);
         }
         return unwrap(afterSteps);
     }
 
-    public List<Steps> getAfter() {
-        return after;
-    }
-
-    public Set<Outcome> getOutcomes() {
-        Set<Outcome> outcomes = new LinkedHashSet<>();
-        for (Steps steps : after) {
-            outcomes.add(steps.outcome);
+    private void extractedAfterStepsConditional(Scope scope, Outcome outcome, Meta meta, MetaFilter filter, List<Steps> afterSteps, Steps steps) {
+        if (outcome == steps.outcome && (meta.equals(Meta.EMPTY) || filter.allow(meta))) {
+            afterSteps.add(stepsByScope(steps, scope));
         }
-        return outcomes;
-    }
-
-    public MetaFilter getMetaFilter(Outcome outcome) {
-        for (Steps steps : after) {
-            if (outcome.equals(steps.outcome) && isNotBlank(steps.metaFilter)) {
-                return new MetaFilter(steps.metaFilter);
-            }
-        }
-        return MetaFilter.EMPTY;
     }
 
     private List<String> unwrap(List<Steps> stepsCollection) {
@@ -145,7 +131,7 @@ public class Lifecycle {
     }
 
     public boolean isEmpty() {
-        return examplesTable.isEmpty() && before.isEmpty() && after.isEmpty();
+        return EMPTY == this;
     }
 
     @Override
@@ -194,19 +180,6 @@ public class Lifecycle {
             return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
         }
 
-    }
-
-    public enum ExecutionType {
-
-        /** 
-         * Represents steps declared in Lifecycle section: composite ones and steps annotated with @Given, @When, @Then
-         */
-        USER,
-
-        /** 
-         * Represents steps annotated with @BeforeScenario, @AfterScenario, @BeforeStory, @AfterStory
-         */
-        SYSTEM;
     }
 
 }

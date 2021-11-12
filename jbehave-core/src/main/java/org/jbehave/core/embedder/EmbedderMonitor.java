@@ -23,7 +23,7 @@ public interface EmbedderMonitor {
 
     void embeddablesSkipped(List<String> classNames);
 
-    void metaExcluded(Meta meta, MetaFilter filter);
+    void metaNotAllowed(Meta meta, MetaFilter filter);
 
     void runningStory(String path);
 
@@ -31,9 +31,13 @@ public interface EmbedderMonitor {
 
     void storiesSkipped(List<String> storyPaths);
 
-    void storiesExcluded(List<Story> excluded, MetaFilter filter, boolean verbose);
+    /** @deprecated Use #storiesNotAllowed(List<String>, MetaFilter, boolean) */
+    @Deprecated
+    void storiesNotAllowed(List<Story> notAllowed, MetaFilter filter);
 
-    void scenarioExcluded(Scenario scenario, MetaFilter filter);
+    void storiesNotAllowed(List<Story> notAllowed, MetaFilter filter, boolean verbose);
+
+	void scenarioNotAllowed(Scenario scenario, MetaFilter filter);
 
     void batchFailed(BatchFailures failures);
 
@@ -58,8 +62,13 @@ public interface EmbedderMonitor {
 
     void generatingMapsView(File outputDirectory, StoryMaps storyMaps, Properties viewProperties);
 
-    void mapsViewGenerationFailed(File outputDirectory, StoryMaps storyMaps, Properties viewProperties,
-            Throwable cause);
+    void mapsViewGenerationFailed(File outputDirectory, StoryMaps storyMaps, Properties viewProperties, Throwable cause);
+
+    void generatingNavigatorView(File outputDirectory, Properties viewResources);
+
+    void navigatorViewGenerationFailed(File outputDirectory, Properties viewResources, Throwable cause);
+
+    void navigatorViewNotGenerated();
 
     void processingSystemProperties(Properties properties);
 

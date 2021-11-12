@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -13,18 +12,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class AnnotationFinderBehaviour {
+public class AnnotationFinderBehaviour {
 
     @Test
-    void shouldFindIfAnnotationIsPresent() {
+    public void shouldFindIfAnnotationIsPresent(){
         AnnotationFinder annotated = new AnnotationFinder(Annotated.class);
         assertThat(annotated.isAnnotationPresent(MyAnnotationWithoutMembers.class), is(true));        
     }
 
     @Test
-    void shouldFindIfAnnotationValueIsPresent() {
+    public void shouldFindIfAnnotationValueIsPresent(){
         AnnotationFinder annotated = new AnnotationFinder(Annotated.class);
         assertThat(annotated.isAnnotationValuePresent(MyAnnotationWithoutMembers.class, "flag"), is(false));        
         assertThat(annotated.isAnnotationValuePresent(MyAnnotationWithMembers.class, "flag"), is(true));        
@@ -32,18 +31,16 @@ class AnnotationFinderBehaviour {
         assertThat(notAnnotated.isAnnotationValuePresent(MyAnnotationWithoutMembers.class, "flag"), is(false));        
     }
 
-    @Test
-    void shouldFailIfAnnotationIsNotFound() {
+    @Test(expected=AnnotationRequired.class)
+    public void shouldFailIfAnnotationIsNotFound(){
         AnnotationFinder notAnnotated = new AnnotationFinder(NotAnnotated.class);
-        assertThrows(AnnotationRequired.class,
-                () -> notAnnotated.getAnnotatedValue(MyAnnotationWithMembers.class, boolean.class, "flag"));
+        assertThat(notAnnotated.getAnnotatedValue(MyAnnotationWithMembers.class, boolean.class, "flag"), equalTo(false));        
     }
 
     @Test
-    void shouldInheritValues() {
+    public void shouldInheritValues(){
         AnnotationFinder inheritingAnnotated = new AnnotationFinder(InheritingAnnotated.class);
-        List<String> annotatedValues = inheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class,
-                String.class, "values");
+        List<String> annotatedValues = inheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class, String.class, "values");
         assertThat(annotatedValues.size(), equalTo(3));
         assertThat(annotatedValues, hasItem("1"));        
         assertThat(annotatedValues, hasItem("2"));        
@@ -51,10 +48,9 @@ class AnnotationFinderBehaviour {
     }
 
     @Test
-    void shouldInheritValuesWithoutDuplicates() {
+    public void shouldInheritValuesWithoutDuplicates(){
         AnnotationFinder inheritingAnnotated = new AnnotationFinder(InheritingAnnotatedWithDuplicates.class);
-        List<String> annotatedValues = inheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class,
-                String.class, "values");
+        List<String> annotatedValues = inheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class, String.class, "values");
         assertThat(annotatedValues.size(), equalTo(3));
         assertThat(annotatedValues, hasItem("1"));        
         assertThat(annotatedValues, hasItem("2"));        
@@ -62,10 +58,9 @@ class AnnotationFinderBehaviour {
     }
 
     @Test
-    void shouldNotInheritValuesIfInheritFlagIsFalse() {
+    public void shouldNotInheritValuesIfInheritFlagIsFalse(){
         AnnotationFinder notInheritingAnnotated = new AnnotationFinder(NotInheritingAnnotated.class);
-        List<String> annotatedValues = notInheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class,
-                String.class, "values");
+        List<String> annotatedValues = notInheritingAnnotated.getAnnotatedValues(MyAnnotationWithMembers.class, String.class, "values");
         assertThat(annotatedValues.size(), equalTo(2));
         assertThat(annotatedValues, hasItem("2"));        
         assertThat(annotatedValues, hasItem("3"));      

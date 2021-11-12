@@ -1,12 +1,12 @@
 package org.jbehave.core.reporters;
 
-import static org.jbehave.core.reporters.PrintStreamOutput.Format.HTML;
+import org.jbehave.core.configuration.Keywords;
+import org.jbehave.core.i18n.LocalizedKeywords;
 
 import java.io.PrintStream;
 import java.util.Properties;
 
-import org.jbehave.core.configuration.Keywords;
-import org.jbehave.core.i18n.LocalizedKeywords;
+import static org.jbehave.core.reporters.PrintStreamOutput.Format.HTML;
 
 /**
  * <p>
@@ -47,12 +47,10 @@ public class HtmlOutput extends PrintStreamOutput {
         super(HTML, output, defaultHtmlPatterns(), outputPatterns, keywords, reportFailureTrace, compressFailureTrace);
     }
 
-    @SuppressWarnings("checkstyle:LineLength")
     private static Properties defaultHtmlPatterns() {
         Properties patterns = new Properties();
-        patterns.setProperty("beforeStep", "");
         patterns.setProperty("dryRun", "<div class=\"dryRun\">{0}</div>\n");        
-        patterns.setProperty("beforeStory", "<div id=\"{0}\" class=\"story\">\n<h1>{1}</h1>\n<div class=\"path\">{2}</div>\n");
+        patterns.setProperty("beforeStory", "<div class=\"story\">\n<h1>{0}</h1>\n<div class=\"path\">{1}</div>\n");
         patterns.setProperty("storyCancelled", "<div class=\"cancelled\">{0} ({1} {2} s)</div>\n");
         patterns.setProperty("afterStory", "</div>\n");
         patterns.setProperty("pendingMethod", "<div><pre class=\"pending\">{0}</pre></div>\n");        
@@ -75,29 +73,11 @@ public class HtmlOutput extends PrintStreamOutput {
         patterns.setProperty("lifecycleOutcomeEnd", "</div>\n");
         patterns.setProperty("lifecycleMetaFilter", "<div class=\"metaFilter step\">{0} {1}</div>\n");
         patterns.setProperty("lifecycleStep", "<div class=\"step\">{0}</div>\n");
-        patterns.setProperty("beforeBeforeStoriesSteps", "<div class=\"beforeStoriesSteps\">\n");
-        patterns.setProperty("afterBeforeStoriesSteps", "</div>\n");
-        patterns.setProperty("beforeAfterStoriesSteps", "<div class=\"afterStoriesSteps\">\n");
-        patterns.setProperty("afterAfterStoriesSteps", "</div>\n");
-        patterns.setProperty("beforeBeforeSystemStorySteps", "<div class=\"beforeSystemStorySteps\">\n");
-        patterns.setProperty("afterBeforeSystemStorySteps", "</div>\n");
-        patterns.setProperty("beforeAfterSystemStorySteps", "<div class=\"afterSystemStorySteps\">\n");
-        patterns.setProperty("afterAfterSystemStorySteps", "</div>\n");
-        patterns.setProperty("beforeBeforeUserStorySteps", "<div class=\"beforeUserStorySteps\">\n");
-        patterns.setProperty("afterBeforeUserStorySteps", "</div>\n");
-        patterns.setProperty("beforeAfterUserStorySteps", "<div class=\"afterUserStorySteps\">\n");
-        patterns.setProperty("afterAfterUserStorySteps", "</div>\n");
-        patterns.setProperty("beforeBeforeSystemScenarioSteps", "<div class=\"beforeSystemScenarioSteps\">\n");
-        patterns.setProperty("afterBeforeSystemScenarioSteps", "</div>\n");
-        patterns.setProperty("beforeAfterSystemScenarioSteps", "<div class=\"afterSystemScenarioSteps\">\n");
-        patterns.setProperty("afterAfterSystemScenarioSteps", "</div>\n");
-        patterns.setProperty("beforeBeforeUserScenarioSteps", "<div class=\"beforeUserScenarioSteps\">\n");
-        patterns.setProperty("afterBeforeUserScenarioSteps", "</div>\n");
-        patterns.setProperty("beforeAfterUserScenarioSteps", "<div class=\"afterUserScenarioSteps\">\n");
-        patterns.setProperty("afterAfterUserScenarioSteps", "</div>\n");
-        patterns.setProperty("beforeScenarioSteps", "<div class=\"steps\">\n");
-        patterns.setProperty("afterScenarioSteps", "</div>\n");
-        patterns.setProperty("beforeScenario", "<div id=\"{0}\" class=\"scenario\">\n<h2>{1} {2}</h2>\n");
+        patterns.setProperty("beforeBeforeStorySteps", "<div class=\"beforeStorySteps\">\n");
+        patterns.setProperty("afterBeforeStorySteps", "</div>\n");
+        patterns.setProperty("beforeAfterStorySteps", "<div class=\"afterStorySteps\">\n");
+        patterns.setProperty("afterAfterStorySteps", "</div>\n");
+        patterns.setProperty("beforeScenario", "<div class=\"scenario\">\n<h2>{0} {1}</h2>\n");
         patterns.setProperty("afterScenario", "</div>\n");
         patterns.setProperty("afterScenarioWithFailure", "<pre class=\"failure\">{0}</pre>\n</div>\n");
         patterns.setProperty("givenStories", "<div class=\"givenStories\">{0} {1}</div>\n");
@@ -139,9 +119,6 @@ public class HtmlOutput extends PrintStreamOutput {
         patterns.setProperty("parameterValueStart", "<span class=\"step parameter\">");
         patterns.setProperty("parameterValueEnd", "</span>");
         patterns.setProperty("parameterValueNewline", "<br/>");
-        patterns.setProperty("numericParameter", "<h3>{0} {1}</h3>\n");
-        patterns.setProperty("beforeComposedSteps", "<div class=\"steps\">\n");
-        patterns.setProperty("afterComposedSteps", "</div>\n");
         return patterns;
     }
 }

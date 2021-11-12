@@ -14,29 +14,24 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class StepFinderBehaviour {
+public class StepFinderBehaviour {
 
     private StepFinder finder = new StepFinder();
     
     @Test
-    void shouldFindStepdocs() {
+    public void shouldFindStepdocs() {
         MySteps mySteps = new MySteps();
-        List<Stepdoc> stepdocs = finder.stepdocs(
-                new InstanceStepsFactory(new MostUsefulConfiguration(), mySteps).createCandidateSteps());
+        List<Stepdoc> stepdocs = finder.stepdocs(new InstanceStepsFactory(new MostUsefulConfiguration(), mySteps).createCandidateSteps());
         Collections.sort(stepdocs);
         assertThat(stepdocs.size(), equalTo(3));
-        assertThatStepdocIs(stepdocs.get(0), "givenFoo", "givenFoo(java.lang.String)", "foo named $name", "Given",
-                GIVEN, mySteps);
-        assertThatStepdocIs(stepdocs.get(1), "whenFoo", "whenFoo(java.lang.String)", "foo named $name", "When", WHEN,
-                mySteps);
-        assertThatStepdocIs(stepdocs.get(2), "thenFoo", "thenFoo(java.lang.String)", "foo named $name", "Then", THEN,
-                mySteps);
+        assertThatStepdocIs(stepdocs.get(0), "givenFoo", "givenFoo(java.lang.String)", "foo named $name", "Given", GIVEN, mySteps);
+        assertThatStepdocIs(stepdocs.get(1), "whenFoo", "whenFoo(java.lang.String)", "foo named $name", "When", WHEN, mySteps);
+        assertThatStepdocIs(stepdocs.get(2), "thenFoo", "thenFoo(java.lang.String)", "foo named $name", "Then", THEN, mySteps);        
     }
-
-    private void assertThatStepdocIs(Stepdoc stepdoc, String methodName, String methodSignature, String pattern,
-            String startingWord, StepType stepType, Object stepsInstance) {
+    
+    private void assertThatStepdocIs(Stepdoc stepdoc, String methodName, String methodSignature, String pattern, String startingWord, StepType stepType, Object stepsInstance) {
         assertThat(stepdoc.getMethod().getName(), equalTo(methodName));
         assertThat(stepdoc.toString(), containsString(methodName));
         assertThat(stepdoc.getMethodSignature(), containsString(methodName));

@@ -11,7 +11,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.jbehave.core.ConfigurableEmbedder;
 import org.jbehave.core.InjectableEmbedder;
 import org.jbehave.core.embedder.Embedder;
@@ -24,6 +23,7 @@ import org.jbehave.core.embedder.UnmodifiableEmbedderControls;
 import org.jbehave.core.embedder.executors.ExecutorServiceFactory;
 import org.jbehave.core.failures.BatchFailures;
 import org.jbehave.core.io.StoryFinder;
+import org.jbehave.core.junit.AnnotatedEmbedderRunner;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
@@ -34,149 +34,215 @@ import org.jbehave.core.reporters.ReportsCount;
 /**
  * Abstract mojo that holds all the configuration parameters to specify and load
  * stories.
+ * 
+ * @requiresDependencyResolution test
  */
 public abstract class AbstractEmbedderMojo extends AbstractMojo {
 
     static final String TEST_SCOPE = "test";
 
-    @Parameter(defaultValue = "${project.build.sourceDirectory}", required = true)
+    /**
+     * @parameter expression="${project.build.sourceDirectory}"
+     * @required
+     */
     String sourceDirectory;
 
-    @Parameter(defaultValue = "${project.build.testSourceDirectory}", required = true)
+    /**
+     * @parameter expression="${project.build.testSourceDirectory}"
+     * @required
+     */
     String testSourceDirectory;
 
-    @Parameter(defaultValue = "${project.build.outputDirectory}", required = true)
+    /**
+     * @parameter expression="${project.build.outputDirectory}"
+     * @required
+     */
     String outputDirectory;
 
-    @Parameter(defaultValue = "${project.build.testOutputDirectory}", required = true)
+    /**
+     * @parameter expression="${project.build.testOutputDirectory}"
+     * @required
+     */
     String testOutputDirectory;
 
     /**
      * The scope of the mojo classpath, either "compile" or "test"
+     * 
+     * @parameter default-value="compile"
      */
-    @Parameter(defaultValue = "compile")
     String scope;
 
     /**
      * Include filters, relative to the root source directory determined by the
      * scope
+     * 
+     * @parameter
      */
-    @Parameter
     List<String> includes;
 
     /**
      * Exclude filters, relative to the root source directory determined by the
      * scope
+     * 
+     * @parameter
      */
-    @Parameter
     List<String> excludes;
 
     /**
      * Compile classpath.
+     * 
+     * @parameter expression="${project.compileClasspathElements}"
+     * @required
+     * @readonly
      */
-    @Parameter(defaultValue = "${project.compileClasspathElements}", required = true, readonly = true)
     List<String> compileClasspathElements;
 
     /**
      * Test classpath.
+     * 
+     * @parameter expression="${project.testClasspathElements}"
+     * @required
+     * @readonly
      */
-    @Parameter(defaultValue = "${project.testClasspathElements}", required = true, readonly = true)
     List<String> testClasspathElements;
 
     /**
      * The boolean flag to skip stories
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean skip = false;
 
     /**
      * The boolean flag to run in batch mode
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean batch = false;
 
     /**
      * The boolean flag to ignore failure in stories
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean ignoreFailureInStories = false;
 
     /**
      * The boolean flag to ignore failure in view
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean ignoreFailureInView = false;
 
     /**
      * The boolean flag to generate view after stories are run
+     * 
+     * @parameter default-value="true"
      */
-    @Parameter(defaultValue = "true")
     boolean generateViewAfterStories = true;
 
     /**
      * The boolean flag to output failures in verbose mode
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean verboseFailures = false;
 
     /**
      * The boolean flag to output filtering in verbose mode
+     * 
+     * @parameter default-value="false"
      */
-    @Parameter(defaultValue = "false")
     boolean verboseFiltering = false;
 
     /**
      * The story timeouts
+     * 
+     * @parameter
      */
-    @Parameter
     String storyTimeouts;
 
     /**
-     * The boolean flag to fail on story timeout
+     * The story timeout in secs
+     * 
+     * @parameter
+     * @deprecated Use storyTimeouts
      */
-    @Parameter(defaultValue = "false")
+    @Deprecated
+    long storyTimeoutInSecs;
+    
+    /**
+     * The story timeout in secs by path
+     * 
+     * @parameter
+     * @deprecated Use storyTimeouts
+     */
+    @Deprecated
+    String storyTimeoutInSecsByPath;
+
+    /**
+     * The boolean flag to fail on story timeout
+     * 
+     * @parameter default-value="false"
+     */
     boolean failOnStoryTimeout = false;
 
     /**
      * The number of threads
+     * 
+     * @parameter default-value="1"
      */
-    @Parameter(defaultValue = "1")
     int threads = 1;
 
     /**
      * The embedder class
+     * 
+     * @parameter default-value="org.jbehave.core.embedder.Embedder"
      */
-    @Parameter(defaultValue = "org.jbehave.core.embedder.Embedder")
     String embedderClass = Embedder.class.getName();
 
     /**
      * The implementation class of the {@link ExecutorServiceFactory}
+     * 
+     * @parameter
      */
-    @Parameter
     String executorsClass;
 
     /**
      * The class that is injected with the embedder
+     * 
+     * @parameter
      */
-    @Parameter
     String injectableEmbedderClass;
 
     /**
-     * The story finder used to retrieve story paths and class names
+     * The annotated embedder runner class
+     * 
+     * @parameter default-value="org.jbehave.core.junit.AnnotatedEmbedderRunner"
+     * @deprecated Obsolete
      */
-    @Parameter
+    @Deprecated
+    String annotatedEmbedderRunnerClass = AnnotatedEmbedderRunner.class.getName();
+
+    /**
+     * Used to find story paths and class names
+     * 
+     * @parameter
+     */
     String storyFinderClass = StoryFinder.class.getName();
 
     /**
-     * The meta filters
+     * The meta filter
+     * 
+     * @parameter
      */
-    @Parameter
     String[] metaFilters;
 
     /**
      * The system properties
+     * 
+     * @parameter
      */
-    @Parameter
     Properties systemProperties = new Properties();
 
     /**
@@ -297,9 +363,8 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
 
         embedder.useClassLoader(classLoader);
         embedder.useEmbedderControls(embedderControls());
-        if (executorsClass != null) {
-            ExecutorServiceFactory executorServiceFactory = classLoader.newInstance(ExecutorServiceFactory.class,
-                    executorsClass);
+        if ( executorsClass != null ){
+            ExecutorServiceFactory executorServiceFactory = classLoader.newInstance(ExecutorServiceFactory.class, executorsClass);
             embedder.useExecutorService(executorServiceFactory.create(embedder.embedderControls()));
         }
         embedder.useEmbedderMonitor(embedderMonitor());
@@ -328,10 +393,16 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
                 .doIgnoreFailureInView(ignoreFailureInView).doVerboseFailures(verboseFailures)
                 .doVerboseFiltering(verboseFiltering)
                 .doFailOnStoryTimeout(failOnStoryTimeout).useThreads(threads);
-        if (storyTimeouts != null) {
-            embedderControls.useStoryTimeouts(storyTimeouts);
+        if ( storyTimeoutInSecs != 0 ){
+        	embedderControls.useStoryTimeoutInSecs(storyTimeoutInSecs);
+        }
+        if ( storyTimeoutInSecsByPath != null ){
+        	embedderControls.useStoryTimeoutInSecsByPath(storyTimeoutInSecsByPath);
+        }
+        if ( storyTimeouts != null ){
+        	embedderControls.useStoryTimeouts(storyTimeouts);
         }        
-        return new UnmodifiableEmbedderControls(embedderControls);
+		return new UnmodifiableEmbedderControls(embedderControls);
     }
 
     protected class MavenEmbedderMonitor extends NullEmbedderMonitor {
@@ -362,7 +433,7 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
         }
 
         @Override
-        public void metaExcluded(Meta meta, MetaFilter filter) {
+        public void metaNotAllowed(Meta meta, MetaFilter filter) {
             getLog().debug(meta + " excluded by filter '" + filter.asString() + "'");
         }
 
@@ -387,21 +458,23 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
         }
 
         @Override
-        public void storiesExcluded(List<Story> excluded, MetaFilter filter, boolean verbose) {
+        public void storiesNotAllowed(List<Story> stories, MetaFilter filter, boolean verbose) {
             StringBuilder sb = new StringBuilder();
-            sb.append(excluded.size() + " stories excluded by filter: " + filter.asString() + "\n");
+            sb.append(stories.size() + " stories excluded by filter: " + filter.asString() + "\n");
             if (verbose) {
-                for (Story story : excluded) {
+                for (Story story : stories) {
                     sb.append(story.getPath()).append("\n");
                 }
             }
             getLog().info(sb.toString());
         }
 
-        @Override
-        public void scenarioExcluded(Scenario scenario, MetaFilter filter) {
-            getLog().info("Scenario '" + scenario.getTitle() + "' excluded by filter: " + filter.asString() + "\n");
-        }
+    	@Override
+        public void scenarioNotAllowed(Scenario scenario, MetaFilter filter) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Scenario '"+scenario.getTitle()+"' excluded by filter: " + filter.asString() + "\n");
+            getLog().info(sb.toString());
+    	}
 
         @Override
         public void runningWithAnnotatedEmbedderRunner(String className) {
@@ -434,10 +507,10 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
                     "Reports view generated with " + count.getStories() + " stories (of which "
                             + count.getStoriesPending() + " pending) containing " + count.getScenarios()
                             + " scenarios (of which " + count.getScenariosPending() + " pending)");
-            if (count.getStoriesExcluded() > 0 || count.getScenariosExcluded() > 0) {
+            if (count.getStoriesNotAllowed() > 0 || count.getScenariosNotAllowed() > 0) {
                 getLog().info(
-                        "Meta filters excluded " + count.getStoriesExcluded() + " stories and  "
-                                + count.getScenariosExcluded() + " scenarios");
+                        "Meta filters excluded " + count.getStoriesNotAllowed() + " stories and  "
+                                + count.getScenariosNotAllowed() + " scenarios");
             }
         }
 
@@ -469,6 +542,26 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
             getLog().warn(
                     "Failed to generate maps view to '" + outputDirectory + "' using story maps '" + storyMaps + "'"
                             + " and view properties '" + viewProperties + "'", cause);
+        }
+
+        @Override
+        public void generatingNavigatorView(File outputDirectory, Properties viewProperties) {
+            getLog().info(
+                    "Generating navigator view to '" + outputDirectory + "' using view properties '" + viewProperties
+                            + "'");
+        }
+
+        @Override
+        public void navigatorViewGenerationFailed(File outputDirectory, Properties viewProperties, Throwable cause) {
+            getLog().warn(
+                    "Failed to generate navigator view to '" + outputDirectory + "' using view properties '"
+                            + viewProperties + "'", cause);
+        }
+
+        @Override
+        public void navigatorViewNotGenerated() {
+            getLog().warn(
+                    "Navigator view not generated, as the CrossReference has not been declared in the StoryReporterBuilder");
         }
 
         @Override
@@ -505,16 +598,14 @@ public abstract class AbstractEmbedderMojo extends AbstractMojo {
         
         @Override
         public void invalidTimeoutFormat(String path) {
-            getLog().warn("Failed to set specific story timeout for story " + path
-                    + " because 'storyTimeoutInSecsByPath' has incorrect format");
-            getLog().warn("'storyTimeoutInSecsByPath' must be a CSV of regex expressions matching story paths. "
-                    + "E.g. \"*/long/*.story:5000,*/short/*.story:200\"");
-        }
+        	getLog().warn("Failed to set specific story timeout for story " + path + " because 'storyTimeoutInSecsByPath' has incorrect format");
+        	getLog().warn("'storyTimeoutInSecsByPath' must be a CSV of regex expressions matching story paths. E.g. \"*/long/*.story:5000,*/short/*.story:200\"");
+    	}
 
-        @Override
+    	@Override
         public void usingTimeout(String path, long timeout) {
-            getLog().info("Using timeout for story " + path + " of " + timeout + " secs.");
-        }
+        	getLog().info("Using timeout for story " + path + " of "+timeout+" secs.");
+    	}
 
         @Override
         public String toString() {

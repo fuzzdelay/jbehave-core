@@ -1,9 +1,9 @@
 package org.jbehave.io;
 
+import org.apache.commons.fileupload.FileItem;
+
 import java.io.File;
 import java.util.List;
-
-import org.apache.commons.fileupload.FileItem;
 
 /**
  * Manages data files, allowing the upload, list and delete. If a file is any
@@ -15,16 +15,16 @@ import org.apache.commons.fileupload.FileItem;
  */
 public interface FileManager {
 
-    List<File> list();
+	List<File> list();
 
-    List<File> listContent(File file, boolean relativePaths);
+	List<File> listContent(File file, boolean relativePaths);
 
-    void delete(List<File> files);
+	void delete(List<File> files);
 
-    List<File> upload(List<FileItem> fileItems, List<String> errors);
+	List<File> upload(List<FileItem> fileItems, List<String> errors);
 
     void unarchiveFiles(List<File> files, List<String> errors);
 
     File getUploadDirectory();
-    
+	
 }

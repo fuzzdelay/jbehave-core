@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jbehave</groupId>
     <artifactId>jbehave-examples</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>4.9-SNAPSHOT</version>
   </parent>
   <artifactId>jbehave-performance-example</artifactId>
   <name>JBehave Performance Example</name>
@@ -46,6 +46,7 @@
                 <include>${embeddables}</include>
               </includes>
               <excludes />
+              <skip>${skip}</skip>
               <batch>false</batch>
               <threads>${threads}</threads>
               <storyTimeoutInSecs>${story.timeout.in.secs}</storyTimeoutInSecs>

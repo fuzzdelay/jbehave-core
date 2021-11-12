@@ -1,23 +1,22 @@
 package org.jbehave.core.steps.pico;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.List;
 
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.Steps;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.picocontainer.Characteristics;
 import org.picocontainer.DefaultPicoContainer;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.behaviors.Caching;
 import org.picocontainer.injectors.AbstractInjector;
 import org.picocontainer.injectors.ConstructorInjection;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class PicoStepsFactoryBehaviour {
 
@@ -26,7 +25,7 @@ public class PicoStepsFactoryBehaviour {
     }
 
     @Test
-    void assertThatStepsCanBeCreated() {
+    public void assertThatStepsCanBeCreated() {
         // Given
         MutablePicoContainer parent = createPicoContainer();
         parent.as(Characteristics.USE_NAMES).addComponent(FooSteps.class);
@@ -39,7 +38,7 @@ public class PicoStepsFactoryBehaviour {
 
 
     @Test
-    void assertThatStepsWithStepsWithDependencyCanBeCreated() {
+    public void assertThatStepsWithStepsWithDependencyCanBeCreated() {
         MutablePicoContainer parent = createPicoContainer();
         parent.as(Characteristics.USE_NAMES).addComponent(FooStepsWithDependency.class);
         parent.addComponent(Integer.class, 42);
@@ -64,14 +63,13 @@ public class PicoStepsFactoryBehaviour {
         return ((Steps)candidateSteps).instance();
     }
 
-    @Test
-    void assertThatStepsWithMissingDependenciesCannotBeCreated() {
+    @Test(expected=AbstractInjector.UnsatisfiableDependenciesException.class)
+    public void assertThatStepsWithMissingDependenciesCannotBeCreated() {
         MutablePicoContainer parent = createPicoContainer();
         parent.as(Characteristics.USE_NAMES).addComponent(FooStepsWithDependency.class);
         PicoStepsFactory factory = new PicoStepsFactory(new MostUsefulConfiguration(), parent);
         // When
-        assertThrows(AbstractInjector.UnsatisfiableDependenciesException.class,
-                () -> factory.createInstanceOfType(FooStepsWithDependency.class));
+        factory.createInstanceOfType(FooStepsWithDependency.class);
         // Then ... expected exception is thrown        
     }
 

@@ -1,7 +1,6 @@
 package org.jbehave.examples.core;
 
 import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML_TEMPLATE;
 import static org.jbehave.core.reporters.Format.TXT;
 import static org.jbehave.core.reporters.Format.XML;
 
@@ -22,6 +21,7 @@ import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.parsers.RegexStoryParser;
+import org.jbehave.core.reporters.CrossReference;
 import org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToPackagedName;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
@@ -31,46 +31,27 @@ import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.DateConverter;
 import org.jbehave.core.steps.ParameterConverters.ExamplesTableConverter;
 import org.jbehave.examples.core.service.TradingService;
-import org.jbehave.examples.core.steps.AndSteps;
-import org.jbehave.examples.core.steps.BankAccountSteps;
-import org.jbehave.examples.core.steps.BeforeAfterSteps;
-import org.jbehave.examples.core.steps.CalendarSteps;
-import org.jbehave.examples.core.steps.CompositeNestedSteps;
-import org.jbehave.examples.core.steps.CompositeSteps;
-import org.jbehave.examples.core.steps.ContextSteps;
-import org.jbehave.examples.core.steps.IgnoringSteps;
-import org.jbehave.examples.core.steps.JsonSteps;
-import org.jbehave.examples.core.steps.MetaParametrisationSteps;
-import org.jbehave.examples.core.steps.MyContext;
-import org.jbehave.examples.core.steps.NamedAnnotationsSteps;
-import org.jbehave.examples.core.steps.NamedParametersSteps;
-import org.jbehave.examples.core.steps.ParameterDelimitersSteps;
-import org.jbehave.examples.core.steps.ParametrisationByDelimitedNameSteps;
-import org.jbehave.examples.core.steps.ParametrisedSteps;
-import org.jbehave.examples.core.steps.PendingSteps;
-import org.jbehave.examples.core.steps.PriorityMatchingSteps;
-import org.jbehave.examples.core.steps.RestartingSteps;
-import org.jbehave.examples.core.steps.SandpitSteps;
-import org.jbehave.examples.core.steps.SearchSteps;
-import org.jbehave.examples.core.steps.StepsContextSteps;
-import org.jbehave.examples.core.steps.TableMappingSteps;
-import org.jbehave.examples.core.steps.TableSteps;
-import org.jbehave.examples.core.steps.TraderSteps;
+import org.jbehave.examples.core.steps.*;
+
+import static org.jbehave.core.reporters.Format.HTML_TEMPLATE;
 
 /**
  * <p>
  * Example of how to run a single story via JUnit. JUnitStory is a simple facade
  * around the Embedder. The user need only provide the configuration and the
- * InjectableStepsFactory. Using this paradigm, each story class must extends this class and maps one-to-one to
+ * CandidateSteps. Using this paradigm (which is the analogous to the one used
+ * in JBehave 2) each story class must extends this class and maps one-to-one to
  * a textual story via the configured {@link StoryPathResolver}.
  * </p>
  * <p>
  * Users wanting to run multiple stories via the same Java class (new to JBehave
- * 3) should look at {@link org.jbehave.examples.core.CoreStories}, {@link CoreStoriesEmbedders} or
+ * 3) should look at {@link org.jbehave.examples.core.CoreStories}, {@link CoreStoryRunner} or
  * {@link org.jbehave.core.junit.AnnotatedEmbedderRunner}
  * </p>
  */
 public abstract class CoreStory extends JUnitStory {
+
+    private final CrossReference xref = new CrossReference();
 
     public CoreStory() {
         configuredEmbedder().embedderControls().doGenerateViewAfterStories(true).doIgnoreFailureInStories(false)
@@ -83,15 +64,14 @@ public abstract class CoreStory extends JUnitStory {
         Properties viewResources = new Properties();
         viewResources.put("decorateNonHtml", "true");
         LoadFromClasspath resourceLoader = new LoadFromClasspath(embeddableClass);
+        TableParsers tableParsers = new TableParsers();
         TableTransformers tableTransformers = new TableTransformers();
         ParameterControls parameterControls = new ParameterControls();
         // Start from default ParameterConverters instance
         ParameterConverters parameterConverters = new ParameterConverters(resourceLoader, tableTransformers);
         // factory to allow parameter conversion and loading from external
         // resources (used by StoryParser too)
-        LocalizedKeywords keywords = new LocalizedKeywords();
-        TableParsers tableParsers = new TableParsers(keywords, parameterConverters);
-        ExamplesTableFactory examplesTableFactory = new ExamplesTableFactory(keywords, resourceLoader,
+        ExamplesTableFactory examplesTableFactory = new ExamplesTableFactory(new LocalizedKeywords(), resourceLoader,
                 parameterConverters, parameterControls, tableParsers, tableTransformers);
         // add custom converters
         parameterConverters.addConverters(new DateConverter(new SimpleDateFormat("yyyy-MM-dd")),
@@ -108,6 +88,7 @@ public abstract class CoreStory extends JUnitStory {
                                 .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
                                 .withDefaultFormats().withPathResolver(new ResolveToPackagedName())
                                 .withViewResources(viewResources).withFormats(CONSOLE, TXT, HTML_TEMPLATE, XML)
+                                .withCrossReference(xref)
                                 .withFailureTrace(true).withFailureTraceCompression(true))
                 .useParameterConverters(parameterConverters)
                 .useParameterControls(parameterControls)
@@ -117,13 +98,15 @@ public abstract class CoreStory extends JUnitStory {
     @Override
     public InjectableStepsFactory stepsFactory() {
         MyContext context = new MyContext();
-        return new InstanceStepsFactory(configuration(), new AndSteps(), new BankAccountSteps(), new BeforeAfterSteps(),
-                new CalendarSteps(), new CompositeSteps(), new CompositeNestedSteps(), new ContextSteps(context),
-                new StepsContextSteps(), new TableMappingSteps(), new IgnoringSteps(), new JsonSteps(),
+        return new InstanceStepsFactory(configuration(),
+                new AndSteps(), new BankAccountSteps(), new BeforeAfterSteps(),
+                new CalendarSteps(), new CompositeSteps(), new CompositeNestedSteps(), new ContextSteps(context), new StepsContextSteps(),
+                new TableMappingSteps(), new IgnoringSteps(), new JsonSteps(),
                 new MetaParametrisationSteps(), new NamedAnnotationsSteps(), new NamedParametersSteps(),
                 new ParameterDelimitersSteps(), new ParametrisationByDelimitedNameSteps(), new ParametrisedSteps(),
-                new PendingSteps(), new PriorityMatchingSteps(), new RestartingSteps(), new SandpitSteps(),
-                new SearchSteps(), new TableSteps(), new TraderSteps(new TradingService())
+                new PendingSteps(), new PriorityMatchingSteps(),
+                new RestartingSteps(), new SandpitSteps(), new SearchSteps(),
+                new TableSteps(), new TraderSteps(new TradingService())
         );
     }
 }

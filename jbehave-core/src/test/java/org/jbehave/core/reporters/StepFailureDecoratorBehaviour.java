@@ -1,33 +1,26 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verify;
-
-import java.util.List;
-import java.util.Map;
-
 import org.hamcrest.MatcherAssert;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.GivenStories;
-import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.OutcomesTable;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.steps.Timing;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.jbehave.core.model.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.runners.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-class StepFailureDecoratorBehaviour {
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+
+@RunWith(MockitoJUnitRunner.class)
+public class StepFailureDecoratorBehaviour {
 
     @Mock
     private StoryReporter delegate;
@@ -36,14 +29,13 @@ class StepFailureDecoratorBehaviour {
     private StepFailureDecorator decorator;
 
     @Test
-    void shouldJustDelegateAllReportingMethodsOtherThanFailure() {
+    public void shouldJustDelegateAllReportingMethodsOtherThanFailure() {
         // Given
         Story story = new Story();
         boolean givenStory = false;
         List<String> steps = asList("Given step <one>", "Then step <two>");
         ExamplesTable table = new ExamplesTable("|one|two|\n |1|2|\n");
         Map<String, String> tableRow = table.getRow(0);
-        Timing timing = new Timing();
 
         // When
         decorator.dryRun();
@@ -60,7 +52,7 @@ class StepFailureDecoratorBehaviour {
         decorator.beforeExamples(steps, table);
         decorator.example(tableRow, 0);
         decorator.afterExamples();
-        decorator.afterScenario(timing);
+        decorator.afterScenario();
         decorator.afterStory(givenStory);
 
         // Then
@@ -77,12 +69,12 @@ class StepFailureDecoratorBehaviour {
         inOrder.verify(delegate).beforeExamples(steps, table);
         inOrder.verify(delegate).example(tableRow, 0);
         inOrder.verify(delegate).afterExamples();
-        inOrder.verify(delegate).afterScenario(timing);
+        inOrder.verify(delegate).afterScenario();
         inOrder.verify(delegate).afterStory(givenStory);
     }
 
     @Test
-    void shouldProvideFailureCauseWithMessageDescribingStep() {
+    public void shouldProvideFailureCauseWithMessageDescribingStep() {
         // Given
         Throwable t = new UUIDExceptionWrapper(new IllegalArgumentException("World Peace for everyone"));
         // When
@@ -96,7 +88,7 @@ class StepFailureDecoratorBehaviour {
     }
 
     @Test
-    void shouldRethrowFailureCauseAfterStory() {
+    public void shouldRethrowFailureCauseAfterStory() {
         // Given
         Throwable t = new UUIDExceptionWrapper(new IllegalArgumentException("World Peace for everyone"));
         String stepAsString = "When I have a bad idea";
@@ -104,8 +96,12 @@ class StepFailureDecoratorBehaviour {
         boolean givenStory = false;
 
         // When
-        Throwable rethrown = assertThrows(Throwable.class, () -> decorator.afterStory(givenStory));
-        // Then
-        MatcherAssert.assertThat(rethrown, equalTo(t));
+        try {
+            decorator.afterStory(givenStory);
+            throw new AssertionError("Should have rethrown exception");
+        } catch (Throwable rethrown) {
+            // Then
+            MatcherAssert.assertThat(rethrown, equalTo(t));
+        }
     }
 }

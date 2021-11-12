@@ -8,14 +8,14 @@ import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.groovy.GroovyAnnotationBuilder;
 import org.jbehave.core.junit.AnnotatedEmbedderRunner;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 
-class GroovyAnnotatedEmbedderRunnerBehaviour {
+public class GroovyAnnotatedEmbedderRunnerBehaviour {
 
     @Test
-    void shouldCreateWithSpringAnnotatedBuilder() throws InitializationError {
+    public void shouldCreateWithSpringAnnotatedBuilder() throws InitializationError{
         AnnotatedEmbedderRunner runner = new GroovyAnnotatedEmbedderRunner(RunningWithAnnotatedEmbedderRunner.class);
         assertThat(runner.annotationBuilder(), instanceOf(GroovyAnnotationBuilder.class));
     }
@@ -28,7 +28,7 @@ class GroovyAnnotatedEmbedderRunnerBehaviour {
         static boolean hasRun;
 
         @Override
-        @org.junit.Test
+        @Test
         public void run() {
             hasRun = true;
         }

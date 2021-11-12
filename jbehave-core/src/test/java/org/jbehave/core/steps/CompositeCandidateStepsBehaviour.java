@@ -1,11 +1,12 @@
 package org.jbehave.core.steps;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.jbehave.core.steps.StepCandidateBehaviour.candidateMatchingStep;
-import static org.mockito.Mockito.mock;
+import com.thoughtworks.paranamer.BytecodeReadingParanamer;
+import org.jbehave.core.annotations.*;
+import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.reporters.StoryReporter;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,29 +14,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.thoughtworks.paranamer.BytecodeReadingParanamer;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.jbehave.core.steps.StepCandidateBehaviour.candidateMatchingStep;
+import static org.mockito.Mockito.mock;
 
-import org.jbehave.core.annotations.Composite;
-import org.jbehave.core.annotations.Given;
-import org.jbehave.core.annotations.Named;
-import org.jbehave.core.annotations.Then;
-import org.jbehave.core.annotations.When;
-import org.jbehave.core.configuration.MostUsefulConfiguration;
-import org.jbehave.core.reporters.StoryReporter;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-class CompositeCandidateStepsBehaviour {
+public class CompositeCandidateStepsBehaviour {
 
     @Test
-    void shouldMatchCompositesFromClassAndCreateComposedStepsUsingMatchedParameters() {
+    public void shouldMatchCompositesAndCreateComposedStepsUsingMatchedParameters() {
         CandidateSteps compositeSteps = new SimpleCompositeSteps();
         shouldMatchCompositesAndCreateComposedStepsUsingMatchedParameters(compositeSteps);
     }
 
     @Test
-    void shouldMatchCompositesFromFileAndCreateComposedStepsUsingMatchedParameters() {
+    public void shouldMatchCompositesFromFileAndCreateComposedStepsUsingMatchedParameters() {
         CandidateSteps compositeSteps = new CompositeCandidateSteps(new MostUsefulConfiguration(),
                 Collections.singleton("composite.steps"));
         shouldMatchCompositesAndCreateComposedStepsUsingMatchedParameters(compositeSteps);
@@ -51,8 +46,7 @@ class CompositeCandidateStepsBehaviour {
         Map<String, String> namedParameters = new HashMap<>();
         namedParameters.put("customer", "Ms Smith");
         List<Step> composedSteps = new ArrayList<>();
-        candidate.addComposedSteps(composedSteps, "Given Mr Jones has previously bought a ticket", namedParameters,
-                candidates);
+        candidate.addComposedSteps(composedSteps, "Given Mr Jones has previously bought a ticket", namedParameters, candidates);
         assertThat(composedSteps.size(), equalTo(2));
         for (Step step : composedSteps) {
             step.perform(mock(StoryReporter.class), null);
@@ -81,10 +75,8 @@ class CompositeCandidateStepsBehaviour {
     static class SimpleCompositeSteps extends Steps {
 
         @Given("$customer has previously bought a $product")
-        @Composite(steps = {
-            "Given <customer> is logged in",
-            "When a <product> is added to the cart"
-        })
+        @Composite(steps = { "Given <customer> is logged in",
+                "When a <product> is added to the cart" })
         public void aCompositeStep(@Named("customer") String customer, @Named("product") String product) {
         }
 
@@ -92,18 +84,16 @@ class CompositeCandidateStepsBehaviour {
 
 
     @Test
-    void shouldMatchCompositesAndCreateComposedStepsUsingNamedParameters() {
+    public void shouldMatchCompositesAndCreateComposedStepsUsingNamedParameters() {
         CompositeStepsUsingNamedParameters steps = new CompositeStepsUsingNamedParameters();
         List<StepCandidate> candidates = steps.listCandidates();
-        StepCandidate candidate = candidateMatchingStep(candidates,
-                "Given <customer> has previously bough a <product>");
+        StepCandidate candidate = candidateMatchingStep(candidates, "Given <customer> has previously bough a <product>");
         assertThat(candidate.isComposite(), is(true));
         Map<String, String> namedParameters = new HashMap<>();
         namedParameters.put("customer", "Mr Jones");
         namedParameters.put("product", "ticket");
         List<Step> composedSteps = new ArrayList<>();
-        candidate.addComposedSteps(composedSteps, "Given <customer> has previously bought a <product>", namedParameters,
-                candidates);
+        candidate.addComposedSteps(composedSteps, "Given <customer> has previously bought a <product>", namedParameters, candidates);
         assertThat(composedSteps.size(), equalTo(2));
         for (Step step : composedSteps) {
             step.perform(mock(StoryReporter.class), null);
@@ -118,10 +108,8 @@ class CompositeCandidateStepsBehaviour {
         private String added;
 
         @Given("<customer> has previously bough a <product>")
-        @Composite(steps = {
-            "Given <customer> is logged in",
-            "When a <product> is added to the cart"
-        })
+        @Composite(steps = { "Given <customer> is logged in",
+                             "When a <product> is added to the cart" })
         public void aCompositeStep(@Named("customer") String customer, @Named("product") String product) {
         }
 
@@ -138,8 +126,8 @@ class CompositeCandidateStepsBehaviour {
     }
 
     @Test
-    @Disabled("fails as perhaps Paranamer not peer of @named in respect of @composite")
-    void shouldMatchCompositesAndCreateComposedStepsUsingParanamerNamedParameters() {
+    @Ignore("fails as perhaps Paranamer not peer of @named in respect of @composite")
+    public void shouldMatchCompositesAndCreateComposedStepsUsingParanamerNamedParameters() {
         CompositeStepsWithoutNamedAnnotation steps = new CompositeStepsWithoutNamedAnnotation();
         List<StepCandidate> candidates = steps.listCandidates();
         StepCandidate candidate = candidates.get(0);
@@ -149,8 +137,7 @@ class CompositeCandidateStepsBehaviour {
         namedParameters.put("customer", "Mr Jones");
         namedParameters.put("product", "ticket");
         List<Step> composedSteps = new ArrayList<>();
-        candidate.addComposedSteps(composedSteps, "Given <customer> has previously bought a <product>", namedParameters,
-                candidates);
+        candidate.addComposedSteps(composedSteps, "Given <customer> has previously bought a <product>", namedParameters, candidates);
         assertThat(composedSteps.size(), equalTo(2));
         for (Step step : composedSteps) {
             step.perform(mock(StoryReporter.class), null);
@@ -165,10 +152,8 @@ class CompositeCandidateStepsBehaviour {
         private String added;
 
         @Given("<customer> has previously bough a <product>")
-        @Composite(steps = {
-            "Given <customer> is logged in",
-            "When a <product> is added to the cart"
-        })
+        @Composite(steps = {"Given <customer> is logged in",
+                "When a <product> is added to the cart"})
         public void aCompositeStep(String customer, String product) {
         }
 
@@ -185,13 +170,13 @@ class CompositeCandidateStepsBehaviour {
     }
     
     @Test
-    void shouldMatchCompositesAndCreateComposedNestedSteps() {
+    public void shouldMatchCompositesAndCreateComposedNestedSteps() {
         NestedCompositeSteps steps = new NestedCompositeSteps();
         List<StepCandidate> candidates = steps.listCandidates();
         // find main step
         StepCandidate candidate = null;
-        for (StepCandidate cand: candidates) {
-            if (cand.getPatternAsString().equals("all buttons are enabled")) {
+        for(StepCandidate cand: candidates) {
+            if(cand.getPatternAsString().equals("all buttons are enabled")) {
                 candidate = cand;
                 break;
             }
@@ -221,8 +206,8 @@ class CompositeCandidateStepsBehaviour {
         @When("all buttons are enabled")
         @Composite(steps = {
             "Then all left buttons are enabled",
-            "Then all top buttons are enabled"
-        })
+            "Then all top buttons are enabled" }
+        )
         public void all() {
             trail.append("a>");
         }
@@ -230,8 +215,8 @@ class CompositeCandidateStepsBehaviour {
         @Then("all $location buttons are enabled")
         @Composite(steps = {
             "Then first <location> button is enabled",
-            "Then second <location> button is enabled"
-        })
+            "Then second <location> button is enabled" }
+        )
         public void topAll(String location) {
             trail.append(location).append('>');
         }
@@ -243,7 +228,7 @@ class CompositeCandidateStepsBehaviour {
     }
 
     @Test
-    void shouldMatchCompositesWhenStepParameterIsProvided() {
+    public void shouldMatchCompositesWhenStepParameterIsProvided(){
         CompositeStepsWithParameterMatching steps = new CompositeStepsWithParameterMatching();
         List<StepCandidate> candidates = steps.listCandidates();
         StepCandidate candidate = candidateMatchingStep(candidates, "When I login");
@@ -263,19 +248,18 @@ class CompositeCandidateStepsBehaviour {
         
 
         @When("I login")
-        @Composite(steps = { "When I click the Login button" })
-        public void whenILogin() {
-        }
+        @Composite(steps={"When I click the Login button"})
+        public void whenILogin(){}
         
         @When("I click the $button button")
-        public void whenIClickTheButton(@Named("button") String button) {
+        public void whenIClickTheButton(@Named("button") String button){
             this.button = button;
         }
         
     }
     
     @Test
-    void recursiveCompositesShouldWorkWithSomeMissingParameters() {
+    public void recursiveCompositesShouldWorkWithSomeMissingParameters(){
         String userName = "someUserName";
         CompositeStepsWithParameterMissing steps = new CompositeStepsWithParameterMissing();
         List<StepCandidate> candidates = steps.listCandidates();
@@ -283,8 +267,7 @@ class CompositeCandidateStepsBehaviour {
         assertThat(candidate.isComposite(), is(true));
         Map<String, String> noNamedParameters = new HashMap<>();
         List<Step> composedSteps = new ArrayList<>();
-        candidate.addComposedSteps(composedSteps, "Given I am logged in as someUserName", noNamedParameters,
-                candidates);
+        candidate.addComposedSteps(composedSteps, "Given I am logged in as someUserName", noNamedParameters, candidates);
         for (Step step : composedSteps) {
             step.perform(mock(StoryReporter.class), null);
         }
@@ -299,47 +282,41 @@ class CompositeCandidateStepsBehaviour {
         
         @Given("I am logged in as $name")
         @Composite(steps = {
-            "Given my user name is <name>",
-            "Given I log in"
+                "Given my user name is <name>",
+                "Given I log in"
         })
-        public void logInAsUser(@Named("name") String name) {
-        }
+        public void logInAsUser(@Named("name")String name){}
         
         @Given("my user name is $name")
-        public void setUsername(@Named("name")String name) {
+        public void setUsername(@Named("name")String name){
             this.username = name;
         }
         
         @Given("I log in")
         @Composite(steps = {
-            "Given I am on the Login page",
-            "When I type my user name into the Username field",
-            "When I type my password into the Password field",
-            "When I click the Login button"
-        })
-        public void logIn() {
+                "Given I am on the Login page", 
+                "When I type my user name into the Username field", 
+                "When I type my password into the Password field", 
+                "When I click the Login button"} )
+        public void logIn(){
             this.isLoggedIn = true;
         }
         
         @Given("Given I am on the Login page")
-        public void onLoginPage() {
-        }
+        public void onLoginPage(){}
         
         @Given("When I type my user name into the Username field")
-        public void typeUsername() {
-        }
+        public void typeUsername(){}
         
         @Given("When I type my password into the Password field")
-        public void typePassword() {
-        }
+        public void typePassword(){}
         
         @Given("When I click the Login button")
-        public void clickLogin() {
-        }
+        public void clickLogin(){}
     }
 
     @Test
-    void shouldIgnoreCompositesIgnorableStep() {
+    public void shouldIgnoreCompositesIgnorableStep(){
         CompositeWithIgnorableStep steps = new CompositeWithIgnorableStep();
         List<StepCandidate> candidates = steps.listCandidates();
         String compositeName = "When ignore my step";
@@ -359,17 +336,15 @@ class CompositeCandidateStepsBehaviour {
     static class CompositeWithIgnorableStep extends Steps {
 
         @When("ignore my step")
-        @Composite(steps = { "!-- When ignore me" })
-        public void whenIgnoreMyStep() {
-        }
+        @Composite(steps={"!-- When ignore me"})
+        public void whenIgnoreMyStep(){}
 
         @When("ignore me")
-        public void whenIgnoreMe() {
-        }
+        public void whenIgnoreMe(){}
     }
 
     @Test
-    void shouldCommentCompositesComment() {
+    public void shouldCommentCompositesComment(){
         CompositeWithComment steps = new CompositeWithComment();
         List<StepCandidate> candidates = steps.listCandidates();
         String compositeName = "When comment my comment";
@@ -389,8 +364,7 @@ class CompositeCandidateStepsBehaviour {
     static class CompositeWithComment extends Steps {
 
         @When("comment my comment")
-        @Composite(steps = { "!-- comment" })
-        public void whenIgnoreMyStep() {
-        }
+        @Composite(steps={"!-- comment"})
+        public void whenIgnoreMyStep(){}
     }
 }

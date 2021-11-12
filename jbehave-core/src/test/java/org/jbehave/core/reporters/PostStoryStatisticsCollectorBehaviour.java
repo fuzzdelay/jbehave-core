@@ -1,16 +1,5 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Description;
 import org.jbehave.core.model.ExamplesTable;
@@ -20,25 +9,35 @@ import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.OutcomesTable.OutcomesFailed;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
-import org.jbehave.core.steps.Timing;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-class PostStoryStatisticsCollectorBehaviour {
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+
+public class PostStoryStatisticsCollectorBehaviour {
     private OutputStream out;
     private PrintStream printStream;
 
     private PostStoryStatisticsCollector reporter;
 
-    @BeforeEach
-    public void beforeEach() {
+    @Before
+    public void setUp() {
         out = new ByteArrayOutputStream();
         printStream = new PrintStream(out);
         reporter = new PostStoryStatisticsCollector(printStream);
     }
 
     @Test
-    void shouldCollectStoryStatistics() {
+    public void shouldCollectStoryStatistics() {
         // When
         narrateAnInterestingStory();
 
@@ -71,33 +70,33 @@ class PostStoryStatisticsCollectorBehaviour {
     }
 
     @Test
-    void shouldCollectStoryStatisticsWhenStoryExcludedByFilter() {
+    public void shouldCollectStoryStatisticsWhenStoryNotAllowedByFilter() {
         // When
-        StoryNarrator.narrateAnInterestingStoryExcludedByFilter(reporter, true);
+        StoryNarrator.narrateAnInterestingStoryNotAllowedByFilter(reporter, true);
 
         // Then
         String statistics = out.toString();
-        assertThat(statistics, containsString("excluded=1"));
+        assertThat(statistics, containsString("notAllowed=1"));
     }
 
     @Test
-    void shouldCollectStoryStatisticsWhenScenariosExcludedByFilter() {
+    public void shouldCollectStoryStatisticsWhenScenariosNotAllowedByFilter() {
         // When
-        StoryNarrator.narrateAnInterestingStoryExcludedByFilter(reporter, false);
+        StoryNarrator.narrateAnInterestingStoryNotAllowedByFilter(reporter, false);
         
         // Then
         String statistics = out.toString();
-        assertThat(statistics, containsString("excluded=0"));
+        assertThat(statistics, containsString("notAllowed=0"));
         assertThat(statistics, containsString("pending=0"));
         assertThat(statistics, containsString("scenarios=1"));
         assertThat(statistics, containsString("scenariosSuccessful=0"));
         assertThat(statistics, containsString("scenariosPending=0"));
         assertThat(statistics, containsString("scenariosFailed=0"));
-        assertThat(statistics, containsString("scenariosExcluded=1"));
+        assertThat(statistics, containsString("scenariosNotAllowed=1"));
     }
 
     @Test
-    void shouldNotCountFailedScenariosIfExceptionsAreNull() {
+    public void shouldNotCountFailedScenariosIfExceptionsAreNull() {
         // Given
         OutputStream out = new ByteArrayOutputStream();
         StoryReporter reporter = new PostStoryStatisticsCollector(new PrintStream(out));
@@ -124,7 +123,7 @@ class PostStoryStatisticsCollectorBehaviour {
         // 1st given story
         reporter.beforeStory(story, true);
         reporter.beforeScenario(new Scenario("a scenario without steps", Meta.EMPTY));
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();
         reporter.afterStory(true);
 
         // 2nd given story
@@ -135,10 +134,10 @@ class PostStoryStatisticsCollectorBehaviour {
         reporter.beforeStory(story, true);
         reporter.beforeScenario(new Scenario("initialise static", Meta.EMPTY));
         reporter.successful("the bank has customers");
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();
         reporter.afterStory(true);
 
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();
         reporter.afterStory(true);
 
         reporter.successful("Given I have a balance of $50");
@@ -146,7 +145,7 @@ class PostStoryStatisticsCollectorBehaviour {
         reporter.comment("!-- A comment");
         reporter.successful("When I request $20");
         reporter.successful("When I ask Liz for a loan of $100");
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();
 
         // 2nd scenario
         reporter.beforeScenario(new Scenario("A failing scenario", Meta.EMPTY));
@@ -163,13 +162,13 @@ class PostStoryStatisticsCollectorBehaviour {
         reporter.example(table.getRow(0), 0);
         reporter.example(table.getRow(1), 1);
         reporter.afterExamples();
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();
 
         // 3rd scenario
         reporter.beforeScenario(new Scenario("A pending scenario", Meta.EMPTY));
         reporter.pending("When I have some money");
         reporter.notPerformed("Then I should have $20");
-        reporter.afterScenario(new Timing());
+        reporter.afterScenario();        
         
         // end story
         reporter.afterStory(false);

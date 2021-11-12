@@ -3,16 +3,13 @@
   <parent>
     <groupId>org.jbehave</groupId>
     <artifactId>jbehave</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>4.8.3</version>
   </parent>
   <artifactId>jbehave-rest</artifactId>
   <packaging>maven-plugin</packaging>
   <name>JBehave REST</name>
   <description>Extension of JBehave Core that supports REST APIs to access stories resources</description>
 
-  <properties>
-    <jersey.version>3.0.0</jersey.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.jbehave</groupId>
@@ -20,24 +17,19 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <version>1.4.17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
+      <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>${jersey.version}</version>
+      <version>1.19.1</version>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jersey.inject</groupId>
-      <artifactId>jersey-hk2</artifactId>
-      <version>${jersey.version}</version>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.5</version>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
-      <version>1.13.1</version>
+      <version>1.9.1</version>
     </dependency>
   </dependencies>
 
@@ -46,7 +38,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven.version}</version>
+        <version>3.4</version>
       </plugin>
     </plugins>
   </build>

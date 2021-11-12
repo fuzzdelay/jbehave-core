@@ -1,23 +1,22 @@
 package org.jbehave.core.reporters;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
 import org.hamcrest.Matchers;
 import org.jbehave.core.model.Story;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class NullStoryReporterBehaviour {
+import static org.hamcrest.MatcherAssert.assertThat;
 
-    private static final String NL = System.getProperty("line.separator");
+public class NullStoryReporterBehaviour {
+
+    private final String NL = System.getProperty("line.separator");
 
     @Test
-    void shouldOnlyReportOverriddenMethods() {
+    public void shouldOnlyReportOverriddenMethods() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(out);
-        StoryReporter reporter = new NullStoryReporter() {
+        StoryReporter reporter = new NullStoryReporter(){
 
             @Override
             public void beforeStory(Story story, boolean givenStory) {

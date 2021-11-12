@@ -1,18 +1,18 @@
 package org.jbehave.examples.core.urls;
 
-import static java.util.Arrays.asList;
-import static org.jbehave.core.io.CodeLocations.codeLocationFromURL;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.util.List;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.io.LoadFromURL;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.examples.core.CoreStories;
+
+import static java.util.Arrays.asList;
+import static org.jbehave.core.io.CodeLocations.codeLocationFromURL;
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ public class RemoteCoreStories extends CoreStories {
     }
 
     @Override
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         // Specify story paths as remote URLs
         String codeLocation = codeLocationFromURL("http://jbehave.org/reference/examples/stories/")
                 .toExternalForm();

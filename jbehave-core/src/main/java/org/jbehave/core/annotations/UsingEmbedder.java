@@ -17,15 +17,20 @@ public @interface UsingEmbedder {
 
     Class<?> embedder() default Embedder.class;
     boolean batch()  default false;
-    boolean skip()  default false;
-    boolean generateViewAfterStories()  default true;
-    boolean ignoreFailureInStories()  default false;
-    boolean ignoreFailureInView()  default false;
-    boolean verboseFailures() default false;
+	boolean skip()  default false;
+	boolean generateViewAfterStories()  default true;
+	boolean ignoreFailureInStories()  default false;
+	boolean ignoreFailureInView()  default false;
+	boolean verboseFailures() default false;
     boolean verboseFiltering() default false;
     String storyTimeouts() default "";
+    /** @deprecated Use storyTimeouts() */
+    @Deprecated long storyTimeoutInSecs() default 300;
+    /** @deprecated Use storyTimeouts() */
+    @Deprecated String storyTimeoutInSecsByPath() default "";
     boolean failOnStoryTimeout() default false;
-    int threads() default 1;
+	int threads() default 1;
+	boolean stepsFactory() default true;
     String[] metaFilters() default {};
     String systemProperties() default "";
 

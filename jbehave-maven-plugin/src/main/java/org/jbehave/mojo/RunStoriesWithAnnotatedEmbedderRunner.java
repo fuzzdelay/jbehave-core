@@ -1,15 +1,16 @@
 package org.jbehave.mojo;
 
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.junit.AnnotatedEmbedderRunner;
+import org.junit.runner.RunWith;
 
 /**
- * Mojo that runs stories with {@link AnnotatedEmbedderRunner}.
+ * Mojo that runs stories with {@link AnnotatedEmbedderRunner}, equivalent to
+ * execution via JUnit's {@link RunWith}.
+ * 
+ * @goal run-stories-with-annotated-embedder
  */
-@Mojo(name = "run-stories-with-annotated-embedder", requiresDependencyResolution = ResolutionScope.TEST)
 public class RunStoriesWithAnnotatedEmbedderRunner extends AbstractEmbedderMojo {
 
     @Override

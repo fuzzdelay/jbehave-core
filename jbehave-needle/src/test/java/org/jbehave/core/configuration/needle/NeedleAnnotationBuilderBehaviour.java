@@ -1,11 +1,7 @@
 package org.jbehave.core.configuration.needle;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,20 +20,22 @@ import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.steps.CandidateSteps;
+import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.jbehave.core.steps.Steps;
 import org.jbehave.core.steps.needle.NeedleStepsFactoryBehaviour.FooSteps;
 import org.jbehave.core.steps.needle.NeedleStepsFactoryBehaviour.FooStepsWithDependency;
 import org.jbehave.core.steps.needle.ValueGetter;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class NeedleAnnotationBuilderBehaviour {
+public class NeedleAnnotationBuilderBehaviour {
 
     @Test
-    void shouldBuildConfigurationFromAnnotationsUsingConfigureAndGuiceConverters() {
+    public void shouldBuildConfigurationFromAnnotationsUsingConfigureAndGuiceConverters() {
         final AnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedUsingConfigureAndNeedleConverters.class);
         final Configuration configuration = builderAnnotated
@@ -76,7 +74,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
         final AnnotationBuilder builderNotAnnotated = new NeedleAnnotationBuilder(
                 NotAnnotated.class);
         assertThatConfigurationIs(builderNotAnnotated.buildConfiguration(),
@@ -111,7 +109,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingNeedle() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingNeedle() {
         final AnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedUsingNeedle.class);
         final Configuration configuration = builderAnnotated
@@ -121,7 +119,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndNeedle() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndNeedle() {
         final AnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedUsingStepsAndNeedle.class);
         final Configuration configuration = builderAnnotated
@@ -132,7 +130,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuiceAndConverters() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndGuiceAndConverters() {
         final AnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedUsingConfigureAndNeedleConverters.class);
         final Configuration configuration = builderAnnotated
@@ -143,7 +141,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
         final AnnotationBuilder builderNotAnnotated = new NeedleAnnotationBuilder(
                 NotAnnotated.class);
         assertThatStepsInstancesAre(builderNotAnnotated.buildCandidateSteps());
@@ -155,7 +153,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildStepsList() {
+    public void shouldBuildStepsList() {
         final AnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedMultipleSteps.class);
         final List<CandidateSteps> actual = builderAnnotated
@@ -165,7 +163,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
+    public void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
         final NeedleAnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedUsingStepsAndNeedle.class);
         builderAnnotated.buildConfiguration();
@@ -174,7 +172,7 @@ class NeedleAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldSupplyInjectors() {
+    public void shouldSupplyInjectors() {
         final NeedleAnnotationBuilder builderAnnotated = new NeedleAnnotationBuilder(
                 AnnotatedWithStepsWithDependency.class);
         final List<CandidateSteps> buildCandidateSteps = builderAnnotated
@@ -213,7 +211,8 @@ class NeedleAnnotationBuilderBehaviour {
 
     }
 
-    @Configure(parameterConverters = { MyExampleTableConverter.class, MyDateConverter.class, CustomConverter.class })
+    @Configure(parameterConverters = { MyExampleTableConverter.class,
+            MyDateConverter.class, CustomConverter.class })
     @UsingSteps(instances = { FooSteps.class })
     @UsingNeedle(provider = { ValueGetterProvider.class })
     private static class AnnotatedUsingConfigureAndNeedleConverters {
@@ -244,17 +243,18 @@ class NeedleAnnotationBuilderBehaviour {
 
     }
 
-    public static class CustomConverter extends FunctionalParameterConverter<String, CustomObject> {
+    public static class CustomConverter extends FunctionalParameterConverter<CustomObject> {
 
         public CustomConverter() {
-            super(String.class, CustomObject.class, CustomObject::new);
+            super(CustomObject::new);
         }
     }
 
     public static class MyExampleTableConverter extends ParameterConverters.ExamplesTableConverter {
 
         public MyExampleTableConverter() {
-            super(new ExamplesTableFactory(new LoadFromClasspath(), new TableTransformers()));
+            super(new ExamplesTableFactory(new LoadFromClasspath(), new ParameterConverters(), new ParameterControls(),
+                    new TableParsers(), new TableTransformers()));
         }
 
     }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jbehave</groupId>
     <artifactId>jbehave</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>4.8.3</version>
   </parent>
   <artifactId>jbehave-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
@@ -17,18 +17,23 @@
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven.version}</version>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.0.11</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>${maven.version}</version>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>2.0.11</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <version>2.0.11</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-archiver</artifactId>
-      <version>4.2.2</version>
+      <version>1.2</version>
     </dependency>
   </dependencies>
 
@@ -37,7 +42,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven.version}</version>
+        <version>3.4</version>
       </plugin>
     </plugins>
   </build>

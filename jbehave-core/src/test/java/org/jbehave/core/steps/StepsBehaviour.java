@@ -1,15 +1,5 @@
 package org.jbehave.core.steps;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.jbehave.core.steps.JBehaveMatchers.step;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,17 +27,26 @@ import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.reporters.StoryReporter;
-import org.jbehave.core.steps.AbstractCandidateSteps.DuplicateCandidateFound;
 import org.jbehave.core.steps.AbstractStepResult.Failed;
-import org.jbehave.core.steps.StepCreator.StepExecutionType;
-import org.junit.jupiter.api.Test;
+import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.AbstractCandidateSteps.DuplicateCandidateFound;
+import org.junit.Test;
 
-class StepsBehaviour {
+import static org.hamcrest.Matchers.equalTo;
 
-    private final Map<String, String> tableRow = new HashMap<>();
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+public class StepsBehaviour {
+
+    private Map<String, String> tableRow = new HashMap<>();
 
     @Test
-    void shouldListCandidateStepsFromAnnotatedMethodsWithSingleAlias() {
+    public void shouldListCandidateStepsFromAnnotatedMethodsWithSingleAlias() {
         SingleAliasSteps steps = new SingleAliasSteps();
         List<StepCandidate> candidates = steps.listCandidates();
         assertThat(candidates.size(), equalTo(6));
@@ -65,7 +64,7 @@ class StepsBehaviour {
     }
 
     @Test
-    void shouldListCandidateStepsFromAnnotatedMethodsWithMultipleAliases() {
+    public void shouldListCandidateStepsFromAnnotatedMethodsWithMultipleAliases() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
         List<StepCandidate> candidates = steps.listCandidates();
         assertThat(candidates.size(), equalTo(9));
@@ -86,11 +85,10 @@ class StepsBehaviour {
     }
 
     @Test
-    void shouldListCandidateStepsFromAnnotatedMethodsInPojo() {
+    public void shouldListCandidateStepsFromAnnotatedMethodsInPojo() {
         PojoSteps steps = new PojoSteps();
         Configuration configuration = new MostUsefulConfiguration();
-        List<StepCandidate> candidates = new InstanceStepsFactory(configuration, steps).createCandidateSteps().get(0)
-                .listCandidates();
+        List<StepCandidate> candidates = new InstanceStepsFactory(configuration, steps).createCandidateSteps().get(0).listCandidates();
         assertThat(candidates.size(), equalTo(6));
 
         performMatchedStep(candidates, "GIVEN a given", "Given a given");
@@ -109,225 +107,174 @@ class StepsBehaviour {
         StoryReporter reporter = mock(StoryReporter.class);
         findCandidate(candidates, candidateAsString).createMatchedStep(stepAsString, tableRow, Collections.emptyList())
                 .perform(reporter, null);
-        verify(reporter).beforeStep(step(StepExecutionType.EXECUTABLE, stepAsString));
+        verify(reporter).beforeStep(stepAsString);
     }
 
     private StepCandidate findCandidate(List<StepCandidate> candidates, String candidateAsString) {
         for (StepCandidate candidate : candidates) {
-            if (candidateAsString.equals(candidate.toString())) {
+            if ( candidateAsString.equals(candidate.toString()) ){
                 return candidate;
             }
         }
-        throw new RuntimeException("StepCandidate " + candidateAsString + " not found amongst " + candidates);
+        throw new RuntimeException("StepCandidate "+candidateAsString+" not found amongst "+candidates);
     }
 
     @Test
-    void shouldListStepsToBePerformedBeforeStories() {
+    public void shouldListStepsToBePerformedBeforeAndAfterStories() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
 
-        List<BeforeOrAfterStep> beforeStories = steps.listBeforeStories();
-        assertThat(beforeStories.size(), equalTo(1));
-        beforeStories.get(0).createStep().perform(repoter, null);
-        assertThat(beforeStories.get(0).getMethod().getName(), equalTo("beforeStories"));
+        List<BeforeOrAfterStep> beforeAfterStories = steps.listBeforeOrAfterStories();
+        assertThat(beforeAfterStories.size(), equalTo(2));        
+        beforeAfterStories.get(0).createStep().perform(null, null);
+        assertThat(beforeAfterStories.get(0).getStage(), equalTo(Stage.BEFORE));
+        assertThat(beforeAfterStories.get(0).getMethod().getName(), equalTo("beforeStories"));
         assertThat(steps.beforeStories, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeStories"));
-    }
-
-    @Test
-    void shouldListStepsToBePerformedAfterStories() {
-        MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
-        List<BeforeOrAfterStep> afterStories = steps.listAfterStories();
-        assertThat(afterStories.size(), equalTo(1));
-        afterStories.get(0).createStep().perform(repoter, null);
-        assertThat(afterStories.get(0).getMethod().getName(), equalTo("afterStories"));
+        beforeAfterStories.get(1).createStep().perform(null, null);
+        assertThat(beforeAfterStories.get(1).getStage(), equalTo(Stage.AFTER));
+        assertThat(beforeAfterStories.get(1).getMethod().getName(), equalTo("afterStories"));
         assertThat(steps.afterStories, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterStories"));
+        
     }
 
     @Test
-    void shouldListStepsToBePerformedBeforeAndAfterStory() {
+    public void shouldListStepsToBePerformedBeforeAndAfterStory() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
 
-        List<BeforeOrAfterStep> beforeStory = steps.listBeforeStory(false);
-        assertThat(beforeStory.size(), equalTo(1));
-        beforeStory.get(0).createStep().perform(repoter, null);
-        assertThat(beforeStory.get(0).getMethod().getName(), equalTo("beforeStory"));
+        List<BeforeOrAfterStep> beforeAfterStory = steps.listBeforeOrAfterStory(false);
+        assertThat(beforeAfterStory.size(), equalTo(2));        
+        beforeAfterStory.get(0).createStep().perform(null, null);
+        assertThat(beforeAfterStory.get(0).getStage(), equalTo(Stage.BEFORE));
+        assertThat(beforeAfterStory.get(0).getMethod().getName(), equalTo("beforeStory"));
         assertThat(steps.beforeStory, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeStory"));
-
-        List<BeforeOrAfterStep> afterStory = steps.listAfterStory(false);
-        assertThat(afterStory.size(), equalTo(1));
-        afterStory.get(0).createStep().perform(repoter, null);
-        assertThat(afterStory.get(0).getMethod().getName(), equalTo("afterStory"));
+        beforeAfterStory.get(1).createStep().perform(null, null);
+        assertThat(beforeAfterStory.get(1).getStage(), equalTo(Stage.AFTER));
+        assertThat(beforeAfterStory.get(1).getMethod().getName(), equalTo("afterStory"));
         assertThat(steps.afterStory, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterStory"));
-
-        List<BeforeOrAfterStep> beforeGivenStory = steps.listBeforeStory(true);
-        assertThat(beforeGivenStory.size(), equalTo(1));
-        beforeGivenStory.get(0).createStep().perform(repoter, null);
+        
+        List<BeforeOrAfterStep> beforeAfterGivenStory = steps.listBeforeOrAfterStory(true);
+        assertThat(beforeAfterGivenStory.size(), equalTo(2));        
+        beforeAfterGivenStory.get(0).createStep().perform(null, null);
         assertThat(steps.beforeGivenStory, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeGivenStory"));
-
-        List<BeforeOrAfterStep> afterGivenStory = steps.listAfterStory(true);
-        assertThat(afterGivenStory.size(), equalTo(1));
-        afterGivenStory.get(0).createStep().perform(repoter, null);
+        beforeAfterGivenStory.get(1).createStep().perform(null, null);
         assertThat(steps.afterGivenStory, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterGivenStory"));
     }
     
     @Test
-    void shouldProvideStepsToBePerformedBeforeAndAfterScenariosWithFailureOccuring() {
+    public void shouldProvideStepsToBePerformedBeforeAndAfterScenariosWithFailureOccuring() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
         ScenarioType scenarioType = ScenarioType.NORMAL;
-        List<BeforeOrAfterStep> beforeScenario = steps.listBeforeScenario().get(scenarioType);
-        assertThat(beforeScenario.size(), equalTo(1));
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterScenario(scenarioType);
+        assertThat(beforeAfterScenario.size(), equalTo(4));
 
-        beforeScenario.get(0).createStep().perform(repoter, null);
+        beforeAfterScenario.get(0).createStep().perform(null, null);
         assertThat(steps.beforeNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeNormalScenarios"));
 
-        List<BeforeOrAfterStep> afterScenario = steps.listAfterScenario().get(scenarioType);
-        assertThat(afterScenario.size(), equalTo(3));
         Meta storyAndScenarioMeta = null;
         // uponOutcome=ANY
-        afterScenario.get(0).createStepUponOutcome(storyAndScenarioMeta).perform(repoter, null);
+        beforeAfterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).perform(null, null);
         assertThat(steps.afterNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterNormalScenarios"));
 
         // uponOutcome=SUCCESS
-        afterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(repoter, null);
+        beforeAfterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(null, null);
         assertThat(steps.afterSuccessfulScenario, is(false));
 
         // uponOutcome=FAILURE
-        afterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(repoter, null);
+        beforeAfterScenario.get(3).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(null, null);
         assertThat(steps.afterFailedScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterFailedScenarios"));
     }
 
     @Test
-    void shouldProvideStepsToBePerformedBeforeAndAfterScenariosWithNoFailureOccuring() {
+    public void shouldProvideStepsToBePerformedBeforeAndAfterScenariosWithNoFailureOccuring() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
         ScenarioType scenarioType = ScenarioType.NORMAL;
-        List<BeforeOrAfterStep> beforeScenario = steps.listBeforeScenario().get(scenarioType);
-        assertThat(beforeScenario.size(), equalTo(1));
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterScenario(scenarioType);
+        assertThat(beforeAfterScenario.size(), equalTo(4));
 
-        beforeScenario.get(0).createStep().perform(repoter, null);
+        beforeAfterScenario.get(0).createStep().perform(null, null);
         assertThat(steps.beforeNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeNormalScenarios"));
 
-        List<BeforeOrAfterStep> afterScenario = steps.listAfterScenario().get(scenarioType);
-        assertThat(afterScenario.size(), equalTo(3));
         Meta storyAndScenarioMeta = null;
         // uponOutcome=ANY
-        afterScenario.get(0).createStepUponOutcome(storyAndScenarioMeta).perform(repoter, null);
+        beforeAfterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).perform(null, null);
         assertThat(steps.afterNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterNormalScenarios"));
 
         // uponOutcome=SUCCESS
-        afterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).perform(repoter, null);
+        beforeAfterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).perform(null, null);
         assertThat(steps.afterSuccessfulScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterSuccessfulScenarios"));
 
         // uponOutcome=FAILURE
-        afterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).perform(repoter, null);
+        beforeAfterScenario.get(3).createStepUponOutcome(storyAndScenarioMeta).perform(null, null);
         assertThat(steps.afterFailedScenario, is(false));
 
     }
-
+        
     @Test
-    void shouldProvideStepsToBeNotPerformedAfterScenarioUponOutcome() {
+    public void shouldProvideStepsToBeNotPerformedAfterScenarioUponOutcome() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
         ScenarioType scenarioType = ScenarioType.NORMAL;
-        List<BeforeOrAfterStep> beforeScenario = steps.listBeforeScenario().get(scenarioType);
-        assertThat(beforeScenario.size(), equalTo(1));
-
-        beforeScenario.get(0).createStep().doNotPerform(repoter, null);
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterScenario(scenarioType);
+        assertThat(beforeAfterScenario.size(), equalTo(4));
+        
+        beforeAfterScenario.get(0).createStep().doNotPerform(null, null);
         assertThat(steps.beforeNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeNormalScenarios"));
 
-        List<BeforeOrAfterStep> afterScenario = steps.listAfterScenario().get(scenarioType);
-        assertThat(afterScenario.size(), equalTo(3));
         Meta storyAndScenarioMeta = null;
         UUIDExceptionWrapper failure = new UUIDExceptionWrapper();
         // uponOutcome=ANY
-        afterScenario.get(0).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(repoter, failure);
+        beforeAfterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(null, failure);
         assertThat(steps.afterNormalScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterNormalScenarios"));
         
         // uponOutcome=SUCCESS
-        afterScenario.get(1).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(repoter, failure);
+        beforeAfterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(null, failure);
         assertThat(steps.afterSuccessfulScenario, is(false));
         
         // uponOutcome=FAILURE        
-        afterScenario.get(2).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(repoter, failure);
+        beforeAfterScenario.get(3).createStepUponOutcome(storyAndScenarioMeta).doNotPerform(null, failure);
         assertThat(steps.afterFailedScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterFailedScenarios"));
     }
 
     @Test
-    void shouldProvideStepsToBePerformedBeforeAndAfterScenariosParametrisedByExample() {
+    public void shouldProvideStepsToBePerformedBeforeAndAfterScenariosParametrisedByExample() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
         ScenarioType scenarioType = ScenarioType.EXAMPLE;
-        List<BeforeOrAfterStep> beforeScenario = steps.listBeforeScenario().get(scenarioType);
-        assertThat(beforeScenario.size(), equalTo(1));
-
-        beforeScenario.get(0).createStep().perform(repoter, null);
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterScenario(scenarioType);
+        assertThat(beforeAfterScenario.size(), equalTo(2));
+        
+        beforeAfterScenario.get(0).createStep().perform(null, null);
         assertThat(steps.beforeExampleScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeExampleScenarios"));
 
-        List<BeforeOrAfterStep> afterScenario = steps.listAfterScenario().get(scenarioType);
-        assertThat(afterScenario.size(), equalTo(1));
-
-        afterScenario.get(0).createStep().perform(repoter, null);
+        beforeAfterScenario.get(1).createStep().perform(null, null);
         assertThat(steps.afterExampleScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterExampleScenarios"));
+
     }
 
     @Test
-    void shouldProvideStepsToBePerformedBeforeAndAfterAnyScenario() {
+    public void shouldProvideStepsToBePerformedBeforeAndAfterAnyScenario() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        StoryReporter repoter = mock(StoryReporter.class);
-
         ScenarioType scenarioType = ScenarioType.ANY;
-        List<BeforeOrAfterStep> beforeScenario = steps.listBeforeScenario().get(scenarioType);
-        assertThat(beforeScenario.size(), equalTo(1));
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterScenario(scenarioType);
+        assertThat(beforeAfterScenario.size(), equalTo(2));
 
-        beforeScenario.get(0).createStep().perform(repoter, null);
+        beforeAfterScenario.get(0).createStep().perform(null, null);
         assertThat(steps.beforeAnyScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeAnyScenarios"));
 
-        List<BeforeOrAfterStep> afterScenario = steps.listAfterScenario().get(scenarioType);
-        assertThat(afterScenario.size(), equalTo(1));
-
-        afterScenario.get(0).createStep().perform(repoter, null);
+        beforeAfterScenario.get(1).createStep().perform(null, null);
         assertThat(steps.afterAnyScenario, is(true));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterAnyScenarios"));
+
     }
 
     @Test
-    void shouldAllowBeforeOrAfterStepsToUseSpecifiedStepMonitor() {
+    public void shouldAllowBeforeOrAfterStepsToUseSpecifiedStepMonitor() {
         MultipleAliasesSteps steps = new MultipleAliasesSteps();
-        List<BeforeOrAfterStep> beforeStory = steps.listBeforeStory(false);
-        BeforeOrAfterStep step = beforeStory.get(0);
+        List<BeforeOrAfterStep> beforeAfterStory = steps.listBeforeOrAfterStory(false);
+        BeforeOrAfterStep step = beforeAfterStory.get(0);
         StepMonitor stepMonitor = new PrintStreamStepMonitor();
         step.useStepMonitor(stepMonitor);
         assertThat(step.toString(), Matchers.containsString(stepMonitor.getClass().getName()));
     }
 
     @Test
-    void shouldAllowLocalizationOfSteps() {
+    public void shouldAllowLocalizationOfSteps(){
         Configuration configuration = new MostUsefulConfiguration();
         configuration.useKeywords(new LocalizedKeywords(new Locale("it")));
         LocalizedSteps steps = new LocalizedSteps(configuration);
@@ -344,47 +291,41 @@ class StepsBehaviour {
     }
 
     @Test
-    void shouldReportFailuresInBeforeMethods() {
-        StoryReporter repoter = mock(StoryReporter.class);
-        ScenarioType scenarioType = ScenarioType.NORMAL;
-        List<BeforeOrAfterStep> beforeOrAfterStepList = new BeforeSteps().listBeforeScenario().get(scenarioType);
-        StepResult stepResult = beforeOrAfterStepList.get(0).createStep().perform(repoter, null);
-        assertThat(stepResult, instanceOf(Failed.class));
-        assertThat(stepResult.getFailure(), instanceOf(UUIDExceptionWrapper.class));
-        assertThat(stepResult.getFailure().getCause(), instanceOf(BeforeOrAfterFailed.class));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "beforeScenario"));
+    public void shouldReportFailuresInBeforeMethods() {
+        assertFailureReturnedOnStepsPerformed(new BeforeSteps());
     }
 
     @Test
-    void shouldReportFailuresInAfterMethods() {
-        StoryReporter repoter = mock(StoryReporter.class);
+    public void shouldReportFailuresInAfterMethods() {
+        assertFailureReturnedOnStepsPerformed(new AfterSteps());
+    }
+
+    private void assertFailureReturnedOnStepsPerformed(Steps steps) {
         ScenarioType scenarioType = ScenarioType.NORMAL;
-        List<BeforeOrAfterStep> beforeOrAfterStepList = new AfterSteps().listAfterScenario().get(scenarioType);
-        StepResult stepResult = beforeOrAfterStepList.get(0).createStep().perform(repoter, null);
+        List<BeforeOrAfterStep> beforeOrAfterStepList = steps.listBeforeOrAfterScenario(scenarioType);
+        StepResult stepResult = beforeOrAfterStepList.get(0).createStep().perform(null, null);
         assertThat(stepResult, instanceOf(Failed.class));
         assertThat(stepResult.getFailure(), instanceOf(UUIDExceptionWrapper.class));
         assertThat(stepResult.getFailure().getCause(), instanceOf(BeforeOrAfterFailed.class));
-        verify(repoter).beforeStep(step(StepExecutionType.EXECUTABLE, "afterScenario"));
     }
 
-    @Test
-    void shouldFailIfDuplicateStepsAreEncountered() {
+    @Test(expected=DuplicateCandidateFound.class)
+    public void shouldFailIfDuplicateStepsAreEncountered() {
         DuplicateSteps steps = new DuplicateSteps();
-        assertThrows(DuplicateCandidateFound.class, steps::listCandidates);
+        steps.listCandidates();
     }
 
-    @Test
-    void shouldFailIfDuplicateStepsWithDifferentParamsNamesAreEncountered() {
+    @Test(expected=DuplicateCandidateFound.class)
+    public void shouldFailIfDuplicateStepsWithDifferentParamsNamesAreEncountered() {
         DuplicateStepsWithParameters steps = new DuplicateStepsWithParameters();
-        assertThrows(DuplicateCandidateFound.class, steps::listCandidates);
+        steps.listCandidates();
     }
 
     @Test
-    void shouldNotFailWithDuplicateCandidateFoundExceptionIfStepsWordingsDoNotMatchEachOther() {
+    public void shouldNotFailWithDuplicateCandidateFoundExceptionIfStepsWordingsDoNotMatchEachOther() {
         StepsWithParameters steps = new StepsWithParameters();
         Configuration configuration = new MostUsefulConfiguration();
-        List<StepCandidate> candidates = new InstanceStepsFactory(configuration, steps).createCandidateSteps().get(0)
-                .listCandidates();
+        List<StepCandidate> candidates = new InstanceStepsFactory(configuration, steps).createCandidateSteps().get(0).listCandidates();
         assertThat(candidates.size(), equalTo(2));
 
         performMatchedStep(candidates, "GIVEN a given param '$someParameterName'",
@@ -393,8 +334,8 @@ class StepsBehaviour {
                 "Given a given param '$givenParameter' and '$secondParam'");
     }
 
-    @Test
-    void shouldNotCreateStepIfStartingWordNotFound() {
+    @Test(expected=StartingWordNotFound.class)
+    public void shouldNotCreateStepIfStartingWordNotFound(){
         Configuration configuration = new MostUsefulConfiguration();
         configuration.useKeywords(new LocalizedKeywords(new Locale("it")));
         LocalizedSteps steps = new LocalizedSteps(configuration);
@@ -402,30 +343,21 @@ class StepsBehaviour {
         assertThat(candidates.size(), equalTo(3));
 
         // misspelled starting word 
-        StepCandidate stepCandidate = candidates.get(0);
-        List<Step> composedSteps = Collections.emptyList();
-        assertThrows(StartingWordNotFound.class,
-                () -> stepCandidate.createMatchedStep("Dado che un dato che", tableRow, composedSteps));
+        candidates.get(0).createMatchedStep("Dado che un dato che", tableRow, Collections.<Step>emptyList());
+        
     }
 
     @Test
-    void shouldListBeforeStoriesAccordingToTheirOrder() {
+    public void shouldListBeforeAndAfterStoriesAccordingToTheirOrder() {
         OrderedSteps steps = new OrderedSteps();
-        List<BeforeOrAfterStep> beforeStories = steps.listBeforeStories();
-        assertThat(beforeStories.size(), equalTo(3));
-        assertStepName(beforeStories.get(0), "beforeStoriesOrderTwo");
-        assertStepName(beforeStories.get(1), "beforeStoriesOrderOne");
-        assertStepName(beforeStories.get(2), "beforeStoriesOrderDefault");
-    }
-
-    @Test
-    void shouldListAfterStoriesAccordingToTheirOrder() {
-        OrderedSteps steps = new OrderedSteps();
-        List<BeforeOrAfterStep> afterStories = steps.listAfterStories();
-        assertThat(afterStories.size(), equalTo(3));
-        assertStepName(afterStories.get(0), "afterStoriesOrderDefault");
-        assertStepName(afterStories.get(1), "afterStoriesOrderOne");
-        assertStepName(afterStories.get(2), "afterStoriesOrderTwo");
+        List<BeforeOrAfterStep> beforeAfterScenario = steps.listBeforeOrAfterStories();
+        assertThat(beforeAfterScenario.size(), equalTo(6));
+        assertStepName(beforeAfterScenario.get(0), "beforeStoriesOrderTwo");
+        assertStepName(beforeAfterScenario.get(1), "beforeStoriesOrderOne");
+        assertStepName(beforeAfterScenario.get(2), "beforeStoriesOrderDefault");
+        assertStepName(beforeAfterScenario.get(3), "afterStoriesOrderDefault");
+        assertStepName(beforeAfterScenario.get(4), "afterStoriesOrderOne");
+        assertStepName(beforeAfterScenario.get(5), "afterStoriesOrderTwo");
     }
 
     private void assertStepName(BeforeOrAfterStep step, String name) {
@@ -455,19 +387,19 @@ class StepsBehaviour {
         private boolean afterStories;
         
         @Given("a given")
-        @Aliases(values = { "a given alias", "another given alias" })
+        @Aliases(values={"a given alias", "another given alias"})
         public void given() {
             givens++;
         }
 
         @When("a when")
-        @Aliases(values = { "a when alias", "another when alias" })
+        @Aliases(values={"a when alias", "another when alias"})
         public void when() {
             whens++;
         }
         
         @Then("a then")
-        @Aliases(values = { "a then alias", "another then alias" })
+        @Aliases(values={"a then alias", "another then alias"})
         public void then() {
             thens++;
         }
@@ -492,52 +424,52 @@ class StepsBehaviour {
             afterStory = true;
         }
 
-        @BeforeStory(uponGivenStory = true)
+        @BeforeStory(uponGivenStory=true)
         public void beforeGivenStory() {
             beforeGivenStory = true;
         }
-
-        @AfterStory(uponGivenStory = true)
+        
+        @AfterStory(uponGivenStory=true)
         public void afterGivenStory() {
             afterGivenStory = true;
         }        
         
-        @BeforeScenario(uponType = ScenarioType.NORMAL)
+        @BeforeScenario
         public void beforeNormalScenarios() {
             beforeNormalScenario = true;
         }
 
-        @BeforeScenario(uponType = ScenarioType.EXAMPLE)
+        @BeforeScenario(uponType=ScenarioType.EXAMPLE)
         public void beforeExampleScenarios() {
             beforeExampleScenario = true;
         }
 
-        @BeforeScenario(uponType = ScenarioType.ANY)
+        @BeforeScenario(uponType=ScenarioType.ANY)
         public void beforeAnyScenarios() {
             beforeAnyScenario = true;
         }
 
-        @AfterScenario(uponType = ScenarioType.NORMAL)
+        @AfterScenario
         public void afterNormalScenarios() {
             afterNormalScenario = true;
         }
 
-        @AfterScenario(uponType = ScenarioType.EXAMPLE)
+        @AfterScenario(uponType=ScenarioType.EXAMPLE)
         public void afterExampleScenarios() {
             afterExampleScenario = true;
         }
 
-        @AfterScenario(uponType = ScenarioType.ANY)
+        @AfterScenario(uponType=ScenarioType.ANY)
         public void afterAnyScenarios() {
             afterAnyScenario = true;
         }
 
-        @AfterScenario(uponType = ScenarioType.NORMAL, uponOutcome = AfterScenario.Outcome.SUCCESS)
+        @AfterScenario(uponOutcome=AfterScenario.Outcome.SUCCESS)
         public void afterSuccessfulScenarios() {
             afterSuccessfulScenario = true;
         }
-
-        @AfterScenario(uponType = ScenarioType.NORMAL, uponOutcome = AfterScenario.Outcome.FAILURE)
+        
+        @AfterScenario(uponOutcome=AfterScenario.Outcome.FAILURE)
         public void afterFailedScenarios() {
             afterFailedScenario = true;
         }
@@ -599,7 +531,7 @@ class StepsBehaviour {
 
     static class BeforeSteps extends Steps {
         
-        @BeforeScenario(uponType = ScenarioType.NORMAL)
+        @BeforeScenario
         public void beforeScenario() {
             throw new RuntimeException("Damn, I failed!");
         }
@@ -608,7 +540,7 @@ class StepsBehaviour {
 
     static class AfterSteps extends Steps {
 
-        @AfterScenario(uponType = ScenarioType.NORMAL)
+        @AfterScenario
         public void afterScenario() {
             throw new RuntimeException("Damn, I failed!");
         }
@@ -659,7 +591,7 @@ class StepsBehaviour {
             super(configuration);
         }
 
-        @Given("un dato che")
+		@Given("un dato che")
         public void given() {
             givens++;
         }

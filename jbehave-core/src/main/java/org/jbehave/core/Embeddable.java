@@ -2,6 +2,7 @@ package org.jbehave.core;
 
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.junit.JUnitStories;
+import org.jbehave.core.junit.JUnitStory;
 
 /**
  * <p>
@@ -10,8 +11,8 @@ import org.jbehave.core.junit.JUnitStories;
  * <p>
  * Users can either extend the abstract implementation {@link ConfigurableEmbedder},
  * which does not implement the {@link #run()} method, or other
- * implementations, such as {@link JUnitStories} which
- * implement {@link #run()} using JUnit's {@link org.junit.Test} annotation.
+ * implementations, such as {@link JUnitStory} or {@link JUnitStories}, which
+ * implement {@link #run()} using JUnit's {@link Test} annotation.
  * </p>
  * <p>
  * Other test frameworks can be supported in much the same way, by extending the
@@ -20,11 +21,12 @@ import org.jbehave.core.junit.JUnitStories;
  * 
  * @see ConfigurableEmbedder
  * @see InjectableEmbedder
+ * @see JUnitStory
  * @see JUnitStories
  */
 public interface Embeddable {
 
-    void useEmbedder(Embedder embedder);
+	void useEmbedder(Embedder embedder);
 
     void run();
 

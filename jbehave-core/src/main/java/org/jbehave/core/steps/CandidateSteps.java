@@ -1,72 +1,57 @@
 package org.jbehave.core.steps;
 
 import java.util.List;
-import java.util.Map;
 
 import org.jbehave.core.annotations.ScenarioType;
+import org.jbehave.core.configuration.Configuration;
 
 /**
  * Interface providing the list of step candidates, representing methods
- * annotated with {@link org.jbehave.core.annotations.Given @Given}, {@link org.jbehave.core.annotations.When @When}
- * or {@link org.jbehave.core.annotations.Then @Then}
+ * annotated with {@link Given @Given}, {@link When @When} or {@link Then @Then}
  * that can be matched. It also provides the list of before and after steps,
- * representing methods annotated with {@link org.jbehave.core.annotations.BeforeStories @BeforeStories},
- * {@link org.jbehave.core.annotations.AfterStories @AfterStories},
- * {@link org.jbehave.core.annotations.BeforeStory @BeforeStory},
- * {@link org.jbehave.core.annotations.AfterStory @AfterStory},
- * {@link org.jbehave.core.annotations.BeforeScenario @BeforeScenario},
- * {@link org.jbehave.core.annotations.AfterScenario @AfterScenario}, that do not require any matching.
+ * representing methods annotated with {@link BeforeStories @BeforeStories},
+ * {@link AfterStories @AfterStories}, {@link BeforeStory @BeforeStory},
+ * {@link AfterStory @AfterStory}, {@link BeforeScenario @BeforeScenario},
+ * {@link AfterScenario @AfterScenario}, that do not require any matching.
  */
 public interface CandidateSteps {
 
     /**
      * Returns the step candidates that can be matched
-     *
+     * 
      * @return The list of step candidates
      */
     List<StepCandidate> listCandidates();
 
     /**
-     * Returns the before stories steps
-     *
-     * @return The list of the before stories steps
+     * Returns the before or after stories steps
+     * 
+     * @return The list of before or after steps
      */
-    List<BeforeOrAfterStep> listBeforeStories();
+    List<BeforeOrAfterStep> listBeforeOrAfterStories();
 
     /**
-     * Returns the after stories steps
-     *
-     * @return The list of the after stories steps
+     * Returns the before or after story steps, based on the given story status
+     * 
+     * @param givenStory
+     *            the boolean flag denoting if it's a given story
+     * @return The list of before or after steps
      */
-    List<BeforeOrAfterStep> listAfterStories();
+    List<BeforeOrAfterStep> listBeforeOrAfterStory(boolean givenStory);
 
     /**
-     * Returns the before story steps, based on the given story status
-     *
-     * @param givenStory the boolean flag denoting if it's a given story
-     * @return The list of the before story steps
+     * Returns the before or after scenario steps
+     * @param type the ScenarioType
+     * 
+     * @return The list of before or after steps
      */
-    List<BeforeOrAfterStep> listBeforeStory(boolean givenStory);
+    List<BeforeOrAfterStep> listBeforeOrAfterScenario(ScenarioType type);
 
     /**
-     * Returns the after story steps, based on the given story status
-     *
-     * @param givenStory the boolean flag denoting if it's a given story
-     * @return The list of the after story steps
+     * Returns the configuration
+     * 
+     * @return The Configuration
      */
-    List<BeforeOrAfterStep> listAfterStory(boolean givenStory);
+    Configuration configuration();
 
-    /**
-     * Returns the before scenario steps
-     *
-     * @return The list of the before scenario steps
-     */
-    Map<ScenarioType, List<BeforeOrAfterStep>> listBeforeScenario();
-
-    /**
-     * Returns the after scenario steps
-     *
-     * @return The list of the after scenario steps
-     */
-    Map<ScenarioType, List<BeforeOrAfterStep>> listAfterScenario();
 }

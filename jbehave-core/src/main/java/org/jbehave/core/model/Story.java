@@ -1,19 +1,17 @@
 package org.jbehave.core.model;
 
-import static java.util.Collections.unmodifiableList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import static java.util.Collections.unmodifiableList;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 public class Story {
 
-    private final String id = UUID.randomUUID().toString();
     private final String path;
     private final Description description;
     private final Narrative narrative;
@@ -28,7 +26,7 @@ public class Story {
     }
 
     public Story(String path) {
-        this(path, null, null, Arrays.<Scenario>asList());
+        this(path, null, null , Arrays.<Scenario>asList());
     }
 
     public Story(String path, List<Scenario> scenarios) {
@@ -51,13 +49,11 @@ public class Story {
         this(path, description, meta, narrative, null, scenarios);
     }
 
-    public Story(String path, Description description, Meta meta, Narrative narrative, GivenStories givenStories,
-            List<Scenario> scenarios) {
+    public Story(String path, Description description, Meta meta, Narrative narrative, GivenStories givenStories, List<Scenario> scenarios) {
         this(path, description, meta, narrative, givenStories, null, scenarios);
     }
-
-    public Story(String path, Description description, Meta meta, Narrative narrative, GivenStories givenStories,
-            Lifecycle lifecycle, List<Scenario> scenarios) {
+    
+    public Story(String path, Description description, Meta meta, Narrative narrative, GivenStories givenStories, Lifecycle lifecycle, List<Scenario> scenarios) {
         this.path = path;
         this.description = description;
         this.narrative = narrative;
@@ -67,40 +63,30 @@ public class Story {
         this.scenarios = scenarios;
     }
 
-    public Story(Story story, String path, Lifecycle lifecycle) {
-        this.path = path;
-        this.description = story.description;
-        this.narrative = story.narrative;
-        this.meta = story.meta;
-        this.givenStories = story.givenStories;
-        this.lifecycle = lifecycle;
-        this.scenarios = story.scenarios;
-    }
-
     public String getPath() {
-        if (path == null) {
+        if ( path == null ){
             return EMPTY;
         }
         return path;
     }
 
-    public boolean hasDescription() {
+    public boolean hasDescription(){
         return description != null;
     }
 
     public Description getDescription() {
-        if (!hasDescription()) {
+        if ( !hasDescription() ){
             return Description.EMPTY;
         }
         return description;
     }
 
-    public boolean hasNarrative() {
+    public boolean hasNarrative(){
         return narrative != null;
     }
 
     public Narrative getNarrative() {
-        if (!hasNarrative()) {
+        if ( !hasNarrative() ){
             return Narrative.EMPTY;
         }
         return narrative;
@@ -111,17 +97,17 @@ public class Story {
     }
 
     public Meta getMeta() {
-        if (!hasMeta()) {
+        if ( !hasMeta() ){
             return Meta.EMPTY;
         }
         return meta;
     }
 
-    public Meta asMeta(String prefix) {
+    public Meta asMeta(String prefix){
         Properties p = new Properties();
-        p.setProperty(prefix + "path", getPath());
-        p.setProperty(prefix + "description", getDescription().asString());
-        p.setProperty(prefix + "narrative", getNarrative().toString());
+        p.setProperty(prefix+"path", getPath());
+        p.setProperty(prefix+"description", getDescription().asString());
+        p.setProperty(prefix+"narrative", getNarrative().toString());
         return new Meta(p);
     }
 
@@ -129,8 +115,8 @@ public class Story {
         return givenStories != null;
     }
 
-    public GivenStories getGivenStories() {
-        if (!hasGivenStories()) {
+    public GivenStories getGivenStories(){
+        if ( !hasGivenStories() ){
             return GivenStories.EMPTY;
         }
         return givenStories;
@@ -140,8 +126,8 @@ public class Story {
         return lifecycle != null;
     }
 
-    public Lifecycle getLifecycle() {
-        if (!hasLifecycle()) {
+    public Lifecycle getLifecycle(){
+        if ( !hasLifecycle() ){
             return Lifecycle.EMPTY;
         }
         return lifecycle;
@@ -153,10 +139,6 @@ public class Story {
 
     public String getName() {
         return (name != null ? name : getPath());
-    }
-
-    public String getId() {
-        return id;
     }
 
     public void namedAs(String name) {

@@ -37,7 +37,7 @@ public class NullEmbedderMonitor implements EmbedderMonitor {
     }
 
     @Override
-    public void metaExcluded(Meta meta, MetaFilter filter) {
+    public void metaNotAllowed(Meta meta, MetaFilter filter) {
     }
 
     @Override
@@ -53,12 +53,17 @@ public class NullEmbedderMonitor implements EmbedderMonitor {
     }
 
     @Override
-    public void storiesExcluded(List<Story> excluded, MetaFilter filter, boolean verbose) {
+    public void storiesNotAllowed(List<Story> notAllowed, MetaFilter filter) {
+        storiesNotAllowed(notAllowed, filter, false);
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, MetaFilter filter) {
+    public void storiesNotAllowed(List<Story> notAllowed, MetaFilter filter, boolean verbose) {
     }
+
+	@Override
+    public void scenarioNotAllowed(Scenario scenario, MetaFilter filter) {
+	}
 
     @Override
     public void batchFailed(BatchFailures failures) {
@@ -111,6 +116,18 @@ public class NullEmbedderMonitor implements EmbedderMonitor {
     }
 
     @Override
+    public void generatingNavigatorView(File outputDirectory, Properties viewResources) {
+    }
+
+    @Override
+    public void navigatorViewGenerationFailed(File outputDirectory, Properties viewResources, Throwable cause) {
+    }
+
+    @Override
+    public void navigatorViewNotGenerated() {
+    }
+
+    @Override
     public void processingSystemProperties(Properties properties) {
     }
 
@@ -134,16 +151,16 @@ public class NullEmbedderMonitor implements EmbedderMonitor {
     public void usingControls(EmbedderControls embedderControls) {
     }
 
-    public String getSearchDirectory() {
-        return null;
-    }
+	public String getSearchDirectory() {
+		return null;
+	}
 
-    @Override
+	@Override
     public void invalidTimeoutFormat(String path) {
-    }
+	}
 
-    @Override
+	@Override
     public void usingTimeout(String path, long timeout) {
-    }
+	}
 
 }

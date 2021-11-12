@@ -1,9 +1,5 @@
 package org.jbehave.examples.core.steps;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,29 +13,33 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+
 public class BankAccountSteps {
 
     private BankAccount account;
     private List<BankAccount> accounts = new ArrayList<>();
 
     @Given("I have a bank account")
-    public void givenIHaveABankAccount() {
+    public void givenIHaveABankAccount(){
         this.account = new BankAccount("Me");
     }
 
     @Given("my balance is $balance")
-    public void givenBalanceIs(int balance) {
+    public void givenBalanceIs(int balance){
         account.setBalance(balance);
     }
 
     @When("I withdraw $value")
-    public void whenIWithdraw(int value) {
+    public void whenIWithdraw(int value){
         account.withdraw(value);
     }
 
     @Then("my bank account balance should be $balance")
     @Alias("my bank account balance should be <balance>")
-    public void thenBalanceShouldBe(@Named("balance")int balance) {
+    public void thenBalanceShouldBe(@Named("balance")int balance){
         assertThat(account.getBalance(), equalTo(balance));
     }
 
@@ -51,7 +51,7 @@ public class BankAccountSteps {
 
     @Given("these people have bank accounts with balances: $accountInfos")
     public void givenPeopleHaveBankAccounts(@Named("accountInfos")ExamplesTable accountInfos) {
-        for (Map<String, String> info : accountInfos.getRows()) {
+        for(Map<String, String> info : accountInfos.getRows()) {
             final BankAccount account = new BankAccount(info.get("Name"));
             final int balance = Integer.parseInt(info.get("balance"));
             account.setBalance(balance);
@@ -61,7 +61,7 @@ public class BankAccountSteps {
 
     @When("I take all their money")
     public void whenIAddUp() {
-        for (BankAccount bankAccount : accounts) {
+        for(BankAccount bankAccount : accounts) {
             account.deposit(bankAccount.balance);
         }
     }
@@ -73,7 +73,7 @@ public class BankAccountSteps {
 
     @Then("my balance is archived")
     public void thenBalanceIsArchived() {
-        Date now = new Date();
+    	Date now = new Date();
         account.archive(now);
         assertThat(account.getArchived(now), equalTo(account.getBalance()));
     }
@@ -98,15 +98,15 @@ public class BankAccountSteps {
         }
 
         public void archive(Date date) {
-            archive.put(date, balance);
-        }
+        	archive.put(date, balance);
+		}
 
-        public int getArchived(Date date) {
+		public int getArchived(Date date){
             return archive.get(date);
         }
 
-        public String getName() {
-            return name;
+		public String getName(){
+        	return name;
         }
         
         public int getBalance() {

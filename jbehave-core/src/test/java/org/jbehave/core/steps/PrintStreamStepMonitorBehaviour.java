@@ -13,15 +13,15 @@ import java.util.Queue;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.StepPattern;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class PrintStreamStepMonitorBehaviour {
+public class PrintStreamStepMonitorBehaviour {
 
     private final OutputStream out = new ByteArrayOutputStream();
     private final StepMonitor monitor = new PrintStreamStepMonitor(new PrintStream(out));
 
     @Test
-    void shouldReportStepMatchesType() {
+    public void shouldReportStepMatchesType() {
         // When
         monitor.stepMatchesType("When another step", "Given my step", false, StepType.GIVEN, null, null);
 
@@ -31,7 +31,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportStepMatchesPattern() throws NoSuchMethodException {
+    public void shouldReportStepMatchesPattern() throws NoSuchMethodException {
         MySteps steps = new MySteps();
         Method method = MySteps.class.getMethod("thenFoo", String.class);
         // When
@@ -40,14 +40,23 @@ class PrintStreamStepMonitorBehaviour {
 
         // Then
         assertIsOutputEqualTo("Step 'Then foo named name' matches pattern '" + stepPattern
-                + "' for method 'public void org.jbehave.core.steps.PrintStreamStepMonitorBehaviour$MySteps."
-                + "thenFoo(java.lang.String)' "
-                + "with annotations '[@org.jbehave.core.annotations.Then(priority=0, value=\"foo named $name\")]'"
-                + " in steps instance '" + steps + "'");
+                + "' for method 'public void org.jbehave.core.steps.PrintStreamStepMonitorBehaviour$MySteps.thenFoo(java.lang.String)' "
+                + "with annotations '[@org.jbehave.core.annotations.Then(priority=0, value=foo named $name)]' in steps instance '"
+                + steps + "'");
     }
 
     @Test
-    void shouldReportConvertedValueOfTypeWithConverters() {
+    public void shouldReportConvertedValueOfType() {
+        // When
+        monitor.convertedValueOfType("1", int.class, 1, ParameterConverters.NumberConverter.class);
+
+        // Then
+        assertIsOutputEqualTo("Converted value '1' of type 'int' to '1' with converter "
+                + "'class org.jbehave.core.steps.ParameterConverters$NumberConverter'");
+    }
+
+    @Test
+    public void shouldReportConvertedValueOfTypeWithConverters() {
         // When
         Queue<Class<?>> convertersQueue = new LinkedList<>(Arrays.asList(ParameterConverters.NumberConverter.class,
                 ParameterConverters.ExamplesTableConverter.class, ParameterConverters.EnumListConverter.class));
@@ -61,7 +70,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportBeforePerformingStep() {
+    public void shouldReportBeforePerformingStep() {
         // When
         monitor.beforePerforming("a step", false, null);
 
@@ -70,7 +79,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportNothingAfterBeforePerformingStep() {
+    public void shouldReportNothingAfterBeforePerformingStep() {
         // When
         monitor.afterPerforming("a step", false, null);
 
@@ -79,7 +88,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingAnnotatedNameForParameter() {
+    public void shouldReportUsingAnnotatedNameForParameter() {
         // When
         monitor.usingAnnotatedNameForParameter("name", 0);
 
@@ -88,7 +97,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingParameterNameForParameter() {
+    public void shouldReportUsingParameterNameForParameter() {
         // When
         monitor.usingParameterNameForParameter("name", 0);
 
@@ -97,7 +106,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingTableAnnotatedNameForParameter() {
+    public void shouldReportUsingTableAnnotatedNameForParameter() {
         // When
         monitor.usingTableAnnotatedNameForParameter("name", 0);
 
@@ -106,7 +115,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingTableParameterNameForParameter() {
+    public void shouldReportUsingTableParameterNameForParameter() {
         // When
         monitor.usingTableParameterNameForParameter("name", 0);
 
@@ -115,7 +124,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingNaturalOrderForParameter() {
+    public void shouldReportUsingNaturalOrderForParameter() {
         // When
         monitor.usingNaturalOrderForParameter(0);
 
@@ -124,7 +133,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportFoundParameter() {
+    public void shouldReportFoundParameter() {
         // When
         monitor.foundParameter("parameter", 0);
 
@@ -133,7 +142,7 @@ class PrintStreamStepMonitorBehaviour {
     }
 
     @Test
-    void shouldReportUsingStepsContextParameter() {
+    public void shouldReportUsingStepsContextParameter() {
         // When
         monitor.usingStepsContextParameter("fromContext");
 

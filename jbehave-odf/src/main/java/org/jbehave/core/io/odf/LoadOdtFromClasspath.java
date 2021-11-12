@@ -1,10 +1,10 @@
 package org.jbehave.core.io.odf;
 
-import static org.jbehave.core.io.odf.OdfUtils.loadOdt;
-import static org.jbehave.core.io.odf.OdfUtils.parseOdt;
-
 import org.jbehave.core.io.InvalidStoryResource;
 import org.jbehave.core.io.LoadFromClasspath;
+
+import static org.jbehave.core.io.odf.OdfUtils.loadOdt;
+import static org.jbehave.core.io.odf.OdfUtils.parseOdt;
 
 /**
  * Loads ODT story resources from classpath

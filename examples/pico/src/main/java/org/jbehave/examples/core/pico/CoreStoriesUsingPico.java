@@ -1,5 +1,8 @@
 package org.jbehave.examples.core.pico;
 
+import java.util.List;
+
+import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.pico.PicoStepsFactory;
 import org.jbehave.examples.core.CoreStories;
@@ -17,6 +20,8 @@ import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoContainer;
 import org.picocontainer.behaviors.Caching;
 import org.picocontainer.injectors.ConstructorInjection;
+
+import static org.jbehave.core.io.CodeLocations.codeLocationFromPath;
 
 /**
  * Run core stories using PicoStepsFactory. The textual core stories are
@@ -42,6 +47,11 @@ public class CoreStoriesUsingPico extends CoreStories {
         container.addComponent(SandpitSteps.class);
         container.addComponent(SearchSteps.class);
         return container;
+    }
+
+    @Override
+    protected List<String> storyPaths() {
+        return new StoryFinder().findPaths(codeLocationFromPath("../core/src/main/java"), "**/*.story", "");
     }
 
 }

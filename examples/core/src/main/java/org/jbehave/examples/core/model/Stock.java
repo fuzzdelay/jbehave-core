@@ -10,9 +10,9 @@ public class Stock {
 
     public enum AlertStatus {
         ON, OFF
-    }
+    };
 
-    private String symbol;
+	private String symbol;
     private double alertPrice;
     private AlertStatus status = OFF;
     private List<Double> prices = new ArrayList<>();
@@ -22,8 +22,8 @@ public class Stock {
         this.alertPrice = alertPrice;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getSymbol(){
+    	return symbol;
     }
     
     public void tradeAt(double price) {

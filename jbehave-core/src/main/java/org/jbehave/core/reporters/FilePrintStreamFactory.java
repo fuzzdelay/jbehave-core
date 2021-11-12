@@ -91,7 +91,7 @@ public class FilePrintStreamFactory implements PrintStreamFactory {
     /**
      * Resolves directory from code location parent file.
      */
-    public abstract static class AbstractPathResolver implements FilePathResolver {
+    public static abstract class AbstractPathResolver implements FilePathResolver {
 
         @Override
         public String resolveDirectory(StoryLocation storyLocation, String relativeDirectory) {
@@ -125,7 +125,7 @@ public class FilePrintStreamFactory implements PrintStreamFactory {
         @Override
         public String resolveName(StoryLocation storyLocation, String extension) {
             String name = storyLocation.getPath();
-            if (StringUtils.contains(name, '/')) {
+            if ( StringUtils.contains(name, '/') ){
                 name = StringUtils.substringAfterLast(name, "/");
             }
             return StringUtils.substringBeforeLast(name, ".") + "." + extension;

@@ -18,54 +18,54 @@ import org.needle4j.injection.InjectionTargetInformation;
 
 @RunWith(NeedleAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingNeedle(provider = TradingServiceInjectionProvider.class)
 public abstract class ParentAnnotatedEmbedderUsingNeedle extends InjectableEmbedder {
 
-    /**
-     * Inline provider
-     *
-     * @author Simon Zambrovski
-     */
-    public static class TradingServiceInjectionProvider implements InjectionProvider<TradingService> {
+  /**
+   * Inline provider
+   * 
+   * @author Simon Zambrovski
+   * 
+   */
+  public static class TradingServiceInjectionProvider implements InjectionProvider<TradingService> {
 
-        protected final TradingService instance = new TradingService();
+    protected final TradingService instance = new TradingService();
 
-        public TradingServiceInjectionProvider() {
-        }
-
-        @Override
-        public Object getKey(final InjectionTargetInformation injectionTargetInformation) {
-            return injectionTargetInformation.getType();
-        }
-
-        @Override
-        public boolean verify(final InjectionTargetInformation injectionTargetInformation) {
-            return isTargetAssignable(injectionTargetInformation);
-        }
-
-        @Override
-        public TradingService getInjectedObject(Class<?> injectionPointType) {
-            return instance;
-        }
-
-        /**
-         * <code>true</code> when injection target is or extends/implements instance type
-         *
-         * @param injectionTargetInformation the information about the injection target
-         * @return true when type is assignable from instance
-         */
-        protected boolean isTargetAssignable(final InjectionTargetInformation injectionTargetInformation) {
-            return injectionTargetInformation.getType().isAssignableFrom(instance.getClass());
-        }
-
-        protected boolean isTargetQualifierPresent(final InjectionTargetInformation injectionTargetInformation,
-                final Class<? extends Annotation> qualifier) {
-            assertIsQualifier(qualifier);
-            return injectionTargetInformation.isAnnotationPresent(qualifier);
-        }
-
+    public TradingServiceInjectionProvider() {
     }
+
+    @Override
+    public Object getKey(final InjectionTargetInformation injectionTargetInformation) {
+      return injectionTargetInformation.getType();
+    }
+
+    @Override
+    public boolean verify(final InjectionTargetInformation injectionTargetInformation) {
+      return isTargetAssignable(injectionTargetInformation);
+    }
+
+    @Override
+    public TradingService getInjectedObject(Class<?> injectionPointType) {
+      return instance;
+    }
+
+    /**
+     * <code>true</code> when injection target is or extends/implements instance
+     * type
+     * 
+     * @param injectionTargetInformation
+     * @return true when type is assignable from instance
+     */
+    protected boolean isTargetAssignable(final InjectionTargetInformation injectionTargetInformation) {
+      return injectionTargetInformation.getType().isAssignableFrom(instance.getClass());
+    }
+
+    protected boolean isTargetQualifierPresent(final InjectionTargetInformation injectionTargetInformation, final Class<? extends Annotation> qualifier) {
+      assertIsQualifier(qualifier);
+      return injectionTargetInformation.isAnnotationPresent(qualifier);
+    }
+
+  }
 
 }

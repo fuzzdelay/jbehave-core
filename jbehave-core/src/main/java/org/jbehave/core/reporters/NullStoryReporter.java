@@ -6,14 +6,13 @@ import java.util.Map;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.GivenStories;
 import org.jbehave.core.model.Lifecycle;
+import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Narrative;
 import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
-import org.jbehave.core.steps.Timing;
 
 /**
  * <p>
@@ -25,15 +24,7 @@ import org.jbehave.core.steps.Timing;
 public class NullStoryReporter implements StoryReporter {
 
     @Override
-    public void beforeStoriesSteps(Stage stage) {
-    }
-
-    @Override
-    public void afterStoriesSteps(Stage stage) {
-    }
-
-    @Override
-    public void beforeStep(Step step) {
+    public void beforeStep(String step) {
     }
 
     @Override
@@ -65,7 +56,7 @@ public class NullStoryReporter implements StoryReporter {
     }
 
     @Override
-    public void storyExcluded(Story story, String filter) {
+    public void storyNotAllowed(Story story, String filter) {
     }
 
     @Override
@@ -81,47 +72,31 @@ public class NullStoryReporter implements StoryReporter {
     }
 
     @Override
-    public void beforeScenarios() {
-    }
-
-    @Override
-    public void afterScenarios() {
-    }
-
-    @Override
     public void narrative(final Narrative narrative) {
     }
 
     @Override
-    public void lifecycle(Lifecycle lifecycle) {
+    public void lifecyle(Lifecycle lifecycle) {
     }
 
     @Override
-    public void beforeStorySteps(Stage stage, Lifecycle.ExecutionType type) {
+    public void beforeStorySteps(Stage stage) {
     }
 
     @Override
-    public void afterStorySteps(Stage stage, Lifecycle.ExecutionType type) {
+    public void afterStorySteps(Stage stage) {
     }
 
     @Override
-    public void beforeScenarioSteps(Stage stage, Lifecycle.ExecutionType type) {
+    public void beforeScenarioSteps(Stage stage) {
     }
 
     @Override
-    public void afterScenarioSteps(Stage stage, Lifecycle.ExecutionType type) {
+    public void afterScenarioSteps(Stage stage) {
     }
 
     @Override
-    public void beforeComposedSteps() {
-    }
-
-    @Override
-    public void afterComposedSteps() {
-    }
-
-    @Override
-    public void beforeGivenStories() {
+    public void beforeGivenStories(){
     }
 
     @Override
@@ -133,7 +108,11 @@ public class NullStoryReporter implements StoryReporter {
     }
 
     @Override
-    public void afterGivenStories() {
+    public void afterGivenStories(){
+    }
+
+    @Override
+    public void beforeScenario(String title) {
     }
 
     @Override
@@ -141,15 +120,23 @@ public class NullStoryReporter implements StoryReporter {
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, String filter) {
+    public void scenarioNotAllowed(Scenario scenario, String filter) {
     }
 
     @Override
-    public void afterScenario(Timing timing) {
+    public void scenarioMeta(Meta meta) {
+    }
+
+    @Override
+    public void afterScenario() {
     }
 
     @Override
     public void beforeExamples(List<String> steps, ExamplesTable table) {
+    }
+
+    @Override
+    public void example(Map<String, String> tableRow) {
     }
 
     @Override

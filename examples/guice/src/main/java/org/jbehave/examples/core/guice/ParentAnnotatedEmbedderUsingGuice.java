@@ -11,8 +11,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(GuiceAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingGuice(modules = { ConfigurationModule.class })
 public abstract class ParentAnnotatedEmbedderUsingGuice extends InjectableEmbedder {
 

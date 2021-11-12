@@ -1,19 +1,16 @@
 package org.jbehave.core.parsers;
 
-import static java.util.regex.Pattern.DOTALL;
-import static java.util.regex.Pattern.compile;
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.i18n.LocalizedKeywords;
-import org.jbehave.core.steps.StepType;
+
+import static java.util.regex.Pattern.DOTALL;
+import static java.util.regex.Pattern.compile;
 
 abstract class AbstractRegexParser {
 
@@ -38,7 +35,8 @@ abstract class AbstractRegexParser {
         List<String> elements = new ArrayList<>();
         StringBuilder element = new StringBuilder();
         String[] elementsAsText = text.split(keyword);
-        for (int i = 0; i < elementsAsText.length; i++) {
+        for (int i = 0; i < elementsAsText.length; i++)
+        {
             String elementAsText = elementsAsText[i];
             element.append(elementAsText);
             if (isLastLineNotComment(elementAsText)) {
@@ -67,7 +65,7 @@ abstract class AbstractRegexParser {
     }
 
     protected String startingWithNL(String text) {
-        if (!text.startsWith("\n")) { // always ensure starts with newline
+        if ( !text.startsWith("\n") ){ // always ensure starts with newline
             return "\n" + text;
         }
         return text;
@@ -87,28 +85,39 @@ abstract class AbstractRegexParser {
     // Regex Patterns
 
     private Pattern findingSteps() {
-        String startingWords = concatenateStartingWords();
+        String initialStartingWords = concatenateInitialStartingWords();
+        String followingStartingWords = concatenateFollowingStartingWords();
         return compile(
-                "((" + startingWords + ")(.*?))(\\Z|" + startingWords + "|\\n" + keywords().examplesTable() + ")",
-                DOTALL);
+                "((" + initialStartingWords + ")\\s(.*?))(\\Z|" + followingStartingWords + "|\\n"
+                        + keywords().examplesTable() + ")", DOTALL);
     }
 
-    protected String concatenateStartingWords() {
-        List<String> startingWords = Stream.concat(
-                keywords().startingWords(stepType -> stepType != StepType.IGNORABLE).map(s -> s + "\\s"),
-                keywords().startingWords(stepType -> stepType == StepType.IGNORABLE)
-        ).collect(toList());
-        return concatenateWithOr(CRLF, startingWords);
+    protected String concatenateInitialStartingWords() {
+        return concatenateStartingWords("");
     }
 
-    protected String concatenateWithOr(String beforeKeyword, List<String> keywords) {
-        StringBuilder builder = new StringBuilder(beforeKeyword).append("(?:");
+    protected String concatenateFollowingStartingWords() {
+        return concatenateStartingWords("\\s");
+    }
+
+    private String concatenateStartingWords(String afterKeyword) {
+        return concatenateWithOr(CRLF, afterKeyword, keywords().startingWords());
+    }
+
+    protected String concatenateWithOr(String... keywords) {
+        return concatenateWithOr(null, null, keywords);
+    }
+
+    private String concatenateWithOr(String beforeKeyword, String afterKeyword, String[] keywords) {
+        String before = beforeKeyword != null ? beforeKeyword : NONE;
+        String after = afterKeyword != null ? afterKeyword : NONE;
+        StringBuilder builder = new StringBuilder(before).append("(?:");
         for (String keyword : keywords) {
             builder.append(keyword).append('|');
         }
-        if (!keywords.isEmpty()) {
+        if (keywords.length > 0) {
             builder.deleteCharAt(builder.length() - 1); // remove last "|"
         }
-        return builder.append(')').toString();
+        return builder.append(')').append(after).toString();
     }
 }

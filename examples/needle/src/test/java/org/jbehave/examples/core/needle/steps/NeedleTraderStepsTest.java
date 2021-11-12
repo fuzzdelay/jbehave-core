@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.hamcrest.Matchers;
 import org.jbehave.examples.core.service.TradingService;
 import org.junit.Rule;
+import org.junit.Test;
 import org.needle4j.annotation.ObjectUnderTest;
 import org.needle4j.junit.NeedleRule;
 
@@ -29,7 +30,7 @@ public class NeedleTraderStepsTest {
     @Inject
     private TradingService tradingServiceMock;
 
-    @org.junit.Test
+    @Test
     public void shouldCreateNewInstanceViaConstructorInjectionWithMockedService() {
         assertThat(needleTraderSteps, Matchers.is(notNullValue()));
         assertThat(needleTraderSteps.getService(), is(tradingServiceMock));

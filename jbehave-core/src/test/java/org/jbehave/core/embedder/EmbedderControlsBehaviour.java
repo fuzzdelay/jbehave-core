@@ -1,19 +1,20 @@
 package org.jbehave.core.embedder;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import org.junit.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import org.junit.jupiter.api.Test;
-
-class EmbedderControlsBehaviour {
+public class EmbedderControlsBehaviour {
         
     @Test
-    void shouldAllowPropertyBasedControls() {
+    public void shouldAllowPropertyBasedControls() {
         EmbedderControls embedderControls = new PropertyBasedEmbedderControls();
 
         assertThat(embedderControls.toString(), containsString(PropertyBasedEmbedderControls.class.getSimpleName()));
@@ -27,6 +28,8 @@ class EmbedderControlsBehaviour {
         assertThat(embedderControls.verboseFailures(), is(defaultControls.verboseFailures()));
         assertThat(embedderControls.verboseFiltering(), is(defaultControls.verboseFiltering()));
         assertThat(embedderControls.storyTimeouts(), equalTo(defaultControls.storyTimeouts()));
+        assertThat(embedderControls.storyTimeoutInSecs(), equalTo(defaultControls.storyTimeoutInSecs()));
+        assertThat(embedderControls.storyTimeoutInSecsByPath(), equalTo(defaultControls.storyTimeoutInSecsByPath()));
         assertThat(embedderControls.failOnStoryTimeout(), is(defaultControls.failOnStoryTimeout()));
         assertThat(embedderControls.threads(), equalTo(defaultControls.threads()));
 
@@ -38,8 +41,7 @@ class EmbedderControlsBehaviour {
         System.setProperty(PropertyBasedEmbedderControls.VERBOSE_FAILURES, "true");
         System.setProperty(PropertyBasedEmbedderControls.VERBOSE_FILTERING, "true");
         System.setProperty(PropertyBasedEmbedderControls.STORY_TIMEOUT_IN_SECS, "500");
-        System.setProperty(PropertyBasedEmbedderControls.STORY_TIMEOUT_IN_SECS_BY_PATH,
-                "**/shorts/*.story:3,**/longs/*.story:20");
+        System.setProperty(PropertyBasedEmbedderControls.STORY_TIMEOUT_IN_SECS_BY_PATH, "**/shorts/*.story:3,**/longs/*.story:20");
         System.setProperty(PropertyBasedEmbedderControls.FAIL_ON_STORY_TIMEOUT, "true");
         System.setProperty(PropertyBasedEmbedderControls.THREADS, "5");
 
@@ -50,13 +52,14 @@ class EmbedderControlsBehaviour {
         assertThat(embedderControls.skip(), is(true));
         assertThat(embedderControls.verboseFailures(), is(true));
         assertThat(embedderControls.verboseFiltering(), is(true));
-        assertThat(embedderControls.storyTimeouts(), equalTo("300"));
+        assertThat(embedderControls.storyTimeoutInSecs(), equalTo(500L));
+        assertThat(embedderControls.storyTimeoutInSecsByPath(), equalTo("**/shorts/*.story:3,**/longs/*.story:20"));
         assertThat(embedderControls.failOnStoryTimeout(), is(true));
         assertThat(embedderControls.threads(), equalTo(5));
     }
     
     @Test
-    void shouldNotAllowModificationOfUnmodifiableControls() throws Throwable {
+    public void shouldNotAllowModificationOfUnmodifiableControls() throws Throwable {
         EmbedderControls delegate = new EmbedderControls();
         EmbedderControls embedderControls = new UnmodifiableEmbedderControls(delegate);
         assertThat(embedderControls.toString(), containsString(UnmodifiableEmbedderControls.class.getSimpleName()));
@@ -68,6 +71,8 @@ class EmbedderControlsBehaviour {
         assertThat(embedderControls.verboseFiltering(), is(delegate.verboseFiltering()));
         assertThat(embedderControls.skip(), equalTo(delegate.skip()));
         assertThat(embedderControls.storyTimeouts(), equalTo(delegate.storyTimeouts()));
+        assertThat(embedderControls.storyTimeoutInSecs(), equalTo(delegate.storyTimeoutInSecs()));
+        assertThat(embedderControls.storyTimeoutInSecsByPath(), equalTo(delegate.storyTimeoutInSecsByPath()));
         assertThat(embedderControls.threads(), equalTo(delegate.threads()));
         assertThatNotAllowed(embedderControls, "doBatch", boolean.class, true);
         assertThatNotAllowed(embedderControls, "doGenerateViewAfterStories", boolean.class, true);
@@ -76,7 +81,8 @@ class EmbedderControlsBehaviour {
         assertThatNotAllowed(embedderControls, "doSkip", boolean.class, true);
         assertThatNotAllowed(embedderControls, "doVerboseFailures", boolean.class, true);
         assertThatNotAllowed(embedderControls, "doVerboseFiltering", boolean.class, true);
-        assertThatNotAllowed(embedderControls, "useStoryTimeouts", String.class, "300");
+        assertThatNotAllowed(embedderControls, "useStoryTimeoutInSecs", long.class, 1);
+        assertThatNotAllowed(embedderControls, "useStoryTimeoutInSecsByPath", String.class, "**/*/BddTest1.story");
         assertThatNotAllowed(embedderControls, "doFailOnStoryTimeout", boolean.class, true);
         assertThatNotAllowed(embedderControls, "useThreads", int.class, 1);
     }

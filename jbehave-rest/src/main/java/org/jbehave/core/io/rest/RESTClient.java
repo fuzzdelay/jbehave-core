@@ -1,24 +1,19 @@
 package org.jbehave.core.io.rest;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+
 import static java.text.MessageFormat.format;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientResponse;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
 
 /**
  * Provides access to REST resources
  */
-@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class RESTClient {
 
     public enum Type {
         JSON, XML
-    }
+    };
 
     private static final String APPLICATION_TYPE = "application/{0}";
     private String username;
@@ -40,25 +35,21 @@ public class RESTClient {
     }
 
     public String get(String uri) {
-        return client().target(uri).request(mediaType(type))
-                .get(ClientResponse.class).getEntity().toString();
+        return client().resource(uri).accept(format(APPLICATION_TYPE, type.name().toLowerCase()))
+                .get(ClientResponse.class).getEntity(String.class);
     }
 
     public void put(String uri, String entity) {
-        client().target(uri).request(mediaType(type))
-                .put(Entity.entity(entity, mediaType(type)));
-    }
-
-    private String mediaType(Type type) {
-        return format(APPLICATION_TYPE, type.name().toLowerCase());
+        client().resource(uri).type(format(APPLICATION_TYPE, type.name().toLowerCase()))
+                .put(ClientResponse.class, entity);
     }
 
     private Client client() {
-        ClientConfig clientConfig = new ClientConfig();
+        Client client = Client.create();
         if (username != null) {
-            clientConfig.register(HttpAuthenticationFeature.basic(username, password));
+            client.addFilter(new HTTPBasicAuthFilter(username, password));
         }
-        return ClientBuilder.newClient(clientConfig);
+        return client;
     }
 
 }

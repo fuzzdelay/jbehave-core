@@ -1,17 +1,12 @@
 package org.jbehave.core.model;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.jbehave.core.model.TableTransformers.TableTransformer;
 
 /**
  * <p>
@@ -44,8 +39,7 @@ public class TableTransformers {
         useTransformer(REPLACING, new Replacing());
     }
 
-    public String transform(String transformerName, String tableAsString, TableParsers tableParsers,
-            TableProperties properties) {
+    public String transform(String transformerName, String tableAsString, TableParsers tableParsers, TableProperties properties) {
         TableTransformer transformer = transformers.get(transformerName);
         if (transformer != null) {
             return transformer.transform(tableAsString, tableParsers, properties);
@@ -76,36 +70,18 @@ public class TableTransformers {
                 rowValues.remove(0);
                 data.put(header, rowValues);
             }
-
-            if (data.values().stream().mapToInt(List::size).distinct().count() != 1) {
-                String errorMessage = data.entrySet()
-                        .stream()
-                        .map(e -> {
-                            int numberOfCells = e.getValue().size();
-                            StringBuilder rowDescription = new StringBuilder(e.getKey())
-                                    .append(" -> ")
-                                    .append(numberOfCells)
-                                    .append(" cell");
-                            if (numberOfCells > 1) {
-                                rowDescription.append('s');
-                            }
-                            return rowDescription.toString();
-                        })
-                        .collect(joining(", ", "The table rows have unequal numbers of cells: ", ""));
-                throw new IllegalArgumentException(errorMessage);
-            }
-
             StringBuilder builder = new StringBuilder();
+            int numberOfRows = 1;
             builder.append(properties.getHeaderSeparator());
             for (String header : data.keySet()) {
                 builder.append(header).append(properties.getHeaderSeparator());
+                numberOfRows = data.get(header).size();
             }
             builder.append(properties.getRowSeparator());
-            int numberOfCells = data.values().iterator().next().size();
-            for (int c = 0; c < numberOfCells; c++) {
+            for (int r = 0; r < numberOfRows; r++) {
                 builder.append(properties.getValueSeparator());
-                for (List<String> row : data.values()) {
-                    builder.append(row.get(c)).append(properties.getValueSeparator());
+                for (List<String> rows : data.values()) {
+                    builder.append(rows.get(r)).append(properties.getValueSeparator());
                 }
                 builder.append(properties.getRowSeparator());
             }
@@ -198,7 +174,7 @@ public class TableTransformers {
         public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties) {
             String replacing = properties.getProperties().getProperty("replacing");
             String replacement = properties.getProperties().getProperty("replacement");
-            if (replacing == null || replacement == null) {
+            if ( replacing == null || replacement == null ) {
                 return tableAsString;
             }
             return tableAsString.replace(replacing, replacement);

@@ -1,13 +1,14 @@
 package org.jbehave.core.io.google;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.jbehave.core.io.InvalidStoryResource;
+import org.jbehave.core.io.google.LoadOdtFromGoogle;
+import org.jbehave.core.io.google.LoadOdtFromGoogle.GoogleAccessFailed;
+import org.junit.Test;
 
 import com.google.gdata.client.DocumentQuery;
 import com.google.gdata.client.docs.DocsService;
@@ -17,15 +18,14 @@ import com.google.gdata.data.docs.DocumentListFeed;
 import com.google.gdata.data.media.MediaSource;
 import com.google.gdata.util.ServiceException;
 
-import org.hamcrest.Matchers;
-import org.jbehave.core.io.InvalidStoryResource;
-import org.jbehave.core.io.google.LoadOdtFromGoogle.GoogleAccessFailed;
-import org.junit.jupiter.api.Test;
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class GoogleOdtLoaderBehaviour {
+public class GoogleOdtLoaderBehaviour {
 
     @Test
-    void shouldGetResourceFromDocsService() throws IOException, ServiceException {
+    public void shouldGetResourceFromDocsService() throws IOException, ServiceException {
         DocsService service = mock(DocsService.class);
         DocumentListFeed feed = mock(DocumentListFeed.class);
         DocumentListEntry entry = mock(DocumentListEntry.class);
@@ -40,7 +40,7 @@ class GoogleOdtLoaderBehaviour {
         when(content.getUri()).thenReturn("http://docs.google.com");
         when(mediaSource.getInputStream()).thenReturn(inputStream);
 
-        LoadOdtFromGoogle storyLoader = new LoadOdtFromGoogle("user", "password", "https://docs.google.com/feeds/default/private/full/", service) {
+        LoadOdtFromGoogle storyLoader = new LoadOdtFromGoogle("user", "password", "https://docs.google.com/feeds/default/private/full/", service){
 
             @Override
             DocumentQuery documentQuery(String title) {
@@ -54,19 +54,17 @@ class GoogleOdtLoaderBehaviour {
             
         };
         InputStream resourceStream = storyLoader.resourceAsStream("a_story");
-        assertThat(resourceStream, Matchers.equalTo(inputStream));
+        MatcherAssert.assertThat(resourceStream, Matchers.equalTo(inputStream));
     }
 
-    @Test
-    void shouldNotLoadInexistingResourceFromGoogleDocs() {
-        LoadOdtFromGoogle googleOdtLoader = new LoadOdtFromGoogle("user", "password",
-                "https://docs.google.com/feeds/default/private/full/", mock(DocsService.class));
-        assertThrows(InvalidStoryResource.class, () -> googleOdtLoader.loadStoryAsText("an_unexisting_story"));
+    @Test(expected = InvalidStoryResource.class)
+    public void shouldNotLoadInexistingResourceFromGoogleDocs() {
+        new LoadOdtFromGoogle("user", "password", "https://docs.google.com/feeds/default/private/full/", mock(DocsService.class)).loadStoryAsText("an_inexisting_story");
     }
 
-    @Test
-    void shouldNotAllowInvalidAccess() {
-        assertThrows(GoogleAccessFailed.class, () -> new LoadOdtFromGoogle("DUMMY", "DUMMY"));
+    @Test(expected = GoogleAccessFailed.class)
+    public void shouldNotAllowInvalidAccess() {
+        new LoadOdtFromGoogle("DUMMY", "DUMMY");
     }
 
 }

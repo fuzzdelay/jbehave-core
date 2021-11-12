@@ -1,19 +1,20 @@
 package org.jbehave.core.steps;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.model.TableTransformers;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class ChainedRowBehaviour {
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.equalTo;
+
+public class ChainedRowBehaviour {
 
     @Test
-    void shouldChainRowValuesWithoutOverwritingAlreadyExisting() {
+    public void shouldChainRowValuesWithoutOverwritingAlreadyExisting() {
         Map<String,String> map1 = new HashMap<>();
         map1.put("one", "11");
         Map<String,String> map2 = new HashMap<>();

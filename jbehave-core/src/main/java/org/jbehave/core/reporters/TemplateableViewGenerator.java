@@ -26,6 +26,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jbehave.core.io.IOUtils;
@@ -35,9 +36,12 @@ import org.jbehave.core.model.StoryMaps;
 import org.jbehave.core.reporters.TemplateableViewGenerator.Reports.ViewType;
 
 /**
- * {@link ViewGenerator}, which uses the configured {@link TemplateProcessor} to generate the views from templates. The
- * default view properties are overridable via the method {@link Properties} parameter. To override, specify the path to
- * the new template under the appropriate key:
+ * <p>
+ * {@link ViewGenerator}, which uses the configured {@link TemplateProcessor} to
+ * generate the views from templates. The default view properties are
+ * overridable via the method {@link Properties} parameter. To override, specify
+ * the path to the new template under the appropriate key:
+ * 
  * <pre>
  * &quot;views&quot;: the path to global view template, including reports and maps views
  * &quot;maps&quot;: the path to the maps view template
@@ -45,13 +49,15 @@ import org.jbehave.core.reporters.TemplateableViewGenerator.Reports.ViewType;
  * &quot;decorated&quot;: the path to the template to generate a decorated (i.e. styled) single report
  * &quot;nonDecorated&quot;: the path to the template to generated a non decorated single report
  * </pre>
- *
- * <p>The view generator provides the following resources:
+ * <p>
+ * The view generator provides the following resources:
+ * 
  * <pre>
  * &quot;decorateNonHtml&quot; = &quot;true&quot;
  * &quot;defaultFormats&quot; = &quot;stats&quot;
  * &quot;viewDirectory&quot; = &quot;view&quot;
  * </pre>
+ * 
  * </p>
  * 
  * @author Mauro Talevi
@@ -143,7 +149,7 @@ public class TemplateableViewGenerator implements ViewGenerator {
             // story durations file not found - carry on
         }
         Map<String,Long> durations = new HashMap<>();
-        for (Object key : p.keySet()) {
+        for ( Object key : p.keySet() ){
             durations.put(toReportPath(key), toMillis(p.get(key)));
         }
         return durations;
@@ -168,25 +174,24 @@ public class TemplateableViewGenerator implements ViewGenerator {
     @Override
     public ReportsCount getReportsCount() {
         int stories = countStoriesWithScenarios();
-        int storiesExcluded = count("excluded", reports);
+        int storiesNotAllowed = count("notAllowed", reports);
         int storiesPending = count("pending", reports);
         int scenarios = count("scenarios", reports);
         int scenariosFailed = count("scenariosFailed", reports);
-        int scenariosExcluded = count("scenariosExcluded", reports);
+        int scenariosNotAllowed = count("scenariosNotAllowed", reports);
         int scenariosPending = count("scenariosPending", reports);
         int stepsFailed = count("stepsFailed", reports);
-        return new ReportsCount(stories, storiesExcluded, storiesPending, scenarios, scenariosFailed,
-                scenariosExcluded, scenariosPending, stepsFailed);
+        return new ReportsCount(stories, storiesNotAllowed, storiesPending, scenarios, scenariosFailed,
+                scenariosNotAllowed, scenariosPending, stepsFailed);
     }
 
-    private int countStoriesWithScenarios() {
+    private int countStoriesWithScenarios(){
         int storyCount = 0;
-        for (Report report : reports.getReports()) {
+        for (Report report : reports.getReports()){
             Map<String, Integer> stats = report.getStats();
-            if (stats.containsKey("scenarios")) {
-                if (stats.get("scenarios") > 0) {
-                    storyCount++;
-                }
+            if (stats.containsKey("scenarios")){
+                if (stats.get("scenarios") > 0)
+                storyCount++;
             }
         }
         return storyCount;
@@ -319,9 +324,7 @@ public class TemplateableViewGenerator implements ViewGenerator {
     }
 
     public static class Reports {
-        public enum ViewType {
-            LIST
-        }
+        public enum ViewType { LIST };
 
         private final Map<String, Report> reports = new HashMap<>();
         private final StoryNameResolver nameResolver;
@@ -333,11 +336,11 @@ public class TemplateableViewGenerator implements ViewGenerator {
             addTotalsReport();
         }
         
-        public ViewType getViewType() {
+        public ViewType getViewType(){
             return viewType;
         }
         
-        public void viewAs(ViewType viewType) {
+        public void viewAs(ViewType viewType){
             this.viewType = viewType;
         }
         
@@ -456,7 +459,7 @@ public class TemplateableViewGenerator implements ViewGenerator {
 
         @Override
         public int compareTo(Report that) {
-            return this.getName().compareTo(that.getName());
+            return CompareToBuilder.reflectionCompare(this.getName(), that.getName());
         }
 
         @Override

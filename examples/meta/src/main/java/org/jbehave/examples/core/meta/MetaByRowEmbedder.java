@@ -8,6 +8,7 @@ import org.jbehave.core.annotations.spring.UsingSpring;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.junit.spring.SpringAnnotatedEmbedderRunner;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SpringAnnotatedEmbedderRunner.class)
@@ -15,12 +16,12 @@ import org.junit.runner.RunWith;
 @UsingSpring(resources = { "org.jbehave.examples.core.meta.StepsScanner" })
 public final class MetaByRowEmbedder extends InjectableEmbedder {
 
-    @Override
-    @org.junit.Test
-    public void run() {
-        injectedEmbedder().metaFilters().add("+smoke");
-        injectedEmbedder().runStoriesAsPaths(new StoryFinder().findPaths(
-                codeLocationFromClass(this.getClass()), "**/*.story", ""));
-    }
+	@Override
+    @Test
+	public void run() {
+		injectedEmbedder().metaFilters().add("+smoke");
+		injectedEmbedder().runStoriesAsPaths(new StoryFinder().findPaths(
+				codeLocationFromClass(this.getClass()), "**/*.story", ""));
+	}
 
 }

@@ -1,13 +1,13 @@
 package org.jbehave.core.steps;
 
-import static java.util.Arrays.asList;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jbehave.core.configuration.Configuration;
+
+import static java.util.Arrays.asList;
 
 /**
  * An {@link InjectableStepsFactory} that is provided Object instances.
@@ -35,7 +35,7 @@ public class InstanceStepsFactory extends AbstractStepsFactory {
     @Override
     public Object createInstanceOfType(Class<?> type) {
         Object instance = stepsInstances.get(type);
-        if (instance == null) {
+        if ( instance == null ){
             throw new StepsInstanceNotFound(type, this);
         }
         return instance;

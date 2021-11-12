@@ -8,14 +8,14 @@ import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.pico.PicoAnnotationBuilder;
 import org.jbehave.core.junit.AnnotatedEmbedderRunner;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 
-class PicoAnnotatedEmbedderRunnerBehaviour {
+public class PicoAnnotatedEmbedderRunnerBehaviour {
 
     @Test
-    void shouldCreateWithPicoAnnotatedBuilder() throws InitializationError {
+    public void shouldCreateWithPicoAnnotatedBuilder() throws InitializationError{
         AnnotatedEmbedderRunner runner = new PicoAnnotatedEmbedderRunner(RunningWithAnnotatedEmbedderRunner.class);
         assertThat(runner.annotationBuilder(), instanceOf(PicoAnnotationBuilder.class));
     }
@@ -28,7 +28,7 @@ class PicoAnnotatedEmbedderRunnerBehaviour {
         static boolean hasRun;
 
         @Override
-        @org.junit.Test
+        @Test
         public void run() {
             hasRun = true;
         }

@@ -16,7 +16,19 @@ public interface StepMonitor {
 
     void stepMatchesPattern(String step, boolean matches, StepPattern stepPattern, Method method, Object stepsInstance);
 
+    /**
+     * @deprecated Use {@link #convertedValueOfType(String, Type, Object, Queue)}
+     */
+    void convertedValueOfType(String value, Type type, Object converted, Class<?> converterClass);
+
     void convertedValueOfType(String value, Type type, Object converted, Queue<Class<?>> converterClasses);
+
+    /**
+     * @deprecated Use {@link #beforePerforming(String, boolean, Method)} and
+     * {@link #afterPerforming(String, boolean, Method)}
+     */
+    @Deprecated
+    void performing(String step, boolean dryRun);
 
     void beforePerforming(String step, boolean dryRun, Method method);
 

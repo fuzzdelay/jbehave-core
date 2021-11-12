@@ -76,7 +76,7 @@
 </#if>
 <td class="${storyClass}">${report.name}</td>
 <td>
-<@renderStat stats "excluded" "failed"/>
+<@renderStat stats "notAllowed" "failed"/>
 </td>
 <td>
 <@renderStat stats "scenarios"/> 
@@ -141,7 +141,7 @@
 <td>${totalReports}</td>
 <#assign stats = reports.getReport("Totals").getStats()>
 <td>
-<@renderStat stats "excluded" "failed"/>
+<@renderStat stats "notAllowed" "failed"/>
 </td>
 <td>
 <@renderStat stats "scenarios"/> 

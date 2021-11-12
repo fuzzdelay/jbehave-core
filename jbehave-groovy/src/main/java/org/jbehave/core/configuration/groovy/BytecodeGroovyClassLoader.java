@@ -1,5 +1,11 @@
 package org.jbehave.core.configuration.groovy;
 
+import groovy.lang.GroovyClassLoader;
+import groovyjarjarasm.asm.ClassWriter;
+import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.control.CompilationUnit;
+import org.codehaus.groovy.control.SourceUnit;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.AccessController;
@@ -7,21 +13,16 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.control.CompilationUnit;
-import org.codehaus.groovy.control.SourceUnit;
-
-import groovy.lang.GroovyClassLoader;
-import groovyjarjarasm.asm.ClassWriter;
-
 /**
- * Groovy does not cache the bytecode sequences for generated classes. BytecodeReadingParanamer needs these to get
- * paramater names from classes The Groovy compiler does create the debug tables, and they are the same as the ones made
- * for a native Java class, so this derived GroovyClassLoader fills in for the missing functionality from the base
- * GroovyClassLoader.
+ * Groovy does not cache the bytecode sequences for generated classes.
+ * BytecodeReadingParanamer needs these to get paramater names from classes The
+ * Groovy compiler does create the debug tables, and they are the same as the
+ * ones made for a native Java class, so this derived GroovyClassLoader fills in
+ * for the missing functionality from the base GroovyClassLoader.
  * 
- * <p>Groovy allows a mechanism via a system property to force the dump of bytecode to a (temp) directory, but caching
- * the bytecode avoids having to clean up temp directories after the run.</p>
+ * Groovy allows a mechanism via a system property to force the dump of bytecode
+ * to a (temp) directory, but caching the bytecode avoids having to clean up
+ * temp directories after the run.
  */
 public class BytecodeGroovyClassLoader extends GroovyClassLoader {
 

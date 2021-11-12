@@ -1,71 +1,40 @@
 package org.jbehave.core.reporters;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.jbehave.core.failures.KnownFailure;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.i18n.LocalizedKeywords;
-import org.jbehave.core.io.CodeLocations;
-import org.jbehave.core.io.IOUtils;
-import org.jbehave.core.io.StoryLocation;
-import org.jbehave.core.io.StoryPathResolver;
-import org.jbehave.core.io.UnderscoredCamelCaseResolver;
+import org.jbehave.core.io.*;
 import org.jbehave.core.junit.JUnitStory;
-import org.jbehave.core.model.Description;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.GivenStories;
-import org.jbehave.core.model.Lifecycle;
-import org.jbehave.core.model.Lifecycle.ExecutionType;
 import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.Narrative;
 import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.OutcomesTable.OutcomesFailed;
 import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Step;
-import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryNarrator.IsDateEqual;
-import org.jbehave.core.steps.StepCollector.Stage;
-import org.jbehave.core.steps.StepCreator.StepExecutionType;
-import org.jbehave.core.steps.Timing;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 
-class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
+import java.io.*;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Properties;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+
+public class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
 
     @Test
-    void shouldOutputStoryToTxt() throws IOException {
+    public void shouldOutputStoryToTxt() throws IOException {
         // Given
         String name = "stream-story.txt";
-        File file = newFile("target/" + name);
+        File file = newFile("target/" +name);
         StoryReporter reporter = new TxtOutput(createPrintStream(file));
 
         // When
@@ -75,26 +44,27 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         assertFileOutputIsSameAs(file, name);
     }
 
+
     @Test
-    void shouldOutputStoryToTxtWhenExcludedByFilter() throws IOException {
+    public void shouldOutputStoryToTxtWhenNotAllowedByFilter() throws IOException {
         // Given
-        String name = "stream-story-excluded.txt";
-        File file = newFile("target/" + name);
+        String name = "stream-story-not-allowed.txt";
+        File file = newFile("target/"+ name);
         StoryReporter reporter = new TxtOutput(createPrintStream(file));
 
         // When
         StoryNarrator
-                .narrateAnInterestingStoryExcludedByFilter(reporter, false);
+                .narrateAnInterestingStoryNotAllowedByFilter(reporter, false);
 
         // Then
         assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryToTxtUsingCustomPatterns() throws IOException, ParserConfigurationException, SAXException {
+    public void shouldOutputStoryToTxtUsingCustomPatterns() throws IOException {
         // Given
         String name = "stream-story-custom-patterns.txt";
-        File file = newFile("target/" + name);
+        File file = newFile("target/"+ name);
         Properties patterns = new Properties();
         patterns.setProperty("pending", "{0} - {1} - need to implement me\n");
         patterns.setProperty("failed", "{0} <<< {1}\n");
@@ -106,10 +76,11 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
 
         // Then
         assertFileOutputIsSameAs(file, name);
+
     }
 
     @Test
-    void shouldOutputStoryToHtml() throws IOException, ParserConfigurationException, SAXException {
+    public void shouldOutputStoryToHtml() throws IOException {
         // Given
         String name = "stream-story.html";
         File file = newFile("target/" + name);
@@ -119,26 +90,26 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         StoryNarrator.narrateAnInterestingStory(reporter, false);
 
         // Then
-        assertXml(name, fileContent(file));
+        assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryToHtmlWhenExcludedByFilter() throws IOException {
+    public void shouldOutputStoryToHtmlWhenNotAllowedByFilter() throws IOException {
         // Given
-        String name = "stream-story-excluded.html";
+        String name = "stream-story-not-allowed.html";
         File file = newFile("target/" + name);
         StoryReporter reporter = new HtmlOutput(createPrintStream(file));
 
         // When
         StoryNarrator
-                .narrateAnInterestingStoryExcludedByFilter(reporter, false);
+                .narrateAnInterestingStoryNotAllowedByFilter(reporter, false);
 
         // Then
         assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryToHtmlUsingCustomPatterns() throws IOException, ParserConfigurationException, SAXException {
+    public void shouldOutputStoryToHtmlUsingCustomPatterns() throws IOException {
         // Given
         String name = "stream-story-custom-patterns.html";
         File file = newFile("target/" + name);
@@ -152,11 +123,11 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         StoryNarrator.narrateAnInterestingStory(reporter, false);
 
         // Then
-        assertXml(name, fileContent(file));
+        assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryToXml() throws IOException, SAXException, ParserConfigurationException {
+    public void shouldOutputStoryToXml() throws IOException, SAXException {
         // Given
         String name = "stream-story.xml";
         File file = newFile("target/" + name);
@@ -166,26 +137,27 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         StoryNarrator.narrateAnInterestingStory(reporter, false);
 
         // Then
-        assertXml(name, fileContent(file));
+        assertFileOutputIsSameAs(file, name);
+        validateFileOutput(file);
     }
 
     @Test
-    void shouldOutputStoryToXmlWhenExcludedByFilter() throws IOException {
+    public void shouldOutputStoryToXmlWhenNotAllowedByFilter() throws IOException {
         // Given
-        String name = "stream-story-excluded.xml";
+        String name = "stream-story-not-allowed.xml";
         File file = newFile("target/" + name);
         StoryReporter reporter = new XmlOutput(createPrintStream(file));
 
         // When
         StoryNarrator
-                .narrateAnInterestingStoryExcludedByFilter(reporter, false);
+                .narrateAnInterestingStoryNotAllowedByFilter(reporter, false);
 
         // Then
         assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryToXmlUsingCustomPatterns() throws IOException, ParserConfigurationException, SAXException {
+    public void shouldOutputStoryToXmlUsingCustomPatterns() throws IOException {
         // Given
         String name = "stream-story-custom-patterns.xml";
         File file = newFile("target/" + name);
@@ -199,11 +171,11 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         StoryNarrator.narrateAnInterestingStory(reporter, false);
 
         // Then
-        assertXml(name, fileContent(file));
+        assertFileOutputIsSameAs(file, name);
     }
 
     @Test
-    void shouldOutputStoryJson() throws IOException {
+    public void shouldOutputStoryJson() throws IOException, SAXException {
         // Given
         String name = "stream-story.json";
         File file = new File("target/" + name);
@@ -214,231 +186,79 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         StoryNarrator.narrateAnInterestingStory(reporter, false);
 
         // Then
-        assertJson(name, fileContent(file));
+        String expected = IOUtils.toString(getClass().getResourceAsStream("/" + name), true);
+        JsonParser parser = new JsonParser();
+        JsonObject expectedObject = parser.parse(fileContent(file)).getAsJsonObject();
+        JsonObject actualObject = parser.parse(expected).getAsJsonObject();
+        assertThat(expectedObject, is(actualObject));
     }
 
     @Test
-    void shouldReportEventsToJsonOutputScenarioNestedGivenStoriesWithMultipleExamplesAndLifecycles()
-            throws IOException {
-        ExamplesTable examplesTable = new ExamplesTable("|key|row|\n|key1|row1|\n|key2|row2|");
-        Lifecycle lifecycle = new Lifecycle(new ExamplesTable("|key|row|\n|key1|row1|\n|key2|row2|"));
-        Map<String, String> example = new HashMap<>();
-        example.put("key1", "value1");
-        example.put("key2", "value2");
-
-        // Given
-        OutputStream out = new ByteArrayOutputStream();
-        StoryReporter reporter = new JsonOutput(new PrintStream(out), new Properties(), new LocalizedKeywords());
-
-        // When
-        String storyPath = "/path/to/story";
-        Story rootStory = spyStoryUuid(new Story(storyPath, new Description("Root story"),
-                new Narrative("renovate my house", "customer", "get a loan"), new ArrayList<>()));
-        String step = "My step";
-        Story givenStory = spyStoryUuid(new Story(storyPath, new Description("Given story"),
-                new Narrative("renovate my house", "customer", "get a loan"), new ArrayList<>()));
-        Scenario scenario = spyScenarioUuid(
-                new Scenario("My scenario", Meta.EMPTY, new GivenStories(givenStory.getPath()), examplesTable,
-                        singletonList(step)));
-
-        reporter.beforeStory(rootStory, false);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-
-        reporter.beforeGivenStories();
-        reporter.givenStories(scenario.getGivenStories().getPaths());
-        reporter.beforeStory(givenStory, true);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-
-        reporter.beforeGivenStories();
-        reporter.givenStories(singletonList(givenStory.getPath()));
-        reporter.beforeStory(givenStory, true);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(true);
-        reporter.afterGivenStories();
-
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(true);
-        reporter.afterGivenStories();
-
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-        reporter.beforeGivenStories();
-        reporter.givenStories(scenario.getGivenStories().getPaths());
-        reporter.beforeStory(givenStory, true);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-        reporter.beforeGivenStories();
-        reporter.givenStories(singletonList(givenStory.getPath()));
-        reporter.beforeStory(givenStory, true);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(scenario.getSteps(), examplesTable);
-        reporter.example(example, 0);
-        reportStep(reporter, step, Stage.BEFORE, ExecutionType.USER);
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(true);
-        reporter.afterGivenStories();
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(true);
-        reporter.afterGivenStories();
-        reportStep(reporter, step, null, null);
-        reportStep(reporter, step, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(false);
-
-        // Then
-        assertJson("story-level-examples.json", out.toString());
-    }
-
-    @Test
-    void shouldReportEventsToJsonOutputIfScenarioIsEmptyWithLifecycleExamplesTable() {
-        ExamplesTable examplesTable = new ExamplesTable("|key|row|\n|key1|row1|\n|key2|row2|");
-        Lifecycle lifecycle = new Lifecycle(new ExamplesTable("|key|row|\n|key1|row1|\n|key2|row2|"));
-        Map<String, String> example = new HashMap<>();
-
-        // Given
-        OutputStream out = new ByteArrayOutputStream();
-        StoryReporter reporter = new JsonOutput(new PrintStream(out), new Properties(), new LocalizedKeywords());
-
-        // When
-        Story rootStory = spyStoryUuid(new Story("/path/to/story", new Description("Root story"),
-                new Narrative("renovate my house", "customer", "get a loan"), new ArrayList<>()));
-
-        Scenario scenario = spyScenarioUuid(new Scenario("My scenario", Meta.EMPTY, null, examplesTable,
-                emptyList()));
-        Timing timing = getTiming();
-
-        reporter.beforeStory(rootStory, false);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(emptyList(), examplesTable);
-        reporter.example(example, 0);
-        reporter.afterExamples();
-        reporter.afterScenario(timing);
-        reporter.beforeScenario(scenario);
-        reporter.beforeExamples(emptyList(), examplesTable);
-        reporter.example(example, 0);
-        reporter.afterExamples();
-        reporter.afterScenario(timing);
-        reporter.afterScenarios();
-        reporter.afterStory(false);
-
-        // Then
-        String expected = "{\"id\": \"story-id\", \"path\": \"\\/path\\/to\\/story\", \"title\": \"Root story\","
-                + "\"lifecycle\": {\"keyword\": \"Lifecycle:\",\"parameters\": {\"names\": [\"key\",\"row\"],\"values\""
-                + ": [[\"key1\",\"row1\"],[\"key2\",\"row2\"]]}},\"scenarios\": [{\"keyword\": \"Scenario:\", \"id\": "
-                + "\"scenario-id\", \"title\": \"My scenario\",\"examples\": {\"keyword\": \"Examples:\",\"steps\": [],"
-                + "\"parameters\": {\"names\": [\"key\",\"row\"],\"values\": [[\"key1\",\"row1\"],[\"key2\",\"row2\"]]}"
-                + ",\"examples\": [{\"keyword\": \"Example:\", \"parameters\": {}}]},\"start\":1,\"end\":2},"
-                + "{\"keyword\": \"Scenario:\", \"id\": \"scenario-id\", \"title\": \"My scenario\",\"examples\": "
-                + "{\"keyword\": \"Examples:\",\"steps\": [],\"parameters\": {\"names\": [\"key\",\"row\"],\"values\": "
-                + "[[\"key1\",\"row1\"],[\"key2\",\"row2\"]]},\"examples\": [{\"keyword\": \"Example:\", \"parameters\""
-                + ": {}}]},\"start\":1,\"end\":2}]}";
-
-        assertThat(dos2unix(out.toString()), equalTo(expected));
-    }
-
-    @Test
-    void shouldNotSuppressStackTraceForNotKnownFailure() {
+    public void shouldNotSuppressStackTraceForNotKnownFailure() {
 
         // Given
         final OutputStream out = new ByteArrayOutputStream();
-        PrintStreamFactory factory = () -> new PrintStream(out);
-        StoryReporter reporter = new TxtOutput(factory.createPrintStream(), new Properties(), new LocalizedKeywords(),
-                true);
+        PrintStreamFactory factory = new PrintStreamFactory() {
+
+            @Override
+            public PrintStream createPrintStream() {
+                return new PrintStream(out);
+            }
+        };
+        TxtOutput reporter = new TxtOutput(factory.createPrintStream(), new Properties(), new LocalizedKeywords(), true);
 
 
         reporter.failed("Then I should have a balance of $30", new UUIDExceptionWrapper(new NullPointerException()));
-        reporter.afterScenario(getTiming());
+        reporter.afterScenario();
 
-        assertThat(dos2unix(out.toString()), startsWith("Then I should have a balance of $30 (FAILED)\n"
-                + "(java.lang.NullPointerException)\n"
-                + "\n"
-                + "java.lang.NullPointerException\n"
-                + "\tat "));
+        assertThat(dos2unix(out.toString()), startsWith("Then I should have a balance of $30 (FAILED)\n" +
+                "(java.lang.NullPointerException)\n" +
+                "\n" +
+                "java.lang.NullPointerException\n" +
+                "\tat "));
+
     }
 
     @Test
-    void shouldSuppressStackTraceForKnownFailure() {
+    public void shouldSuppressStackTraceForKnownFailure() {
         // Given
         final OutputStream out = new ByteArrayOutputStream();
-        PrintStreamFactory factory = () -> new PrintStream(out);
-        StoryReporter reporter = new TxtOutput(factory.createPrintStream(), new Properties(), new LocalizedKeywords(),
-                true);
+        PrintStreamFactory factory = new PrintStreamFactory() {
+
+            @Override
+            public PrintStream createPrintStream() {
+                return new PrintStream(out);
+            }
+        };
+        TxtOutput reporter = new TxtOutput(factory.createPrintStream(), new Properties(), new LocalizedKeywords(), true);
 
 
         reporter.failed("Then I should have a balance of $30", new UUIDExceptionWrapper(new MyKnownFailure()));
-        reporter.afterScenario(getTiming());
+        reporter.afterScenario();
 
-        assertThat(dos2unix(out.toString()), equalTo("Then I should have a balance of $30 (FAILED)\n"
-                + "(org.jbehave.core.reporters.PrintStreamOutputBehaviour$MyKnownFailure)\n\n"
-                + ""));
+        assertThat(dos2unix(out.toString()), equalTo("Then I should have a balance of $30 (FAILED)\n" +
+                "(org.jbehave.core.reporters.PrintStreamOutputBehaviour$MyKnownFailure)\n\n" +
+                ""));
     }
 
     @Test
-    void shouldReportFailureTraceWhenToldToDoSo() {
+    public void shouldReportFailureTraceWhenToldToDoSo() {
         // Given
         UUIDExceptionWrapper exception = new UUIDExceptionWrapper(new RuntimeException("Leave my money alone!"));
         OutputStream stackTrace = new ByteArrayOutputStream();
         exception.getCause().printStackTrace(new PrintStream(stackTrace));
         OutputStream out = new ByteArrayOutputStream();
-        StoryReporter reporter = new TxtOutput(new PrintStream(out), new Properties(),
+        TxtOutput reporter = new TxtOutput(new PrintStream(out), new Properties(),
                 new LocalizedKeywords(), true);
 
         // When
-        reporter.beforeScenario(spyScenarioUuid(new Scenario("A title", Meta.EMPTY)));
+        reporter.beforeScenario(new Scenario("A title", Meta.EMPTY));
         reporter.successful("Given I have a balance of $50");
         reporter.successful("When I request $20");
         reporter.failed("When I ask Liz for a loan of $100", exception);
         reporter.pending("Then I should have a balance of $30");
         reporter.notPerformed("Then I should have $20");
-        reporter.afterScenario(getTiming());
+        reporter.afterScenario();
 
         // Then
         String expected = "Scenario: A title\n" 
@@ -451,8 +271,7 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
                 + "\n";
         String actual = dos2unix(out.toString());
         assertThat(actual, containsString(expected));
-        assertThat(actual, containsString(
-                "at org.jbehave.core.reporters.PrintStreamOutputBehaviour.shouldReportFailureTraceWhenToldToDoSo("));
+        assertThat(actual, containsString("at org.jbehave.core.reporters.PrintStreamOutputBehaviour.shouldReportFailureTraceWhenToldToDoSo("));
 
 
         // Given
@@ -466,26 +285,24 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         reporter.failed("When I ask Liz for a loan of $100", exception);
         reporter.pending("Then I should have a balance of $30");
         reporter.notPerformed("Then I should have $20");
-        reporter.afterScenario(getTiming());
+        reporter.afterScenario();
 
         // Then
         assertThat(out.toString().contains(stackTrace.toString()), is(false));
     }
 
     @Test
-    void shouldReportEventsToIdeOnlyConsoleOutput() {
+    public void shouldReportEventsToIdeOnlyConsoleOutput() {
         // When
         StoryNarrator.narrateAnInterestingStory(new IdeOnlyConsoleOutput(), false);
         StoryNarrator.narrateAnInterestingStory(new IdeOnlyConsoleOutput(new LocalizedKeywords()), false);
-        StoryNarrator.narrateAnInterestingStory(
-                new IdeOnlyConsoleOutput(new Properties(), new LocalizedKeywords(), true), false);
+        StoryNarrator.narrateAnInterestingStory(new IdeOnlyConsoleOutput(new Properties(), new LocalizedKeywords(), true), false);
     }
 
     @Test
-    void shouldReportEventsToPrintStreamInItalian() {
+    public void shouldReportEventsToPrintStreamInItalian() {
         // Given
-        UUIDExceptionWrapper exception = new UUIDExceptionWrapper(
-                new RuntimeException("Lasciate in pace i miei soldi!"));
+        UUIDExceptionWrapper exception = new UUIDExceptionWrapper(new RuntimeException("Lasciate in pace i miei soldi!"));
         OutputStream out = new ByteArrayOutputStream();
         LocalizedKeywords keywords = new LocalizedKeywords(Locale.ITALIAN);
         StoryReporter reporter = new TxtOutput(new PrintStream(out), new Properties(), keywords,
@@ -511,12 +328,11 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
     }
 
     @Test
-    void shouldCreateAndWriteToFilePrintStreamForStoryLocation() throws IOException {
+    public void shouldCreateAndWriteToFilePrintStreamForStoryLocation() throws IOException {
 
         // Given
         String storyPath = storyPath(MyStory.class);
-        FilePrintStreamFactory factory = new FilePrintStreamFactory(
-                new StoryLocation(CodeLocations.codeLocationFromClass(this.getClass()), storyPath));
+        FilePrintStreamFactory factory = new FilePrintStreamFactory(new StoryLocation(CodeLocations.codeLocationFromClass(this.getClass()), storyPath));
         File file = factory.outputFile();
         file.delete();
         assertThat(file.exists(), is(false));
@@ -532,7 +348,7 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
     }
 
     @Test
-    void shouldReportEventsToFilePrintStreamsAndGenerateView() throws IOException {
+    public void shouldReportEventsToFilePrintStreamsAndGenerateView() throws IOException {
         final String storyPath = storyPath(MyStory.class);
         File outputDirectory = new File("target/output");
         StoryReporter reporter = new StoryReporterBuilder().withRelativeDirectory(outputDirectory.getName())
@@ -551,7 +367,7 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
     }
 
     @Test
-    void shouldReportEventsToFilePrintStreamsAndGenerateViewWithoutDecoratingNonHtml() throws IOException {
+    public void shouldReportEventsToFilePrintStreamsAndGenerateViewWithoutDecoratingNonHtml() throws IOException {
         final String storyPath = storyPath(MyStory.class);
         File outputDirectory = new File("target/output");
         StoryReporter reporter = new StoryReporterBuilder().withRelativeDirectory(outputDirectory.getName())
@@ -573,14 +389,13 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
 
     
     @Test
-    void shouldBuildPrintStreamReportersAndOverrideDefaultForAGivenFormat() throws IOException {
+    public void shouldBuildPrintStreamReportersAndOverrideDefaultForAGivenFormat() throws IOException {
         final String storyPath = storyPath(MyStory.class);
-        final FilePrintStreamFactory factory = new FilePrintStreamFactory(
-                new StoryLocation(CodeLocations.codeLocationFromClass(this.getClass()), storyPath));
+        final FilePrintStreamFactory factory = new FilePrintStreamFactory(new StoryLocation(CodeLocations.codeLocationFromClass(this.getClass()), storyPath));
         StoryReporter reporter = new StoryReporterBuilder() {
             @Override
-            public StoryReporter reporterFor(String storyPath, Format format) {
-                if (format == TXT) {
+            public StoryReporter reporterFor(String storyPath, org.jbehave.core.reporters.Format format) {
+                if (format == org.jbehave.core.reporters.Format.TXT) {
                     factory.useConfiguration(new FilePrintStreamFactory.FileConfiguration("text"));
                     return new TxtOutput(factory.createPrintStream(), new Properties(), new LocalizedKeywords(), true);
                 } else {
@@ -610,18 +425,16 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
     }
 
     @Test
-    void shouldUseCustomDateFormatInOutcomesTable() {
+    public void shouldUseCustomDateFormatInOutcomesTable() {
         // Given
         OutputStream out = new ByteArrayOutputStream();
         StoryReporter reporter = new TxtOutput(new PrintStream(out));
 
         // When
-        OutcomesTable outcomesTable = new OutcomesTable(new LocalizedKeywords(),
-                singletonMap(Date.class, "dd/MM/yyyy"));
+        OutcomesTable outcomesTable = new OutcomesTable(new LocalizedKeywords(), "dd/MM/yyyy");
         Date actualDate = StoryNarrator.dateFor("01/01/2011");
         Date expectedDate = StoryNarrator.dateFor("02/01/2011");
-        outcomesTable.addOutcome("A wrong date", actualDate,
-                new IsDateEqual(expectedDate, outcomesTable.getFormat(Date.class)));
+        outcomesTable.addOutcome("A wrong date", actualDate, new IsDateEqual(expectedDate, outcomesTable.getDateFormat()));
         try {
             outcomesTable.verify();
         } catch (UUIDExceptionWrapper e) {
@@ -636,82 +449,17 @@ class PrintStreamOutputBehaviour extends AbstractOutputBehaviour {
         assertThat(dos2unix(out.toString()), equalTo(expected));
     }
 
-    @Test
-    void shouldReportEventsToJsonOutputEmptyScenarioLifecycle() throws IOException {
-        // Given
-        OutputStream out = new ByteArrayOutputStream();
-        StoryReporter reporter = new JsonOutput(new PrintStream(out), new Properties(), new LocalizedKeywords());
-        String scenarioStep = "Then '((some data))' is ((equal to)) '((some data))'";
-
-        // When
-        ExamplesTable table = new ExamplesTable("|actual|expected|\n|some data|some data|\n");
-        Lifecycle lifecycle = new Lifecycle(table);
-        ExamplesTable emptyExamplesTable = ExamplesTable.EMPTY;
-        Story story = spyStoryUuid(
-                new Story("/path/to/story", new Description("Story with lifecycle and empty scenario"), null, null,
-                        null, lifecycle, new ArrayList<>()));
-
-        reporter.beforeStory(story, false);
-        reporter.lifecycle(lifecycle);
-        reporter.beforeScenarios();
-        reporter.beforeScenario(spyScenarioUuid(new Scenario("Normal scenario", Meta.EMPTY)));
-        reporter.beforeExamples(singletonList("Then '<expected>' is equal to '<actual>'"), emptyExamplesTable);
-        reporter.example(table.getRow(0), -1);
-        reportStep(reporter, scenarioStep, Stage.BEFORE, ExecutionType.USER);
-        reportStep(reporter, scenarioStep, null, null);
-        reportStep(reporter, scenarioStep, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.beforeScenario(spyScenarioUuid(new Scenario("Some empty scenario", Meta.EMPTY)));
-        reporter.beforeExamples(emptyList(), emptyExamplesTable);
-        reporter.example(table.getRow(0), -1);
-        reportStep(reporter, scenarioStep, Stage.BEFORE, ExecutionType.USER);
-        reportStep(reporter, scenarioStep, Stage.AFTER, ExecutionType.USER);
-        reporter.afterExamples();
-        reporter.afterScenario(getTiming());
-        reporter.afterScenarios();
-        reporter.afterStory(false);
-
-        // Then
-        assertJson("story-empty-scenario-with-lifecycle.json", out.toString());
-    }
-
-    private void reportStep(StoryReporter reporter, String step, Stage stage, Lifecycle.ExecutionType type) {
-        reporter.beforeScenarioSteps(stage, type);
-        reporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, step));
-        reporter.successful(step);
-        reporter.afterScenarioSteps(stage, type);
-    }
-
-    private Timing getTiming() {
-        Timing timing = mock(Timing.class);
-        when(timing.getStart()).thenReturn(1L);
-        when(timing.getEnd()).thenReturn(2L);
-        return timing;
-    }
-
-    private static Scenario spyScenarioUuid(Scenario scenario) {
-        Scenario spy = spy(scenario);
-        when(spy.getId()).thenReturn("scenario-id");
-        return spy;
-    }
-
-    private static Story spyStoryUuid(Story story) {
-        Story spy = spy(story);
-        when(spy.getId()).thenReturn("story-id");
-        return spy;
-    }
-
     @SuppressWarnings("serial")
     private static class MyKnownFailure extends KnownFailure {
     }
 
-    private abstract static class MyStory extends JUnitStory {
+    private abstract class MyStory extends JUnitStory {
 
     }
 
     private PrintStream createPrintStream(File file) throws FileNotFoundException {
         return new PrintStream(new FilePrintStreamFactory.FilePrintStream(file,true));
     }
+
 
 }

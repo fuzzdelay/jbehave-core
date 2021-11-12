@@ -14,41 +14,39 @@ import org.jbehave.examples.core.steps.PriorityMatchingSteps;
 import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
 
+/**
+ * @author aaronwalker
+ *
+ */
 @Singleton
-public class WeldStepProducer {
-    @Inject
-    @New
+public class WeldStepProducer
+{
+    @Inject @New 
     private TradingService tradingService;
-
-    @Produces
-    @Singleton
-    public TradingService getTradingService() {
+    
+    @Singleton @Produces
+    public TradingService getTradingService()
+    {
         return tradingService;
     }
-
-    //extended Trader example steps using an annotated static classes to mark them as Weld Steps
+    
+    //extended Trader example steps using an annotated static classes to mark them as Weld Steps 
     
     @WeldStep
-    public static class WeldBeforeAfterSteps extends BeforeAfterSteps {
-    }
+    public static class WeldBeforeAfterSteps extends BeforeAfterSteps {}
     
     @WeldStep
-    public static class WeldAndSteps extends AndSteps {
-    }
+    public static class WeldAndSteps extends AndSteps {}
     
     @WeldStep
-    public static class WeldCalendarSteps extends CalendarSteps {
-    }
+    public static class WeldCalendarSteps extends CalendarSteps {}
     
     @WeldStep
-    public static class WeldPriorityMatchingSteps extends PriorityMatchingSteps {
-    }
+    public static class WeldPriorityMatchingSteps extends PriorityMatchingSteps {}
     
     @WeldStep
-    public static class WeldSandpitSteps extends SandpitSteps {
-    }
+    public static class WeldSandpitSteps extends SandpitSteps {}
     
     @WeldStep
-    public static class WeldSearchSteps extends SearchSteps {
-    }
+    public static class WeldSearchSteps extends SearchSteps {}
 }

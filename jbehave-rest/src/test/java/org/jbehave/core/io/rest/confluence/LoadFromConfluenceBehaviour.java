@@ -10,14 +10,14 @@ import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.jbehave.core.io.rest.RESTClient;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class LoadFromConfluenceBehaviour {
+public class LoadFromConfluenceBehaviour {
 
     @Test
-    void shouldLoadFromConfluence() {
+    public void shouldLoadFromConfluence() {
         // given
-        LoadFromConfluence loader = new LoadFromConfluence(new MockRestClient());
+        LoadFromConfluence loader = new LoadFromConfluence(new MockRESTClient());
 
         // when
         String story = loader.loadResourceAsText("https://demo.confluence.com/rest/prototype/1/content/12517648");
@@ -32,9 +32,9 @@ class LoadFromConfluenceBehaviour {
                 "Examples:", "|precondition|be-captured|", "|xyz|not be captured|")));
     }
 
-    private static class MockRestClient extends RESTClient {
+    private static class MockRESTClient extends RESTClient {
 
-        public MockRestClient() {
+        public MockRESTClient() {
             super(Type.XML);
         }
 

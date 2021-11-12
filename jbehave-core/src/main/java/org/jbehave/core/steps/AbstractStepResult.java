@@ -16,6 +16,7 @@ import org.jbehave.core.reporters.StoryReporter;
  * <li>NotPerformed</li>
  * <li>Pending</li>
  * <li>Successful</li>
+ * <li>Silent</li>
  * <li>Ignorable</li>
  * <li>Skipped</li>
  * </ul>
@@ -86,6 +87,18 @@ public abstract class AbstractStepResult implements StepResult {
 
     }
 
+    public static class Silent extends Successful {
+
+        public Silent(Method method) {
+            super(method);
+        }
+
+        @Override
+        public void describeTo(StoryReporter reporter) {
+            // do not report
+        }
+    }
+
     public static class Ignorable extends AbstractStepResult {
         public Ignorable(String step) {
             super(Type.IGNORABLE, step);
@@ -123,7 +136,7 @@ public abstract class AbstractStepResult implements StepResult {
     protected final String step;
     protected final Type type;
     protected final UUIDExceptionWrapper throwable;
-    private Timing timing = new Timing();
+    private final Timing timing = new Timing();
     private String parametrisedStep;
 
     public AbstractStepResult(Type type, String step) {
@@ -147,13 +160,13 @@ public abstract class AbstractStepResult implements StepResult {
         return this;
     }
 
-    public Timing getTiming() {
+    public Timing getTiming(){
         return timing;
     }
     
     @Override
     public StepResult setTimings(Timer timer) {
-        this.timing = new Timing(timer);
+        this.timing.setTimings(timer);
         return this;
     }
     
@@ -164,8 +177,7 @@ public abstract class AbstractStepResult implements StepResult {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(parametrisedStep()).append(
-                getTiming()).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(parametrisedStep()).append(getTiming()).toString();
     }
 
     public static StepResult successful(String step) {
@@ -204,6 +216,10 @@ public abstract class AbstractStepResult implements StepResult {
         return new Failed(method, e);
     }
 
+    public static StepResult silent(Method method) {
+        return new Silent(method);
+    }
+
     public static StepResult skipped() {
         return new Skipped();
     }
@@ -219,7 +235,7 @@ public abstract class AbstractStepResult implements StepResult {
         for (int i = 0; i < types.length; i++) {
             Class<?> type = types[i];
             sb.append(type.getName());
-            if (i + 1 < types.length) {
+            if (i+1 < types.length) {
                 sb.append(",");
             }
         }

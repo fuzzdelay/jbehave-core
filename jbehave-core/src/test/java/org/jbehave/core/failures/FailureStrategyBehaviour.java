@@ -1,28 +1,22 @@
 package org.jbehave.core.failures;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Test;
 
-import org.junit.jupiter.api.Test;
-
-class FailureStrategyBehaviour {
+public class FailureStrategyBehaviour {
 
     @Test
-    void shouldAllowFailuresToBeAbsorbed() {
+    public void shouldAllowFailuresToBeAbsorbed() {
         new SilentlyAbsorbingFailure().handleFailure(new IllegalStateException());
     }
 
-    @Test
-    void shouldAllowFailuresToBeRethrown() {
-        RethrowingFailure rethrowingFailure = new RethrowingFailure();
-        IllegalStateException throwable = new IllegalStateException();
-        assertThrows(IllegalStateException.class, () -> rethrowingFailure.handleFailure(throwable));
+    @Test(expected = IllegalStateException.class)
+    public void shouldAllowFailuresToBeRethrown() throws Throwable {
+        new RethrowingFailure().handleFailure(new IllegalStateException());
     }
 
-    @Test
-    void shouldAllowFailuresToBeRethrownWhenWrappedAsUuidExceptions() {
-        RethrowingFailure rethrowingFailure = new RethrowingFailure();
-        UUIDExceptionWrapper throwable = new UUIDExceptionWrapper(new IllegalStateException());
-        assertThrows(IllegalStateException.class, () -> rethrowingFailure.handleFailure(throwable));
+    @Test(expected = IllegalStateException.class)
+    public void shouldAllowFailuresToBeRethrownWhenWrappedAsUUIDExceptions() throws Throwable {
+        new RethrowingFailure().handleFailure(new UUIDExceptionWrapper(new IllegalStateException()));
     }
 
 }

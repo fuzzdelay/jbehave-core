@@ -1,7 +1,11 @@
+/**
+ * 
+ */
 package org.jbehave.core.steps.weld;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -45,7 +49,7 @@ public class WeldStepsFactory extends AbstractStepsFactory {
     @Override
     public Object createInstanceOfType(Class<?> type) {
         for (Object o : instances) {
-            if (type.equals(o.getClass())) {
+            if ( type.equals(o.getClass())){
                 return o;
             }
         }

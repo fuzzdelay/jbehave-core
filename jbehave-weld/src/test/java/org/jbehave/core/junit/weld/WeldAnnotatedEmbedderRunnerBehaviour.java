@@ -8,14 +8,15 @@ import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.weld.WeldAnnotationBuilder;
 import org.jbehave.core.junit.AnnotatedEmbedderRunner;
-import org.junit.jupiter.api.Test;
+import org.jbehave.core.junit.weld.WeldAnnotatedEmbedderRunner;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 
-class WeldAnnotatedEmbedderRunnerBehaviour {
+public class WeldAnnotatedEmbedderRunnerBehaviour {
 
     @Test
-    void shouldCreateWithGuiceAnnotatedBuilder() throws InitializationError {
+    public void shouldCreateWithGuiceAnnotatedBuilder() throws InitializationError{
         AnnotatedEmbedderRunner runner = new WeldAnnotatedEmbedderRunner(RunningWithAnnotatedEmbedderRunner.class);
     
         assertThat(runner.annotationBuilder(), instanceOf(WeldAnnotationBuilder.class));
@@ -29,7 +30,7 @@ class WeldAnnotatedEmbedderRunnerBehaviour {
         static boolean hasRun;
 
         @Override
-        @org.junit.Test
+        @Test
         public void run() {
             hasRun = true;
         }

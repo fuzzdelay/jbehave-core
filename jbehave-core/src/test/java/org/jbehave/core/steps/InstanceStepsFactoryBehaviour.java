@@ -15,23 +15,22 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class InstanceStepsFactoryBehaviour {
+public class InstanceStepsFactoryBehaviour {
 
     @Test
-    void shouldCreateCandidateSteps() {
-        MostUsefulConfiguration configuration = new MostUsefulConfiguration();
-        InjectableStepsFactory factory = new InstanceStepsFactory(configuration, new MySteps());
+    public void shouldCreateCandidateSteps() {
+        InjectableStepsFactory factory = new InstanceStepsFactory(new MostUsefulConfiguration(), new MySteps());
         List<CandidateSteps> candidateSteps = factory.createCandidateSteps();
         assertThat(candidateSteps.size(), equalTo(1));
         assertThat(candidateSteps.get(0), instanceOf(Steps.class));
-        ParameterConverters converters = configuration.parameterConverters();
+        ParameterConverters converters = candidateSteps.get(0).configuration().parameterConverters();
         assertThat((String)converters.convert("value", String.class), equalTo("valueConverted"));
     }
 
     @Test
-    void shouldCreateCompositeCandidateSteps() {
+    public void shouldCreateCompositeCandidateSteps() {
         Configuration configuration = new MostUsefulConfiguration();
         configuration.useCompositePaths(Collections.singleton("composite.steps"));
         InjectableStepsFactory factory = new InstanceStepsFactory(configuration);
@@ -41,14 +40,14 @@ class InstanceStepsFactoryBehaviour {
     }
 
     @Test
-    void shouldDetermineIfStepsInstanceHasAnnotatedMethods() {
+    public void shouldDetermineIfStepsInstanceHasAnnotatedMethods() {
         InstanceStepsFactory factory = new InstanceStepsFactory(new MostUsefulConfiguration());
         assertThat(factory.hasAnnotatedMethods(MySteps.class), is(true));
         assertThat(factory.hasAnnotatedMethods(NoAnnotatedMethods.class), is(false));
     } 
 
     @Test
-    void shouldAllowGenericList() {
+    public void shouldAllowGenericList() {
         List<? super MyInterface> list = new ArrayList<>();
         list.add(new MyStepsAWithInterface());
         list.add(new MyStepsBWithInterface());
@@ -84,8 +83,8 @@ class InstanceStepsFactoryBehaviour {
         }
 
         @AsParameterConverter
-        public String convert(String value) {
-            return value + "Converted";
+        public String convert(String value){
+            return value+"Converted";
         }
     }
     

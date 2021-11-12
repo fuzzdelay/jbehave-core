@@ -1,19 +1,17 @@
 package org.jbehave.core.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.jbehave.core.configuration.Keywords.KeywordNotFound;
+import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import org.jbehave.core.configuration.Keywords.KeywordNotFound;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-class KeywordsBehaviour {
+public class KeywordsBehaviour {
 
     @Test
-    void shouldHaveAllKeywordsSetByDefault() {
+    public void shouldHaveAllKeywordsSetByDefault() {
         Keywords keywords = new Keywords();
         assertThat(keywords.narrative(), equalTo("Narrative:"));
         assertThat(keywords.scenario(), equalTo("Scenario:"));
@@ -34,10 +32,9 @@ class KeywordsBehaviour {
         assertThat(keywords.dryRun(), equalTo("DRY RUN"));
     }
 
-    @Test
-    void shouldFailIfSomeKeywordIsMissingInMapConstructor() {
-        Map<String, String> keywords = new HashMap<>();
-        assertThrows(KeywordNotFound.class, () -> new Keywords(keywords));
+    @Test(expected = KeywordNotFound.class)
+    public void shouldFailIfSomeKeywordIsMissingInMapConstructor() {
+        new Keywords(new HashMap<String, String>());
     }
 
 }

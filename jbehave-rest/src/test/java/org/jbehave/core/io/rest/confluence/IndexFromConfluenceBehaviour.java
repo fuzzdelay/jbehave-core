@@ -10,14 +10,14 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.jbehave.core.io.rest.RESTClient;
 import org.jbehave.core.io.rest.Resource;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class IndexFromConfluenceBehaviour {
+public class IndexFromConfluenceBehaviour {
 
     @Test
-    void shouldIndexFromConfluence() {
+    public void shouldIndexFromConfluence() {
         // given
-        IndexFromConfluence indexer = new IndexFromConfluence(new MockRestClient());
+        IndexFromConfluence indexer = new IndexFromConfluence(new MockRESTClient());
 
         // when
         Map<String, Resource> index = indexer.indexResources("https://demo.confluence.com/display/JBEV/jBehave");
@@ -26,9 +26,9 @@ class IndexFromConfluenceBehaviour {
         assertThat(index.size(), equalTo(2));
     }
 
-    private static class MockRestClient extends RESTClient {
+    private static class MockRESTClient extends RESTClient {
 
-        public MockRestClient() {
+        public MockRESTClient() {
             super(Type.XML);
         }
 

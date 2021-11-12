@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jbehave</groupId>
     <artifactId>jbehave-examples</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>4.9-SNAPSHOT</version>
   </parent>
   <artifactId>jbehave-failing-example</artifactId>
   <name>JBehave Failing Example</name>
@@ -46,6 +46,7 @@
                 <include>${embeddables}</include>
               </includes>
               <excludes />
+              <skip>${skip}</skip>
               <batch>false</batch>
               <generateViewAfterStories>true</generateViewAfterStories>
               <ignoreFailureInStories>${ignore.failure.in.stories}</ignoreFailureInStories>

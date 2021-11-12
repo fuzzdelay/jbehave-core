@@ -1,12 +1,5 @@
 package org.jbehave.core.reporters;
 
-import static org.jbehave.core.steps.StepCreator.PARAMETER_TABLE_END;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_TABLE_START;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_END;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VALUE_START;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VERBATIM_END;
-import static org.jbehave.core.steps.StepCreator.PARAMETER_VERBATIM_START;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
@@ -24,22 +17,14 @@ import org.jbehave.core.annotations.AfterScenario.Outcome;
 import org.jbehave.core.annotations.Scope;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.MetaFilter;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.GivenStories;
-import org.jbehave.core.model.Lifecycle;
-import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.Narrative;
-import org.jbehave.core.model.OutcomesTable;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.model.StoryDuration;
-import org.jbehave.core.model.Verbatim;
-import org.jbehave.core.steps.StepCollector;
-import org.jbehave.core.steps.Timing;
+import org.jbehave.core.model.*;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModelException;
+import org.jbehave.core.steps.StepCollector;
+
+import static org.jbehave.core.steps.StepCreator.*;
 
 /**
  * <p>
@@ -66,8 +51,8 @@ public class TemplateableOutput extends NullStoryReporter {
     }
 
     @Override
-    public void storyExcluded(Story story, String filter) {
-        this.outputStory.excludedBy = filter;
+    public void storyNotAllowed(Story story, String filter) {
+        this.outputStory.notAllowedBy = filter;
     }
 
     @Override
@@ -92,19 +77,20 @@ public class TemplateableOutput extends NullStoryReporter {
     }
 
     @Override
-    public void lifecycle(Lifecycle lifecycle) {
-        if (!lifecycle.isEmpty()) {
+    public void lifecyle(Lifecycle lifecycle) {
+        if(!lifecycle.isEmpty()){
             this.outputStory.lifecycle = new OutputLifecycle(lifecycle);            
         }
     }
 
     @Override
-    public void scenarioExcluded(Scenario scenario, String filter) {
-        this.outputScenario.excludedBy = filter;
+    public void scenarioNotAllowed(Scenario scenario, String filter) {
+        this.outputScenario.notAllowedBy = filter;
     }
 
     @Override
-    public void beforeScenario(Scenario scenario) {
+    public void beforeScenario(Scenario scenario)
+    {
         if (this.outputScenario.currentExample == null) {
             this.outputScenario = new OutputScenario();
         }
@@ -118,8 +104,8 @@ public class TemplateableOutput extends NullStoryReporter {
     }
 
     private void addStep(OutputStep outputStep) {
-        if (scope == Scope.STORY) {
-            if (stage == StepCollector.Stage.BEFORE) {
+        if ( scope == Scope.STORY){
+            if ( stage == StepCollector.Stage.BEFORE ){
                 this.outputStory.addBeforeStep(outputStep);
             } else {
                 this.outputStory.addAfterStep(outputStep);
@@ -197,7 +183,7 @@ public class TemplateableOutput extends NullStoryReporter {
     }
 
     @Override
-    public void afterScenario(Timing timing) {
+    public void afterScenario() {
         if (this.outputScenario.currentExample == null) {
             this.outputStory.scenarios.add(outputScenario);
         }
@@ -271,27 +257,27 @@ public class TemplateableOutput extends NullStoryReporter {
             this.keywords = keywords;
         }
 
-        public String getLifecycle() {
+        public String getLifecycle(){
             return keywords.lifecycle();
         }
 
-        public String getScope() {
+        public String getScope(){
             return keywords.scope();
         }
 
-        public String getScopeScenario() {
+        public String getScopeScenario(){
             return keywords.scopeScenario();
         }
 
-        public String getScopeStory() {
+        public String getScopeStory(){
             return keywords.scopeStory();
         }
 
-        public String getBefore() {
+        public String getBefore(){
             return keywords.before();
         }
 
-        public String getAfter() {
+        public String getAfter(){
             return keywords.after();
         }
 
@@ -395,12 +381,12 @@ public class TemplateableOutput extends NullStoryReporter {
             return keywords.duration();
         }
 
-        public String getOutcome() {
-            return keywords.outcome();
+        public String getOutcome(){
+        	return keywords.outcome();
         }
         
-        public String getMetaFilter() {
-            return keywords.metaFilter();
+        public String getMetaFilter(){
+        	return keywords.metaFilter();
         }
         
         public String getYes() {
@@ -418,7 +404,7 @@ public class TemplateableOutput extends NullStoryReporter {
         private OutputMeta meta;
         private OutputNarrative narrative;
         private OutputLifecycle lifecycle;
-        private String excludedBy;
+        private String notAllowedBy;
         private List<String> pendingMethods;
         private List<OutputStep> beforeSteps = new ArrayList<>();
         private List<OutputStep> afterSteps = new ArrayList<>();
@@ -446,8 +432,8 @@ public class TemplateableOutput extends NullStoryReporter {
             return lifecycle;
         }
 
-        public String getExcludedBy() {
-            return excludedBy;
+        public String getNotAllowedBy() {
+            return notAllowedBy;
         }
 
         public void addBeforeStep(OutputStep outputStep) {
@@ -461,10 +447,10 @@ public class TemplateableOutput extends NullStoryReporter {
         public List<OutputStep> getBeforeSteps() {
             return beforeSteps;
         }
-
         public List<OutputStep> getAfterSteps() {
             return afterSteps;
         }
+
 
         public List<String> getPendingMethods() {
             return pendingMethods;
@@ -520,11 +506,11 @@ public class TemplateableOutput extends NullStoryReporter {
             return narrative.iWantTo();
         }
         
-        public String getSoThat() {
+        public String getSoThat(){
             return narrative.soThat();
         }
         
-        public boolean isAlternative() {
+        public boolean isAlternative(){
             return narrative.isAlternative();
         }
 
@@ -537,52 +523,46 @@ public class TemplateableOutput extends NullStoryReporter {
             this.lifecycle = lifecycle;
         }
 
-        public Set<Scope> getScopes() {
-            return lifecycle.getScopes();
-        }
+        public Set<Scope> getScopes() { return lifecycle.getScopes(); };
 
-        public boolean hasBeforeSteps() {
-            return lifecycle.hasBeforeSteps();
-        }
+        public boolean hasBeforeSteps() { return lifecycle.hasBeforeSteps(); }
 
-        public List<String> getBeforeSteps() {
+        public List<String> getBeforeSteps(){
             return lifecycle.getBeforeSteps();
         }
 
-        public List<String> getBeforeSteps(Scope scope) {
+        public List<String> getBeforeSteps(Scope scope){
             return lifecycle.getBeforeSteps(scope);
         }
 
-        public boolean hasAfterSteps() {
-            return lifecycle.hasAfterSteps();
-        }
+        public boolean hasAfterSteps() { return lifecycle.hasAfterSteps(); }
 
-        public List<String> getAfterSteps() {
+        public List<String> getAfterSteps(){
             return lifecycle.getAfterSteps();
         }
 
-        public List<String> getAfterSteps(Scope scope) {
+        public List<String> getAfterSteps(Scope scope){
             return lifecycle.getAfterSteps(scope);
         }
 
-        public List<String> getAfterSteps(Scope scope, Outcome outcome) {
+        public List<String> getAfterSteps(Scope scope, Outcome outcome){
             return lifecycle.getAfterSteps(scope, outcome);
         }
 
-        public List<String> getAfterSteps(Outcome outcome) {
-            return lifecycle.getAfterSteps(outcome);
-        }
-
-        public List<String> getAfterSteps(Outcome outcome, Meta meta) {
-            return lifecycle.getAfterSteps(outcome, meta);
-        }
-
-        public Set<Outcome> getOutcomes() {
+        public Set<Outcome> getOutcomes(){
             return lifecycle.getOutcomes();
         }
 
-        public MetaFilter getMetaFilter(Outcome outcome) {
-            return lifecycle.getMetaFilter(outcome);
+        public MetaFilter getMetaFilter(Outcome outcome){
+        	return lifecycle.getMetaFilter(outcome);
+        }
+        
+        public List<String> getAfterSteps(Outcome outcome){
+            return lifecycle.getAfterSteps(outcome);
+        }
+
+        public List<String> getAfterSteps(Outcome outcome, Meta meta){
+            return lifecycle.getAfterSteps(outcome, meta);
         }
 
     }
@@ -592,7 +572,7 @@ public class TemplateableOutput extends NullStoryReporter {
         private List<OutputStep> steps = new ArrayList<>();
         private OutputMeta meta;
         private GivenStories givenStories;
-        private String excludedBy;
+        private String notAllowedBy;
         private List<String> examplesSteps;
         private ExamplesTable examplesTable;
         private Map<String, String> currentExample;
@@ -636,8 +616,8 @@ public class TemplateableOutput extends NullStoryReporter {
             return givenStories;
         }
 
-        public String getExcludedBy() {
-            return excludedBy;
+        public String getNotAllowedBy() {
+            return notAllowedBy;
         }
 
         public List<String> getExamplesSteps() {
@@ -728,18 +708,23 @@ public class TemplateableOutput extends NullStoryReporter {
             return "";
         }
 
+        /*
+         * formatting without escaping doesn't make sense unless
+         * we do a ftl text output format
+         */
+        @Deprecated
         public String getFormattedStep(String parameterPattern) {
             return getFormattedStep(EscapeMode.NONE, parameterPattern);
         }
 
-        public String getFormattedStep(EscapeMode escapeMode, String parameterPattern) {
+        public String getFormattedStep(EscapeMode outputFormat, String parameterPattern) {
             // note that escaping the stepPattern string only works
             // because placeholders for parameters do not contain
             // special chars (the placeholder is {0} etc)
-            String escapedStep = escapeMode.escapeString(stepPattern);
+            String escapedStep = outputFormat.escapeString(stepPattern);
             if (!parameters.isEmpty()) {
                 try {
-                    return MessageFormat.format(escapedStep, formatParameters(escapeMode, parameterPattern));
+                    return MessageFormat.format(escapedStep, formatParameters(outputFormat, parameterPattern));
                 } catch (RuntimeException e) {
                     throw new StepFormattingFailed(stepPattern, parameterPattern, parameters, e);
                 }
@@ -747,11 +732,10 @@ public class TemplateableOutput extends NullStoryReporter {
             return escapedStep;
         }
 
-        private Object[] formatParameters(EscapeMode escapeMode, String parameterPattern) {
+        private Object[] formatParameters(EscapeMode outputFormat, String parameterPattern) {
             Object[] arguments = new Object[parameters.size()];
             for (int a = 0; a < parameters.size(); a++) {
-                arguments[a] = MessageFormat.format(parameterPattern,
-                        escapeMode.escapeString(parameters.get(a).getValue()));
+                arguments[a] = MessageFormat.format(parameterPattern, outputFormat.escapeString(parameters.get(a).getValue()));
             }
             return arguments;
         }

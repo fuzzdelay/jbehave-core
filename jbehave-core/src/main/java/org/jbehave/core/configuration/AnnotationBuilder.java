@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.thoughtworks.paranamer.Paranamer;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.ConfigurableEmbedder;
 import org.jbehave.core.Embeddable;
@@ -43,6 +41,8 @@ import org.jbehave.core.steps.ScanningStepsFactory;
 import org.jbehave.core.steps.StepCollector;
 import org.jbehave.core.steps.StepFinder;
 import org.jbehave.core.steps.StepMonitor;
+
+import com.thoughtworks.paranamer.Paranamer;
 
 /**
  * Allows the building of {@link Configuration}, {@link CandidateSteps} and
@@ -191,6 +191,8 @@ public class AnnotationBuilder {
         boolean verboseFailures = control(finder, "verboseFailures");
         boolean verboseFiltering = control(finder, "verboseFiltering");
         String storyTimeouts = finder.getAnnotatedValue(UsingEmbedder.class, String.class, "storyTimeouts");
+        long storyTimeoutInSecs = finder.getAnnotatedValue(UsingEmbedder.class, Long.class, "storyTimeoutInSecs");
+        String storyTimeoutInSecsByPath = finder.getAnnotatedValue(UsingEmbedder.class, String.class, "storyTimeoutInSecsByPath");
         boolean failOnStoryTimeout = control(finder, "failOnStoryTimeout");
         int threads = finder.getAnnotatedValue(UsingEmbedder.class, Integer.class, "threads");
         Embedder embedder = embedder();
@@ -199,13 +201,23 @@ public class AnnotationBuilder {
                 .doIgnoreFailureInStories(ignoreFailureInStories).doIgnoreFailureInView(ignoreFailureInView)
                 .doVerboseFailures(verboseFailures).doVerboseFiltering(verboseFiltering)
                 .doFailOnStoryTimeout(failOnStoryTimeout).useThreads(threads);
-        if (StringUtils.isNotBlank(storyTimeouts)) {
+        if ( storyTimeoutInSecs != 0 ){
+            embedderControls.useStoryTimeoutInSecs(storyTimeoutInSecs);
+        }
+        if ( StringUtils.isNotBlank(storyTimeoutInSecsByPath) ){
+            embedderControls.useStoryTimeoutInSecsByPath(storyTimeoutInSecsByPath);
+        }
+        if ( StringUtils.isNotBlank(storyTimeouts) ){
             embedderControls.useStoryTimeouts(storyTimeouts);
         }
         Configuration configuration = buildConfiguration();
         embedder.useConfiguration(configuration);
-        embedder.useStepsFactory(buildStepsFactory(configuration));
-
+        boolean useStepsFactory = finder.getAnnotatedValue(UsingEmbedder.class, Boolean.class, "stepsFactory");
+        if (useStepsFactory) {
+            embedder.useStepsFactory(buildStepsFactory(configuration));
+        } else {
+            embedder.useCandidateSteps(buildCandidateSteps(configuration));
+        }
         List<String> metaFilters = finder.getAnnotatedValues(UsingEmbedder.class, String.class, "metaFilters");
         if (!metaFilters.isEmpty()) {
             embedder.useMetaFilters(metaFilters);
@@ -245,8 +257,7 @@ public class AnnotationBuilder {
 
     @SuppressWarnings("unchecked")
     private StoryFinder storyFinder() {
-        return instanceOf(StoryFinder.class,
-                (Class<? extends StoryFinder>) finder.getAnnotatedValue(UsingPaths.class, Class.class, "storyFinder"));
+        return instanceOf(StoryFinder.class, (Class<? extends StoryFinder>)finder.getAnnotatedValue(UsingPaths.class, Class.class, "storyFinder"));
     }
 
     private boolean control(AnnotationFinder finder, String name) {
@@ -290,20 +301,21 @@ public class AnnotationBuilder {
                 Constructor<V> constructor =
                         ofClass.getConstructor(ClassLoader.class);
                 return constructor.newInstance(annotatedClass.getClassLoader());
-            } catch (NoSuchMethodException ns) {
-                // fall-back to another approach of object construction
+            }
+            catch(NoSuchMethodException ns){
             }
             // by class constructor
             try {
                 Constructor<V> constructor =
                         ofClass.getConstructor(Class.class);
                 return constructor.newInstance(annotatedClass);
-            } catch (NoSuchMethodException ns) {
-                // fall-back to another approach of object construction
+            }
+            catch(NoSuchMethodException ns){
             }                 
             // by class instance
             return ofClass.newInstance();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             annotationMonitor.elementCreationFailed(ofClass, e);
             throw new InstantiationFailed(ofClass, type, e);
         }
@@ -331,6 +343,7 @@ public class AnnotationBuilder {
             if (instance instanceof ConfigurableEmbedder) {
                 ConfigurableEmbedder configurableEmbedder = (ConfigurableEmbedder) instance;
                 configurableEmbedder.useConfiguration(embedder.configuration());
+                configurableEmbedder.addSteps(embedder.candidateSteps());
                 configurableEmbedder.useStepsFactory(embedder.stepsFactory());
             }
             return instance;

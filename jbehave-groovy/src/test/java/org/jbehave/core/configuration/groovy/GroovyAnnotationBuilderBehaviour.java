@@ -14,18 +14,18 @@ import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.Steps;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class GroovyAnnotationBuilderBehaviour {
+public class GroovyAnnotationBuilderBehaviour {
 
     @Test
-    void shouldBuildConfigurationFromAnnotations() {
+    public void shouldBuildConfigurationFromAnnotations() {
         GroovyAnnotationBuilder builder = new GroovyAnnotationBuilder(AnnotatedUsingGroovy.class);
         assertThatConfigurationIs(builder.buildConfiguration(), new MostUsefulConfiguration());
     }
 
     @Test
-    void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
         GroovyAnnotationBuilder builderNotAnnotated = new GroovyAnnotationBuilder(NotAnnotated.class);
         assertThatConfigurationIs(builderNotAnnotated.buildConfiguration(), new MostUsefulConfiguration());
     }
@@ -46,7 +46,7 @@ class GroovyAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingGroovy() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingGroovy() {
         GroovyAnnotationBuilder builderAnnotated = new GroovyAnnotationBuilder(AnnotatedUsingGroovy.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), "FooSteps");
@@ -67,7 +67,7 @@ class GroovyAnnotationBuilderBehaviour {
     }
     
     public static class TestGroovyResourceFinder extends GroovyResourceFinder {
-        public TestGroovyResourceFinder() {
+        public TestGroovyResourceFinder(){
             super(CodeLocations.codeLocationFromPath("src/test/java"), "**/configuration/groovy/*.groovy", "");
         }
     }

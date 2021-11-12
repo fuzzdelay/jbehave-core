@@ -15,12 +15,12 @@ import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.reporters.FilePrintStreamFactory.FileConfiguration;
 import org.jbehave.core.reporters.FilePrintStreamFactory.FilePathResolver;
 import org.jbehave.core.reporters.Format;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class SpringStoryReporterBuilderBehaviour {
+public class SpringStoryReporterBuilderBehaviour {
 
     @Test
-    void shouldAllowUseOfGettersAndSetters() {
+    public void shouldAllowUseOfGettersAndSetters(){
         SpringStoryReporterBuilder builder = new SpringStoryReporterBuilder();
         
         URL codeLocation = CodeLocations.codeLocationFromClass(this.getClass());

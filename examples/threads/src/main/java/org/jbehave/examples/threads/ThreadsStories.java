@@ -1,9 +1,5 @@
 package org.jbehave.examples.threads;
 
-import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,22 +13,22 @@ import org.jbehave.core.embedder.StoryTimeouts.TimeoutParser;
 import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.io.StoryFinder;
-import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
 import org.jbehave.examples.threads.steps.ThreadsSteps;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnit4StoryRunner.class)
+import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+
 public class ThreadsStories extends JUnitStories {
 
     public ThreadsStories() {
         Embedder embedder = configuredEmbedder();
         embedder.embedderControls().doGenerateViewAfterStories(true).doIgnoreFailureInStories(true)
-                .doIgnoreFailureInView(true).doVerboseFiltering(true).useThreads(1).useStoryTimeouts("7secs")
-                .doFailOnStoryTimeout(false);
+                .doIgnoreFailureInView(true).doVerboseFiltering(true).useThreads(1).useStoryTimeouts("7secs").doFailOnStoryTimeout(false);
         embedder.useMetaFilters(Arrays.asList("groovy: story_path ==~ /.*long.*/"));
         embedder.useTimeoutParsers(new CustomTimeoutParser());
     }
@@ -41,9 +37,7 @@ public class ThreadsStories extends JUnitStories {
     public Configuration configuration() {
         Class<? extends Embeddable> embeddableClass = this.getClass();
         return new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
-                .useStoryControls(new StoryControls().useStoryMetaPrefix("story_")
-                        .useScenarioMetaPrefix("scenario_")  // optional prefixes
-                )
+                .useStoryControls(new StoryControls().useStoryMetaPrefix("story_").useScenarioMetaPrefix("scenario_")) // optional prefixes
                 .useStoryReporterBuilder(
                         new StoryReporterBuilder()
                                 .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
@@ -57,21 +51,21 @@ public class ThreadsStories extends JUnitStories {
     }
 
     @Override
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder().findPaths(codeLocationFromClass(this.getClass()), "**/*.story", "");
     }
     
     public static class CustomTimeoutParser implements TimeoutParser {
 
-        @Override
+    	@Override
         public boolean isValid(String timeout) {
-            return timeout.matches("(\\d+)secs");
-        }
+    		return timeout.matches("(\\d+)secs");
+    	}
 
-        @Override
+    	@Override
         public long asSeconds(String timeout) {
-            return Long.parseLong(StringUtils.substringBefore(timeout, "secs"));
-        }
+    		return Long.parseLong(StringUtils.substringBefore(timeout, "secs"));
+    	}
 
     }
 

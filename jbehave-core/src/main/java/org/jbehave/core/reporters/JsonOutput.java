@@ -1,8 +1,11 @@
 package org.jbehave.core.reporters;
 
 import static org.jbehave.core.reporters.PrintStreamOutput.Format.JSON;
+import static org.jbehave.core.steps.StepCreator.*;
 
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -27,12 +30,18 @@ public class JsonOutput extends PrintStreamOutput {
     private static final char[] JSON_START_CHARS = { JSON_DOCUMENT_START, JSON_OBJECT_START, JSON_ARRAY_START };
 
     private static final String[] STEP_KEYS = { "successful", "ignorable", "comment", "pending", "notPerformed",
-        "failed", "restarted" };
+            "failed", "restarted" };
+
+    private static final String[] PARAMETER_KEYS = { PARAMETER_TABLE_START, PARAMETER_TABLE_END,
+            PARAMETER_VERBATIM_START, PARAMETER_VERBATIM_END, PARAMETER_VALUE_START, PARAMETER_VALUE_END,
+            PARAMETER_VALUE_NEWLINE, "parameterValueStart", "parameterValueEnd", "parameterValueNewline" };
 
     private char lastChar = JSON_DOCUMENT_START;
 
     private int givenStoriesLevel = 0;
     private int storyPublishingLevel = 0;
+    private final Map<Integer, Boolean> scenarioPublishingPerLevels = new HashMap<>();
+    private boolean scenarioCompleted = false;
     private boolean stepPublishing = false;
 
     public JsonOutput(PrintStream output, Keywords keywords) {
@@ -68,21 +77,45 @@ public class JsonOutput extends PrintStreamOutput {
         } else if ("beforeStory".equals(key) && storyPublishingLevel < givenStoriesLevel) {
             // Starting given "stories"
             print("\"stories\": [");
-            storyPublishingLevel++;
-        }
-        //Closing "examples" if "steps" are empty
-        if ("exampleScenariosEnd".equals(key) && !stepPublishing) {
-            print("}");
+            storyPublishingLevel ++;
         }
         if (stepPublishing) {
-            if ("exampleScenariosEnd".equals(key) || "example".equals(key) && givenStoriesLevel == 0) {
+            if ("example".equals(key) || "exampleScenariosEnd".equals(key)) {
                 // Closing previous "example"
-                print("}");
+                print("]}");
+                stepPublishing = false;
             }
             if ("afterScenario".equals(key) || "afterScenarioWithFailure".equals(key)) {
+                // Closing "steps"
+                print("]");
+                stepPublishing = false;
+                scenarioCompleted = true;
+            }
+            else if ("afterBeforeStorySteps".equals(key) || "afterAfterStorySteps".equals(key)){
                 stepPublishing = false;
             }
         } else if (ArrayUtils.contains(STEP_KEYS, key)) {
+            // Starting "steps"
+            print("\"steps\": [");
+            stepPublishing = true;
+        } else if ("beforeScenario".equals(key)) {
+            scenarioCompleted = false;
+            if (scenarioPublishingPerLevels.get(storyPublishingLevel) != Boolean.TRUE) {
+                // Starting "scenarios"
+                print("\"scenarios\": [");
+                scenarioPublishingPerLevels.put(storyPublishingLevel, Boolean.TRUE);
+            }
+        } else if ("afterScenario".equals(key) || "afterScenarioWithFailure".equals(key)) {
+            // Need to complete scenario with examples
+            scenarioCompleted = true;
+        }
+        else if (!"afterExamples".equals(key) && scenarioPublishingPerLevels.get(storyPublishingLevel) == Boolean.TRUE
+                && scenarioCompleted && !ArrayUtils.contains(PARAMETER_KEYS, key)) {
+            // Closing "scenarios"
+            scenarioPublishingPerLevels.put(storyPublishingLevel, Boolean.FALSE);
+            print("]");
+        }
+        if ("beforeBeforeStorySteps".equals(key) || "beforeAfterStorySteps".equals(key)) {
             stepPublishing = true;
         }
         return super.format(key, defaultPattern, args);
@@ -93,15 +126,11 @@ public class JsonOutput extends PrintStreamOutput {
         return text;
     }
 
-    @SuppressWarnings("checkstyle:LineLength")
     private static Properties defaultXmlPatterns() {
         Properties patterns = new Properties();
         patterns.setProperty("dryRun", "\"dryRun\": \"{0}\"");
-        patterns.setProperty("beforeStory", "'{'\"id\": \"{0}\", \"path\": \"{2}\", \"title\": \"{1}\"");
+        patterns.setProperty("beforeStory", "'{'\"path\": \"{1}\", \"title\": \"{0}\"");
         patterns.setProperty("storyCancelled", "'{'\"cancelled\": '{'\"keyword\": \"{0}\", \"durationKeyword\": \"{1}\", \"durationInSecs\": \"{2}\"}}");
-        patterns.setProperty("afterStory", "}");
-        patterns.setProperty("beforeScenarios", "\"scenarios\": [");
-        patterns.setProperty("afterScenarios", "]");
         patterns.setProperty("afterStory", "}");
         patterns.setProperty("pendingMethodsStart", "\"pendingMethods\": [");
         patterns.setProperty("pendingMethod", "\"{0}\"");
@@ -125,30 +154,12 @@ public class JsonOutput extends PrintStreamOutput {
         patterns.setProperty("lifecycleOutcomeEnd", "]}");
         patterns.setProperty("lifecycleMetaFilter", "\"metaFilter\": \"{0} {1}\"");
         patterns.setProperty("lifecycleStep", "\"{0}\"");
-        patterns.setProperty("beforeBeforeStoriesSteps", "'{'\"beforeStoriesSteps\": [");
-        patterns.setProperty("afterBeforeStoriesSteps", "]}");
-        patterns.setProperty("beforeAfterStoriesSteps", "'{'\"afterStoriesSteps\": [");
-        patterns.setProperty("afterAfterStoriesSteps", "]}");
-        patterns.setProperty("beforeBeforeSystemStorySteps", "\"beforeSystemStorySteps\": [");
-        patterns.setProperty("afterBeforeSystemStorySteps", "]");
-        patterns.setProperty("beforeAfterSystemStorySteps", "\"afterSystemStorySteps\": [");
-        patterns.setProperty("afterAfterSystemStorySteps", "]");
-        patterns.setProperty("beforeBeforeUserStorySteps", "\"beforeUserStorySteps\": [");
-        patterns.setProperty("afterBeforeUserStorySteps", "]");
-        patterns.setProperty("beforeAfterUserStorySteps", "\"afterUserStorySteps\": [");
-        patterns.setProperty("afterAfterUserStorySteps", "]");
-        patterns.setProperty("beforeBeforeSystemScenarioSteps", "\"beforeSystemScenarioSteps\": [");
-        patterns.setProperty("afterBeforeSystemScenarioSteps", "]");
-        patterns.setProperty("beforeAfterSystemScenarioSteps", "\"afterSystemScenarioSteps\": [");
-        patterns.setProperty("afterAfterSystemScenarioSteps", "]");
-        patterns.setProperty("beforeBeforeUserScenarioSteps", "\"beforeUserScenarioSteps\": [");
-        patterns.setProperty("afterBeforeUserScenarioSteps", "]");
-        patterns.setProperty("beforeAfterUserScenarioSteps", "\"afterUserScenarioSteps\": [");
-        patterns.setProperty("afterAfterUserScenarioSteps", "]");
-        patterns.setProperty("beforeScenarioSteps", "\"steps\": [");
-        patterns.setProperty("afterScenarioSteps", "]");
-        patterns.setProperty("beforeScenario","'{'\"keyword\": \"{1}\", \"id\": \"{0}\", \"title\": \"{2}\"");
-        patterns.setProperty("scenarioExcluded", "\"excluded\": '{'\"pattern\": \"{0}\"}");
+        patterns.setProperty("beforeBeforeStorySteps", "\"beforeStorySteps\": [");
+        patterns.setProperty("afterBeforeStorySteps", "]");
+        patterns.setProperty("beforeAfterStorySteps", "\"afterStorySteps\": [");
+        patterns.setProperty("afterAfterStorySteps", "]");
+        patterns.setProperty("beforeScenario","'{'\"keyword\": \"{0}\", \"title\": \"{1}\"");
+        patterns.setProperty("scenarioNotAllowed", "\"notAllowed\": '{'\"pattern\": \"{0}\"}");
         patterns.setProperty("afterScenario", "}");
         patterns.setProperty("afterScenarioWithFailure", "\"failure\": \"{0}\" }");
         patterns.setProperty("givenStories", "\"givenStories\": '{'\"keyword\": \"{0}\", \"paths\": \"{1}\"}");
@@ -157,14 +168,13 @@ public class JsonOutput extends PrintStreamOutput {
         patterns.setProperty("givenStory", "'{'\"parameters\": \"{1}\", \"path\": \"{0}\"}");
         patterns.setProperty("givenStoriesEnd", "]");
         patterns.setProperty("afterGivenStories", "}");
-        patterns.setProperty("beforeStep", "'{'");
-        patterns.setProperty("successful", "\"outcome\": \"successful\", \"value\": \"{0}\"}");
-        patterns.setProperty("ignorable", "\"outcome\": \"ignorable\", \"value\": \"{0}\"}");
-        patterns.setProperty("comment", "\"outcome\": \"comment\", \"value\": \"{0}\"}");
-        patterns.setProperty("pending", "\"outcome\": \"pending\", \"keyword\": \"{1}\", \"value\": \"{0}\"}");
-        patterns.setProperty("notPerformed", "\"outcome\": \"notPerformed\", \"keyword\": \"{1}\", \"value\": \"{0}\"}");
-        patterns.setProperty("failed", "\"outcome\": \"failed\", \"keyword\": \"{1}\", \"value\": \"{0}\", \"failure\": \"{2}\"}");
-        patterns.setProperty("restarted", "\"outcome\": \"restarted\", \"value\": \"{0}\", \"reason\": \"{1}\"}");
+        patterns.setProperty("successful", "'{'\"outcome\": \"successful\", \"value\": \"{0}\"}");
+        patterns.setProperty("ignorable", "'{'\"outcome\": \"ignorable\", \"value\": \"{0}\"}");
+        patterns.setProperty("comment", "'{'\"outcome\": \"comment\", \"value\": \"{0}\"}");
+        patterns.setProperty("pending", "'{'\"outcome\": \"pending\", \"keyword\": \"{1}\", \"value\": \"{0}\"}");
+        patterns.setProperty("notPerformed", "'{'\"outcome\": \"notPerformed\", \"keyword\": \"{1}\", \"value\": \"{0}\"}");
+        patterns.setProperty("failed", "'{'\"outcome\": \"failed\", \"keyword\": \"{1}\", \"value\": \"{0}\", \"failure\": \"{2}\"}");
+        patterns.setProperty("restarted", "'{'\"outcome\": \"restarted\", \"value\": \"{0}\", \"reason\": \"{1}\"}");
         patterns.setProperty("restartedStory", "'{'\"story\": '{'\"outcome\": \"restartedStory\", \"value\": \"{0}\", \"reason\": \"{1}\"}}");
         patterns.setProperty("outcomesTableStart", "'{'\"outcomes\": '{'");
         patterns.setProperty("outcomesTableHeadStart", "\"fields\": [");
@@ -179,7 +189,6 @@ public class JsonOutput extends PrintStreamOutput {
         patterns.setProperty("beforeExampleParameters", " \"parameters\": '{'");
         patterns.setProperty("afterExampleParameters", "}");
         patterns.setProperty("exampleParameter", "\"{0}\":\"{1}\"");
-        patterns.setProperty("numericParameter", "\"{0}\":{1}");
         patterns.setProperty("beforeExamples", "\"examples\": '{'\"keyword\": \"{0}\"");
         patterns.setProperty("examplesStepsStart", "\"steps\": [");
         patterns.setProperty("examplesStep", "\"{0}\"");
@@ -203,8 +212,6 @@ public class JsonOutput extends PrintStreamOutput {
         patterns.setProperty("parameterValueStart", "((");
         patterns.setProperty("parameterValueEnd", "))");
         patterns.setProperty("parameterValueNewline", "\\n");
-        patterns.setProperty("beforeComposedSteps", "\"steps\": [");
-        patterns.setProperty("afterComposedSteps", "]");
         return patterns;
     }
 }

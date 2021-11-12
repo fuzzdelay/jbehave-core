@@ -5,14 +5,12 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class Scenario extends StepsContainer {
 
-    private final String id = UUID.randomUUID().toString();
     private final String title;
     private final Meta meta;
     private final GivenStories givenStories;
@@ -34,8 +32,7 @@ public class Scenario extends StepsContainer {
         this(title, null, null, null, steps);
     }
 
-    public Scenario(String title, Meta meta, GivenStories givenStories, ExamplesTable examplesTable,
-            List<String> steps) {
+    public Scenario(String title, Meta meta, GivenStories givenStories, ExamplesTable examplesTable, List<String> steps) {
         super(steps);
         this.title = title;
         this.meta = meta;
@@ -44,7 +41,7 @@ public class Scenario extends StepsContainer {
     }
 
     public String getTitle() {
-        if (title == null) {
+        if ( title == null ){
             return EMPTY;
         }
         return title;
@@ -55,7 +52,7 @@ public class Scenario extends StepsContainer {
     }
 
     public GivenStories getGivenStories() {
-        if (!hasGivenStories()) {
+        if ( !hasGivenStories() ){
             return GivenStories.EMPTY;
         }
         return givenStories;
@@ -66,32 +63,28 @@ public class Scenario extends StepsContainer {
     }
 
     public ExamplesTable getExamplesTable() {
-        if (!hasExamplesTable()) {
+        if ( !hasExamplesTable() ){
             return ExamplesTable.EMPTY;
         }
         return examplesTable;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public boolean hasMeta() {
+    public boolean hasMeta(){
         return meta != null;
     }
 
-    public Meta getMeta() {
-        if (!hasMeta()) {
+    public Meta getMeta(){
+        if ( !hasMeta() ){
             return Meta.EMPTY;
         }
         return meta;
     }
 
-    public Meta asMeta(String prefix) {
+    public Meta asMeta(String prefix){
         Properties p = new Properties();
-        p.setProperty(prefix + "title", getTitle());
-        p.setProperty(prefix + "givenStories", getGivenStories().asString());
-        p.setProperty(prefix + "examplesTable", getExamplesTable().asString());
+        p.setProperty(prefix+"title", getTitle());
+        p.setProperty(prefix+"givenStories", getGivenStories().asString());
+        p.setProperty(prefix+"examplesTable", getExamplesTable().asString());
         return new Meta(p);
     }
 

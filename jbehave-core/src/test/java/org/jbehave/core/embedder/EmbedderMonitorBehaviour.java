@@ -1,13 +1,5 @@
 package org.jbehave.core.embedder;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -23,12 +15,23 @@ import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.model.StoryMaps;
 import org.jbehave.core.reporters.PrintStreamOutput.Format;
 import org.jbehave.core.reporters.ReportsCount;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class EmbedderMonitorBehaviour {
+import static java.util.Arrays.asList;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+public class EmbedderMonitorBehaviour {
 
     @Test
-    void shouldNotPrintWithSilentMonitor() {
+    public void shouldNotPrintWithSilentMonitor() {
         OutputStream out = new ByteArrayOutputStream();
         SilentEmbedderMonitor monitor = new SilentEmbedderMonitor();
         monitor.print("a message");
@@ -37,7 +40,7 @@ class EmbedderMonitorBehaviour {
     }
 
     @Test
-    void shouldOnlyPrintFailuresWithReportingFailuresMonitor() {
+    public void shouldOnlyPrintFailuresWithReportingFailuresMonitor() {
         OutputStream out = new ByteArrayOutputStream();
         ReportingFailuresEmbedderMonitor monitor = new ReportingFailuresEmbedderMonitor(new PrintStream(out));
         monitor.runningEmbeddable("embeddable");
@@ -48,17 +51,17 @@ class EmbedderMonitorBehaviour {
         monitor.batchFailed(new BatchFailures());
         monitor.storyFailed("/path", new RuntimeException());
         assertThat(out.toString(), is(not("")));
-    }
+   }
 
     @Test
-    void shouldDelegateOutput() {
+    public void shouldDelegateOutput() {
         EmbedderMonitor monitor = new ReportingFailuresEmbedderMonitor();
-        assertThat(monitor.toString(),
-                containsString(ReportingFailuresEmbedderMonitor.class.getSimpleName() + "[output="));
-    }
+        assertThat(monitor.toString(), containsString(ReportingFailuresEmbedderMonitor.class.getSimpleName()+"[output="));
+   }
+
 
     @Test
-    void shouldAllowDecorationOfDelegate() {
+    public void shouldAllowDecorationOfDelegate() {
         // Given
         EmbedderMonitor delegate = mock(EmbedderMonitor.class);
         EmbedderMonitor monitor = new EmbedderMonitorDecorator(delegate);
@@ -80,6 +83,7 @@ class EmbedderMonitorBehaviour {
         Properties viewProperties = mock(Properties.class);
         monitor.generatingMapsView(outputDirectory, storyMaps, viewProperties);
         Properties viewResources = mock(Properties.class);
+        monitor.generatingNavigatorView(outputDirectory, viewResources);
         List<String> formats = asList("TXT");
         monitor.generatingReportsView(outputDirectory, formats, viewProperties);
         String storyPath = "path";
@@ -88,7 +92,9 @@ class EmbedderMonitorBehaviour {
         monitor.mapsViewGenerationFailed(outputDirectory, storyMaps, viewProperties, cause);
         Meta meta = mock(Meta.class);
         MetaFilter filter = mock(MetaFilter.class);
-        monitor.metaExcluded(meta, filter);
+        monitor.metaNotAllowed(meta, filter);
+        monitor.navigatorViewGenerationFailed(outputDirectory, viewResources, cause);
+        monitor.navigatorViewNotGenerated();
         Properties properties = mock(Properties.class);
         monitor.processingSystemProperties(properties);
         ReportsCount count = mock(ReportsCount.class);
@@ -119,10 +125,13 @@ class EmbedderMonitorBehaviour {
         verify(delegate).embeddableNotConfigurable(name);
         verify(delegate).embeddablesSkipped(names);
         verify(delegate).generatingMapsView(outputDirectory, storyMaps, viewProperties);
+        verify(delegate).generatingNavigatorView(outputDirectory, viewResources);
         verify(delegate).generatingReportsView(outputDirectory, formats, viewProperties);
         verify(delegate).mappingStory(storyPath, metaFilters);
         verify(delegate).mapsViewGenerationFailed(outputDirectory, storyMaps, viewProperties, cause);
-        verify(delegate).metaExcluded(meta, filter);
+        verify(delegate).metaNotAllowed(meta, filter);
+        verify(delegate).navigatorViewGenerationFailed(outputDirectory, viewResources, cause);
+        verify(delegate).navigatorViewNotGenerated();
         verify(delegate).processingSystemProperties(properties);
         verify(delegate).reportsViewGenerated(count);
         verify(delegate).reportsViewGenerationFailed(outputDirectory, formats, viewProperties, cause);
@@ -132,6 +141,6 @@ class EmbedderMonitorBehaviour {
         verify(delegate).storyTimeout(story, storyDuration);
         verify(delegate).systemPropertySet(name, value);
         verify(delegate).usingThreads(threads);
-    }
+   }
 
 }

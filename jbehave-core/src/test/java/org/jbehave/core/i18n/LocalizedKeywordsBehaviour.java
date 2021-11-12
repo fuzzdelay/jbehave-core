@@ -1,49 +1,8 @@
 package org.jbehave.core.i18n;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.jbehave.core.configuration.Keywords.AFTER;
-import static org.jbehave.core.configuration.Keywords.AND;
-import static org.jbehave.core.configuration.Keywords.AS_A;
-import static org.jbehave.core.configuration.Keywords.BEFORE;
-import static org.jbehave.core.configuration.Keywords.DRY_RUN;
-import static org.jbehave.core.configuration.Keywords.EXAMPLES_TABLE;
-import static org.jbehave.core.configuration.Keywords.EXAMPLES_TABLE_HEADER_SEPARATOR;
-import static org.jbehave.core.configuration.Keywords.EXAMPLES_TABLE_IGNORABLE_SEPARATOR;
-import static org.jbehave.core.configuration.Keywords.EXAMPLES_TABLE_ROW;
-import static org.jbehave.core.configuration.Keywords.EXAMPLES_TABLE_VALUE_SEPARATOR;
-import static org.jbehave.core.configuration.Keywords.FAILED;
-import static org.jbehave.core.configuration.Keywords.GIVEN;
-import static org.jbehave.core.configuration.Keywords.GIVEN_STORIES;
-import static org.jbehave.core.configuration.Keywords.IGNORABLE;
-import static org.jbehave.core.configuration.Keywords.IN_ORDER_TO;
-import static org.jbehave.core.configuration.Keywords.I_WANT_TO;
-import static org.jbehave.core.configuration.Keywords.LIFECYCLE;
-import static org.jbehave.core.configuration.Keywords.META;
-import static org.jbehave.core.configuration.Keywords.META_FILTER;
-import static org.jbehave.core.configuration.Keywords.META_PROPERTY;
-import static org.jbehave.core.configuration.Keywords.NARRATIVE;
-import static org.jbehave.core.configuration.Keywords.NOT_PERFORMED;
-import static org.jbehave.core.configuration.Keywords.OUTCOME;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_ANY;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_DESCRIPTION;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_FAILURE;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_MATCHER;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_SUCCESS;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_VALUE;
-import static org.jbehave.core.configuration.Keywords.OUTCOME_VERIFIED;
-import static org.jbehave.core.configuration.Keywords.PENDING;
-import static org.jbehave.core.configuration.Keywords.SCENARIO;
-import static org.jbehave.core.configuration.Keywords.SCOPE;
-import static org.jbehave.core.configuration.Keywords.SCOPE_SCENARIO;
-import static org.jbehave.core.configuration.Keywords.SCOPE_STORY;
-import static org.jbehave.core.configuration.Keywords.SO_THAT;
-import static org.jbehave.core.configuration.Keywords.STORY_CANCELLED;
-import static org.jbehave.core.configuration.Keywords.THEN;
-import static org.jbehave.core.configuration.Keywords.WHEN;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.*;
+import static org.jbehave.core.configuration.Keywords.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,41 +16,41 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.i18n.LocalizedKeywords.ResourceBundleNotFound;
 import org.jbehave.core.steps.StepType;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class LocalizedKeywordsBehaviour {
+public class LocalizedKeywordsBehaviour {
 
     @Test
-    void shouldAllowKeywordsInEnglishAsDefault() throws IOException {
+    public void shouldAllowKeywordsInEnglishAsDefault() throws IOException {
         ensureKeywordsAreLocalisedFor(null);
     }
 
     @Test
-    void shouldUseEnglishAsBaseLocaleIfKeywordIsNotFound() throws IOException {
+    public void shouldUseEnglishAsBaseLocaleIfKeywordIsNotFound() throws IOException {
         ensureKeywordsAreLocalisedFor(new Locale("mk"));
     }
 
     @Test
-    void shouldUseConfiguredBaseLocaleIfKeywordIsNotFound() throws IOException {
+    public void shouldUseConfiguredBaseLocaleIfKeywordIsNotFound() throws IOException {
         ensureKeywordsAreLocalisedFor(new Locale("mk"),  Locale.ENGLISH);
     }
 
     @Test
-    void shouldAllowSynonymsToOverrideABaseLocale() {
+    public void shouldAllowSynonymsToOverrideABaseLocale() {
         Keywords keywords = new LocalizedKeywords(new Locale("sy"), Locale.ENGLISH);
         assertThat(keywords.given(), equalTo("Given|Giveth"));
         assertThat(keywords.and(), equalTo("And|With"));
     }
 
     @Test
-    void shouldAllowSynonymsToOverrideABaseBundleForSameLocale() {
-        Keywords keywords = new LocalizedKeywords(new Locale("en"), "i18n/synonyms", "i18n/keywords");
+    public void shouldAllowSynonymsToOverrideABaseBundleForSameLocale() {
+        Keywords keywords = new LocalizedKeywords(new Locale("en"), "i18n/synonyms", "i18n/keywords" );
         assertThat(keywords.given(), equalTo("Given|Giveth"));
         assertThat(keywords.and(), equalTo("And|With"));
     }
 
     @Test
-    void shouldAllowKeywordsInDifferentLocales() throws IOException {
+    public void shouldAllowKeywordsInDifferentLocales() throws IOException {
         ensureKeywordsAreLocalisedFor(new Locale("de"));
         ensureKeywordsAreLocalisedFor(new Locale("en"));
         ensureKeywordsAreLocalisedFor(new Locale("es"));
@@ -111,32 +70,30 @@ class LocalizedKeywordsBehaviour {
     }
 
     @Test
-    void shouldShowKeywordsInToStringRepresentations() {
+    public void shouldShowKeywordsInToStringRepresentations() {
         LocalizedKeywords it = keywordsFor(new Locale("it"));
         LocalizedKeywords pt = keywordsFor(new Locale("pt"));
         assertThat(it.toString(), not(equalTo(pt.toString())));
     }
 
     
-    @Test
-    void shouldFailIfResourceBundleIsNotFound() {
-        Locale locale = new Locale("en");
-        assertThrows(ResourceBundleNotFound.class, () -> ensureKeywordsAreLocalisedFor(locale, "unknown"));
+    @Test(expected = ResourceBundleNotFound.class)
+    public void shouldFailIfResourceBundleIsNotFound() throws IOException {
+        ensureKeywordsAreLocalisedFor(new Locale("en"), "unknown");
     }
 
     @Test
-    void shouldProvideClassLoaderPathInMessageIfResourceBundleIsNotFound() throws IOException {
+    public void shouldProvideClassLoaderPathInMessageIfResourceBundleIsNotFound() throws IOException {
         try {
             ensureKeywordsAreLocalisedFor(new Locale("en"), "unknown");
-        } catch (ResourceBundleNotFound e) {
-            String path = StringUtils.substringAfter(e.getMessage(),
-                    "Resource bundle unknown not found for locale en in classLoader");
+        } catch ( ResourceBundleNotFound e ){
+            String path = StringUtils.substringAfter(e.getMessage(),"Resource bundle unknown not found for locale en in classLoader");
             assertThat(path.split(ResourceBundleNotFound.PATH_SEPARATOR).length, greaterThan(0));
         }
     }
 
     @Test
-    void shouldAllowKeywordsToBeConfigured() {
+    public void shouldAllowKeywordsToBeConfigured() {
         Configuration configuration = new MostUsefulConfiguration();
         ensureKeywordsAreLocalised(configuration, new Locale("en"));
         configuration.useKeywords(new LocalizedKeywords(new Locale("it")));
@@ -217,17 +174,15 @@ class LocalizedKeywordsBehaviour {
         return keywordsFor(locale, null, bundleName, classLoader);
     }
 
-    private LocalizedKeywords keywordsFor(Locale locale, Locale baseLocale, String bundleName,
-            ClassLoader classLoader) {
+    private LocalizedKeywords keywordsFor(Locale locale, Locale baseLocale, String bundleName, ClassLoader classLoader) {
         ClassLoader cl = classLoader != null ? classLoader : this.getClass().getClassLoader();
         LocalizedKeywords keywords;
         if (bundleName == null) {
             keywords = (locale == null ? new LocalizedKeywords() : new LocalizedKeywords(locale));
         } else {
-            keywords = (baseLocale == null ? new LocalizedKeywords(locale, bundleName, cl) : new LocalizedKeywords(
-                    locale, baseLocale, bundleName, cl));
+            keywords = (baseLocale == null ? new LocalizedKeywords(locale, bundleName, cl) : new LocalizedKeywords(locale, baseLocale, bundleName, cl));
         }
-        if (locale != null) {
+        if ( locale != null ){
             assertThat(keywords.getLocale(), equalTo(locale));
         }
         return keywords;

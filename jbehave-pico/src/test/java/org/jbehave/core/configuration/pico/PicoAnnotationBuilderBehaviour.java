@@ -11,7 +11,7 @@ import static org.jbehave.core.reporters.Format.HTML;
 import static org.jbehave.core.reporters.Format.STATS;
 import static org.jbehave.core.reporters.Format.TXT;
 import static org.jbehave.core.reporters.Format.XML;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -42,19 +42,19 @@ import org.jbehave.core.parsers.StepPatternParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.Steps;
 import org.jbehave.core.steps.ParameterConverters.DateConverter;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
-import org.jbehave.core.steps.Steps;
 import org.jbehave.core.steps.pico.PicoStepsFactoryBehaviour.FooSteps;
 import org.jbehave.core.steps.pico.PicoStepsFactoryBehaviour.FooStepsWithDependency;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.picocontainer.MutablePicoContainer;
 import org.picocontainer.PicoContainer;
 
-class PicoAnnotationBuilderBehaviour {
+public class PicoAnnotationBuilderBehaviour {
 
     @Test
-    void shouldBuildConfigurationFromAnnotations() {
+    public void shouldBuildConfigurationFromAnnotations() {
         PicoAnnotationBuilder builder = new PicoAnnotationBuilder(AnnotatedUsingPico.class);
         Configuration configuration = builder.buildConfiguration();
         assertThat(configuration.storyControls().dryRun(), is(true));
@@ -72,8 +72,7 @@ class PicoAnnotationBuilderBehaviour {
         assertThat(configuration.storyReporterBuilder().outputDirectory().getName(), equalTo("my-output-directory"));
         assertThat(configuration.storyReporterBuilder().viewResources().getProperty("index"),
                 equalTo("my-reports-index.ftl"));
-        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"),
-                equalTo("true"));
+        assertThat(configuration.storyReporterBuilder().viewResources().getProperty("decorateNonHtml"), equalTo("true"));
         assertThat(configuration.storyReporterBuilder().reportFailureTrace(), is(true));
     }
 
@@ -87,7 +86,7 @@ class PicoAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildDefaultConfigurationIfAnnotationOrAnnotatedValuesNotPresent() {
         PicoAnnotationBuilder builderNotAnnotated = new PicoAnnotationBuilder(NotAnnotated.class);
         assertThatConfigurationIs(builderNotAnnotated.buildConfiguration(), new MostUsefulConfiguration());
         PicoAnnotationBuilder builderAnnotatedWithoutLocations = new PicoAnnotationBuilder(
@@ -111,7 +110,7 @@ class PicoAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingPico() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingPico() {
         PicoAnnotationBuilder builderAnnotated = new PicoAnnotationBuilder(AnnotatedUsingPico.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class,
@@ -119,21 +118,21 @@ class PicoAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndPico() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndPico() {
         PicoAnnotationBuilder builderAnnotated = new PicoAnnotationBuilder(AnnotatedUsingStepsAndPico.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class);
     }
 
     @Test
-    void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndInheritingPicoFromParent() {
+    public void shouldBuildCandidateStepsFromAnnotationsUsingStepsAndInheritingPicoFromParent() {
         AnnotationBuilder builderAnnotated = new PicoAnnotationBuilder(InheritingAnnotatedUsingSteps.class);
         Configuration configuration = builderAnnotated.buildConfiguration();
         assertThatStepsInstancesAre(builderAnnotated.buildCandidateSteps(configuration), FooSteps.class);
     }
 
     @Test
-    void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
+    public void shouldBuildEmptyStepsListIfAnnotationOrAnnotatedValuesNotPresent() {
         PicoAnnotationBuilder builderNotAnnotated = new PicoAnnotationBuilder(NotAnnotated.class);
         assertThatStepsInstancesAre(builderNotAnnotated.buildCandidateSteps());
         PicoAnnotationBuilder builderAnnotatedWithoutModules = new PicoAnnotationBuilder(AnnotatedWithoutModules.class);
@@ -141,7 +140,7 @@ class PicoAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldNotBuildContainerIfModuleNotInstantiable() {
+    public void shouldNotBuildContainerIfModuleNotInstantiable() {
         AnnotationMonitor annotationMonitor = mock(AnnotationMonitor.class);
         PicoAnnotationBuilder builderPrivateModule = new PicoAnnotationBuilder(AnnotatedWithPrivateModule.class,
                 annotationMonitor);
@@ -150,7 +149,7 @@ class PicoAnnotationBuilderBehaviour {
     }
 
     @Test
-    void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
+    public void shouldCreateOnlyOneContainerForMultipleBuildInvocations() {
         PicoAnnotationBuilder builderAnnotated = new PicoAnnotationBuilder(AnnotatedUsingStepsAndPico.class);
         builderAnnotated.buildConfiguration();
         PicoContainer picoContainer = builderAnnotated.picoContainer();
@@ -209,8 +208,7 @@ class PicoAnnotationBuilderBehaviour {
 
         @Override
         public void configure(MutablePicoContainer container) {
-            container.addComponent(StoryControls.class,
-                    new StoryControls().doDryRun(true).doSkipScenariosAfterFailure(true));
+            container.addComponent(StoryControls.class, new StoryControls().doDryRun(true).doSkipScenariosAfterFailure(true));
             container.addComponent(FailureStrategy.class, SilentlyAbsorbingFailure.class);
             container.addComponent(StepPatternParser.class, new RegexPrefixCapturingPatternParser("MyPrefix"));
             container.addComponent(StoryLoader.class, new LoadFromURL());

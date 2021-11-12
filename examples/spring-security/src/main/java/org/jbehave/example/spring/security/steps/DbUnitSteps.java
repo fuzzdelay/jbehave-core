@@ -1,6 +1,7 @@
 package org.jbehave.example.spring.security.steps;
 
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.dbunit.DatabaseUnitException;
@@ -14,13 +15,13 @@ import org.springframework.stereotype.Component;
 @Component("dbUnitSteps")
 public class DbUnitSteps {
 
-    @Autowired
-    private DataSource dataSource;
+  @Autowired
+  private DataSource dataSource;
 
-    @BeforeStory
-    public void deleteAllData() throws SQLException, DatabaseUnitException {
-        DatabaseDataSourceConnection dbConn = new DatabaseDataSourceConnection(dataSource);
-        IDataSet dataSet = dbConn.createDataSet(new String[] { "ORGANIZATION", "APPLICATION_USER" });
-        DatabaseOperation.DELETE_ALL.execute(dbConn, dataSet);
-    }
+  @BeforeStory
+  public void deleteAllData() throws SQLException, DatabaseUnitException {
+    DatabaseDataSourceConnection dbConn = new DatabaseDataSourceConnection(dataSource);
+    IDataSet dataSet = dbConn.createDataSet(new String[] { "ORGANIZATION", "APPLICATION_USER" });
+    DatabaseOperation.DELETE_ALL.execute(dbConn, dataSet);
+  }
 }

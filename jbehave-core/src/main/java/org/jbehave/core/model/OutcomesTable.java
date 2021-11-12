@@ -1,12 +1,8 @@
 package org.jbehave.core.model;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -15,56 +11,30 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.i18n.LocalizedKeywords;
 
-/**
- * Represents a tabular structure that holds {@link Outcome}s to be verified by invoking method {@link #verify()}. If
- * verification fails an {@link OutcomesFailed} exception is thrown.
- * <p>The Outcomes Tables allows the specification of {@link Keywords} for the outcome fields, as well as rendering
- * formats for different types. The default formats include:
- * <ul>
- *     <li>Date: "EEE MMM dd hh:mm:ss zzz yyyy"</li>
- *     <li>Number: "0.###"</li>
- *     <li>Boolean: "yes,no"</li>
- * </ul>
- * These formats can be overridden as well as new ones added. The formats can be retrieved via methods
- * {@link #getFormat(Type)} and {@link #getFormat(String)}.</p>
- */
 public class OutcomesTable {
 
     private static final String NEWLINE = "\n";
     private static final String HEADER_SEPARATOR = "|";
     private static final String VALUE_SEPARATOR = "|";
+	private static final String DEFAULT_DATE_FORMAT = "EEE MMM dd hh:mm:ss zzz yyyy";
 
     private final Keywords keywords;
-    private final Map<Type,String> formats;
+	private final String dateFormat;
     private final List<Outcome<?>> outcomes = new ArrayList<>();
     private final List<Outcome<?>> failedOutcomes = new ArrayList<>();
     private UUIDExceptionWrapper failureCause;
-
+    
     public OutcomesTable() {
         this(new LocalizedKeywords());
     }
-
+    
     public OutcomesTable(Keywords keywords) {
-        this(keywords, defaultFormats());
+        this(keywords, DEFAULT_DATE_FORMAT);
     }
 
-    public OutcomesTable(Map<Type, String> formats) {
-        this(new LocalizedKeywords(), formats);
-    }
-
-    public OutcomesTable(Keywords keywords, Map<Type, String> formats) {
-        this.keywords = keywords;
-        this.formats = mergeWithDefaults(formats);
-    }
-
-    /**
-     * Creates outcomes table using the specified keywords and date format
-     *
-     * @deprecated Use {@link #OutcomesTable(Keywords, Map)}
-     */
-    @Deprecated
     public OutcomesTable(Keywords keywords, String dateFormat) {
-        this(keywords, mergeWithDefaults(Date.class, dateFormat));
+        this.keywords = keywords;
+		this.dateFormat = dateFormat;
     }
 
     public <T> void addOutcome(String description, T value, Matcher<T> matcher) {
@@ -103,32 +73,10 @@ public class OutcomesTable {
         return keywords.outcomeFields();
     }
 
-    public Map<Type, String> getFormats() {
-        return formats;
+    public String getDateFormat(){
+    	return dateFormat;
     }
-
-    public String getFormat(Type type) {
-        return formats.get(type);
-    }
-
-    public String getFormat(String typeName) {
-        try {
-            return getFormat(Class.forName(typeName));
-        } catch (ClassNotFoundException e) {
-            throw new FormatTypeInvalid(typeName, e);
-        }
-    }
-
-    /**
-     * Provides used date format
-     *
-     * @deprecated Use {@link #getFormat(Type)}
-     */
-    @Deprecated
-    public String getDateFormat() {
-        return getFormat(Date.class);
-    }
-
+    
     public String asString() {
         StringBuilder sb = new StringBuilder();
         for (Iterator<String> iterator = getOutcomeFields().iterator(); iterator.hasNext();) {
@@ -148,26 +96,6 @@ public class OutcomesTable {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
-
-    private static Map<Type,String> defaultFormats() {
-        Map<Type,String> map = new HashMap<>();
-        map.put(Date.class, "EEE MMM dd hh:mm:ss zzz yyyy");
-        map.put(Number.class, "0.###");
-        map.put(Boolean.class, "yes,no");
-        return map;
-    }
-
-    private static Map<Type,String> mergeWithDefaults(Type type, String format) {
-        Map<Type,String> map = defaultFormats();
-        map.put(type, format);
-        return map;
-    }
-
-    private Map<Type, String> mergeWithDefaults(Map<Type, String> formats) {
-        Map<Type,String> map = defaultFormats();
-        map.putAll(formats);
-        return map;
     }
 
     public static class Outcome<T> {
@@ -220,9 +148,4 @@ public class OutcomesTable {
 
     }
 
-    public static class FormatTypeInvalid extends RuntimeException {
-        public FormatTypeInvalid(String type, Throwable e) {
-            super(type, e);
-        }
-    }
 }

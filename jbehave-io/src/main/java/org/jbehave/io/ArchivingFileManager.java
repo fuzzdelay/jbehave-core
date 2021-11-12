@@ -1,15 +1,15 @@
 package org.jbehave.io;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FilenameUtils;
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * File manager that uploads and unarchives data files
@@ -43,7 +43,7 @@ public class ArchivingFileManager implements FileManager {
     }
     
     public List<File> listContent(File file, boolean relativePaths) {
-        if (!archiver.isArchive(file)) {
+        if ( !archiver.isArchive(file) ){
             return asList(file);
         }
         File directory = new File(uploadDirectory, archiver.directoryOf(new File(file.getName())).getPath());

@@ -36,21 +36,31 @@ public class GivenStories {
 
     private Map<String, String> parametersByAnchor(String anchor) {
         int examplesRow = -1;
-        if (!StringUtils.isBlank(anchor)) {
+        examplesRow = getExamplesRow(anchor, examplesRow);
+        Map<String, String> parameters = null;
+        if ( examplesRow > -1 && examplesTable != null && examplesRow < examplesTable.getRowCount() ){
+             parameters = examplesTable.getRow(examplesRow);
+        }
+        if (getStringStringHashMap(parameters == null)) return new HashMap<>();
+        return parameters;
+    }
+
+    private boolean getStringStringHashMap(boolean b) {
+        if (b) {
+            return true;
+        }
+        return false;
+    }
+
+    private int getExamplesRow(String anchor, int examplesRow) {
+        if ( !StringUtils.isBlank(anchor) ){
             try {
                 examplesRow = Integer.parseInt(anchor);
             } catch (NumberFormatException e) {
                 // continue
             }
         }
-        Map<String, String> parameters = null;
-        if (examplesRow > -1 && examplesTable != null && examplesRow < examplesTable.getRowCount()) {
-            parameters = examplesTable.getRow(examplesRow);
-        }
-        if (parameters == null) {
-            return new HashMap<>();
-        }
-        return parameters;
+        return examplesRow;
     }
 
     public List<String> getPaths() {
@@ -63,9 +73,7 @@ public class GivenStories {
 
     public boolean requireParameters() {
         for (GivenStory story : stories) {
-            if (story.hasAnchor()) {
-                return true;
-            }
+            if (getStringStringHashMap(story.hasAnchor())) return true;
         }
         return false;
     }

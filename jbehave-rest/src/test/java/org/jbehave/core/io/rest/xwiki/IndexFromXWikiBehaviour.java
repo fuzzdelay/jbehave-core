@@ -9,13 +9,13 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.jbehave.core.io.rest.Resource;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class IndexFromXWikiBehaviour {
+public class IndexFromXWikiBehaviour {
 
     @Test
-    void canIndexFromXWiki() {
-        IndexFromXWiki indexer = new IndexFromXWiki();
+    public void canIndexFromXWiki() {
+    	IndexFromXWiki indexer = new IndexFromXWiki();
         String rootPath = "http://localhost:8080/xwiki/rest/wikis/xwiki/spaces/Main/pages";
         String entity = read("xwiki-index.json");
         Map<String, Resource> index = indexer.createIndexFromEntity(rootPath, entity);

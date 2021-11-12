@@ -12,9 +12,9 @@ import java.util.Map;
 
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.BeforeScenario;
+import org.jbehave.core.annotations.ToContext;
 import org.jbehave.core.annotations.FromContext;
 import org.jbehave.core.annotations.Named;
-import org.jbehave.core.annotations.ToContext;
 import org.jbehave.core.failures.PendingStepFound;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.ExamplesTable;
@@ -90,8 +90,8 @@ public class SomeSteps extends Steps {
         this.args = args;
     }
 
-    public ExamplesTable aMethodReturningExamplesTable(String value) {
-        return new ExamplesTable(value);
+    public ExamplesTable aMethodReturningExamplesTable(String value){
+    	return new ExamplesTable(value);
     }
 
     @AsParameters
@@ -100,7 +100,7 @@ public class SomeSteps extends Steps {
         String col2;
     }
 
-    public ExamplesTable aFailingMethodReturningExamplesTable(String value) {
+    public ExamplesTable aFailingMethodReturningExamplesTable(String value){
         throw new RuntimeException(value);
     }
     
@@ -122,7 +122,7 @@ public class SomeSteps extends Steps {
         this.args = multipleArgs;
     }
 
-    public void methodThatExpectsUuidExceptionWrapper(UUIDExceptionWrapper exception) {
+    public void aMethodThatExpectsUUIDExceptionWrapper(UUIDExceptionWrapper exception) {
         this.args = exception;
     }
 
@@ -130,13 +130,13 @@ public class SomeSteps extends Steps {
     public String aMethodStoringAString() {
         return "someValue";
     }
-
-    @ToContext(value = "someKey", retentionLevel = ToContext.RetentionLevel.SCENARIO)
+    
+    @ToContext(value = "someKey", retentionLevel= ToContext.RetentionLevel.SCENARIO)
     public String aMethodStoringAStringInScenario() {
         return "someValue";
     }
-
-    @ToContext(value = "someKey", retentionLevel = ToContext.RetentionLevel.STORY)
+    
+    @ToContext(value = "someKey", retentionLevel= ToContext.RetentionLevel.STORY)
     public String aMethodStoringAStringInStory() {
         return "someValue";
     }
@@ -155,12 +155,12 @@ public class SomeSteps extends Steps {
         return null;
     }
 
-    enum SomeEnum {
-        ONE,
-        TWO,
-        THREE,
-        MULTIPLE_WORDS_AND_1_NUMBER,
-        ;
-    }
+}
 
+enum SomeEnum {
+    ONE,
+    TWO,
+    THREE,
+    MULTIPLE_WORDS_AND_1_NUMBER,
+    ;
 }

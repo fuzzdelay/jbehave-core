@@ -13,8 +13,7 @@ public class FailingAfterStories extends CoreStory {
 
     @Override
     public Configuration configuration() {
-        return super.configuration().useStoryControls(
-                new StoryControls().doResetStateBeforeStory(false).doResetStateBeforeScenario(false));
+        return super.configuration().useStoryControls(new StoryControls().doResetStateBeforeStory(false).doResetStateBeforeScenario(false));
     }
 
     @Override
@@ -23,7 +22,7 @@ public class FailingAfterStories extends CoreStory {
     }
 
     @AfterStories
-    public void afterStories() {
+    public void afterStories(){
         throw new RuntimeException("Bum went the stories");
     }
 

@@ -8,14 +8,14 @@ import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingEmbedder;
 import org.jbehave.core.configuration.guice.GuiceAnnotationBuilder;
 import org.jbehave.core.junit.AnnotatedEmbedderRunner;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.InitializationError;
 
-class GuiceAnnotatedEmbedderRunnerBehaviour {
+public class GuiceAnnotatedEmbedderRunnerBehaviour {
 
     @Test
-    void shouldCreateWithGuiceAnnotatedBuilder() throws InitializationError {
+    public void shouldCreateWithGuiceAnnotatedBuilder() throws InitializationError{
         AnnotatedEmbedderRunner runner = new GuiceAnnotatedEmbedderRunner(RunningWithAnnotatedEmbedderRunner.class);
         assertThat(runner.annotationBuilder(), instanceOf(GuiceAnnotationBuilder.class));
     }
@@ -28,7 +28,7 @@ class GuiceAnnotatedEmbedderRunnerBehaviour {
         static boolean hasRun;
 
         @Override
-        @org.junit.Test
+        @Test
         public void run() {
             hasRun = true;
         }

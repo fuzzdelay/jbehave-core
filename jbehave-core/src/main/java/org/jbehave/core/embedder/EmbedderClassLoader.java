@@ -82,7 +82,7 @@ public class EmbedderClassLoader extends URLClassLoader {
     private static URL toURL(String element) {
         try {
             return new File(element).toURI().toURL();
-        } catch (Exception e) {
+        } catch ( Exception e ){
             throw new InvalidClasspathElement(element, e);
         }
     }
@@ -97,8 +97,7 @@ public class EmbedderClassLoader extends URLClassLoader {
     public static class InstantiationFailed extends RuntimeException {
 
         public InstantiationFailed(String className, Class<?> type, ClassLoader classLoader, Throwable cause) {
-            super("Instantiation failed for" + className + " of type " + type + " using class loader " + classLoader,
-                    cause);
+            super("Instantiation failed for" + className + " of type " + type + " using class loader "+classLoader, cause);
         }
 
     }

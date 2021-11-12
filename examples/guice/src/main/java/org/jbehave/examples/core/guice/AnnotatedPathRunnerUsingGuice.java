@@ -1,14 +1,6 @@
 package org.jbehave.examples.core.guice;
 
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.text.SimpleDateFormat;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
 
 import org.jbehave.core.annotations.Configure;
 import org.jbehave.core.annotations.UsingEmbedder;
@@ -35,6 +27,14 @@ import org.jbehave.examples.core.steps.SandpitSteps;
 import org.jbehave.examples.core.steps.SearchSteps;
 import org.junit.runner.RunWith;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
+
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
+
 /**
  * Run stories via annotated embedder configuration and steps using Guice. The
  * textual core stories are exactly the same ones found in the
@@ -43,8 +43,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GuiceAnnotatedPathRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingGuice(modules = { ConfigurationModule.class, StepsModule.class })
 @UsingPaths(searchIn = "../core/src/main/java", includes = { "**/*.story" }, excludes = { "**/examples_table*.story" })
 public class AnnotatedPathRunnerUsingGuice {

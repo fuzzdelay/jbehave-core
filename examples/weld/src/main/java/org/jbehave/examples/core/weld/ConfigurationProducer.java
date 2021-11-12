@@ -6,6 +6,8 @@ import static org.jbehave.core.reporters.Format.TXT;
 import static org.jbehave.core.reporters.Format.XML;
 
 import java.text.SimpleDateFormat;
+
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
@@ -22,11 +24,9 @@ import org.jbehave.core.steps.ParameterConverters.DateConverter;
 @ApplicationScoped
 public class ConfigurationProducer {
     
-    public ConfigurationProducer() {
-    }
+    public ConfigurationProducer() {}
 
-    @Produces
-    @WeldConfiguration
+    @Produces @WeldConfiguration
     public Configuration getConfiguration() {
         LoadFromClasspath resourceLoader = new LoadFromClasspath(getClass().getClassLoader());
         TableTransformers tableTransformers = new TableTransformers();

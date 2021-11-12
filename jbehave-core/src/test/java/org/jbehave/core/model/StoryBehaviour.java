@@ -1,19 +1,21 @@
 package org.jbehave.core.model;
 
+import org.junit.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+
 import static org.hamcrest.Matchers.equalTo;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-class StoryBehaviour {
+public class StoryBehaviour {
 
     @Test
-    void shouldCloneWithScenarios() {
+    public void shouldCloneWithScenarios() {
         Scenario scenario = mock(Scenario.class);
         Meta meta = mock(Meta.class);
         Description description = mock(Description.class);

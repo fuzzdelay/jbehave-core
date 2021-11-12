@@ -1,10 +1,5 @@
 package org.jbehave.examples.core.annotations;
 
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.HTML;
-import static org.jbehave.core.reporters.Format.TXT;
-import static org.jbehave.core.reporters.Format.XML;
-
 import java.text.SimpleDateFormat;
 
 import org.jbehave.core.annotations.Configure;
@@ -32,17 +27,19 @@ import org.jbehave.examples.core.steps.SearchSteps;
 import org.jbehave.examples.core.steps.TraderSteps;
 import org.junit.runner.RunWith;
 
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.XML;
+
 @RunWith(AnnotatedPathRunner.class)
-@Configure(stepPatternParser = MyRegexPrefixCapturingPatternParser.class, storyControls = MyStoryControls.class,
-        storyLoader = MyStoryLoader.class, storyReporterBuilder = MyReportBuilder.class,
-        parameterConverters = { MyDateConverter.class })
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true, storyTimeouts = "100", threads = 1, metaFilters = "-skip",
-        systemProperties = "java.awt.headless=true")
+@Configure(stepPatternParser = MyRegexPrefixCapturingPatternParser.class, storyControls = MyStoryControls.class, storyLoader = MyStoryLoader.class, storyReporterBuilder = MyReportBuilder.class, 
+        parameterConverters = { MyDateConverter.class } )
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true,
+                storyTimeouts = "100", threads = 1, metaFilters = "-skip", systemProperties="java.awt.headless=true")
 @UsingSteps(instances = { TraderSteps.class, BeforeAfterSteps.class, AndSteps.class, CalendarSteps.class,
-    PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
-@UsingPaths(searchIn = "../core/src/main/java", includes = { "**/*.story" },
-        excludes = { "**/custom/*.story,**/failing/*.story,**/given/*.story,**/pending/*.story" })
+        PriorityMatchingSteps.class, SandpitSteps.class, SearchSteps.class })
+@UsingPaths(searchIn = "../core/src/main/java", includes = { "**/*.story" }, excludes = { "**/examples_table*.story", "**/given_relative_path*" })
 public class CoreAnnotatedPathRunner {
 
     public static class MyStoryControls extends StoryControls {

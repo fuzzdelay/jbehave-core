@@ -2,7 +2,7 @@ package org.jbehave.core.steps;
 
 import java.lang.reflect.Method;
 
-public class StepCandidateParamObj {
+public class stepCandidateParamObj {
     private final String patternAsString;
     private final int priority;
     private final StepType stepType;
@@ -10,7 +10,7 @@ public class StepCandidateParamObj {
     private final Class<?> stepsType;
     private final InjectableStepsFactory stepsFactory;
 
-    public StepCandidateParamObj(String patternAsString, int priority, StepType stepType, Method method, Class<?> stepsType, InjectableStepsFactory stepsFactory) {
+    public stepCandidateParamObj(String patternAsString, int priority, StepType stepType, Method method, Class<?> stepsType, InjectableStepsFactory stepsFactory) {
         this.patternAsString = patternAsString;
         this.priority = priority;
         this.stepType = stepType;

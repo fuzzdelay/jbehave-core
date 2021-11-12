@@ -12,6 +12,7 @@ import org.jbehave.core.annotations.groovy.UsingGroovy;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.junit.groovy.GroovyAnnotatedEmbedderRunner;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -19,20 +20,19 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GroovyAnnotatedEmbedderRunner.class)
 @Configure()
-@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true,
-        ignoreFailureInView = true)
+@UsingEmbedder(embedder = Embedder.class, generateViewAfterStories = true, ignoreFailureInStories = true, ignoreFailureInView = true)
 @UsingGroovy()
 public class AnnotatedEmbedderUsingGroovy extends InjectableEmbedder {
 
     @Override
-    @org.junit.Test
+    @Test
     public void run() {
         injectedEmbedder().runStoriesAsPaths(storyPaths());
     }
 
-    public List<String> storyPaths() {
+    protected List<String> storyPaths() {
         return new StoryFinder()
-                .findPaths(codeLocationFromClass(this.getClass()).getFile(), asList("**/using_groovy.story"), null);
+                .findPaths(codeLocationFromClass(this.getClass()).getFile(), asList("**/*.story"), null);
     }
     
 }
