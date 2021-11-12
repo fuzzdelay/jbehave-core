@@ -99,14 +99,39 @@ public class Lifecycle {
         MetaFilter filter = getMetaFilter(outcome);
         List<Steps> afterSteps = new ArrayList<>();
         for (Steps steps : after) {
+<<<<<<< HEAD
             extractedAfterStepsConditional(scope, outcome, meta, filter, afterSteps, steps);
+=======
+            if (afterStepsBool(outcome, meta, filter, steps)) {
+                isAddAfterSteps(scope, (List<Steps>) afterSteps, steps);
+            }
+>>>>>>> e0a49cc04fe54967b2bcaf1848bfe394aa90c68a
         }
         return unwrap(afterSteps);
     }
 
+<<<<<<< HEAD
     private void extractedAfterStepsConditional(Scope scope, Outcome outcome, Meta meta, MetaFilter filter, List<Steps> afterSteps, Steps steps) {
         if (outcome == steps.outcome && (meta.equals(Meta.EMPTY) || filter.allow(meta))) {
             afterSteps.add(stepsByScope(steps, scope));
+=======
+    private boolean isAddAfterSteps(Scope scope, List<Steps> afterSteps, Steps steps) {
+        return afterSteps.add(stepsByScope(steps, scope));
+    }
+
+    private boolean afterStepsBool(Outcome outcome, Meta meta, MetaFilter filter, Steps steps) {
+        return outcome == steps.outcome && (meta.equals(Meta.EMPTY) || !filter.excluded(meta));
+    }
+
+    public List<Steps> getAfter() {
+        return after;
+    }
+
+    public Set<Outcome> getOutcomes() {
+        Set<Outcome> outcomes = new LinkedHashSet<>();
+        for (Steps steps : after) {
+            outcomes.add(steps.outcome);
+>>>>>>> e0a49cc04fe54967b2bcaf1848bfe394aa90c68a
         }
     }
 
@@ -121,7 +146,7 @@ public class Lifecycle {
     private List<Steps> filter(List<Steps> stepsCollection, Scope scope) {
         List<Steps> filteredSteps = new ArrayList<>();
         for (Steps steps : stepsCollection) {
-            filteredSteps.add(stepsByScope(steps, scope));
+            isAddAfterSteps(scope, filteredSteps, steps);
         }
         return filteredSteps;
     }

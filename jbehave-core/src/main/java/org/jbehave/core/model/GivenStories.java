@@ -2,9 +2,7 @@ package org.jbehave.core.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -29,11 +27,12 @@ public class GivenStories {
 
     public List<GivenStory> getStories() {
         for (GivenStory story : stories) {
-            story.useParameters(parametersByAnchor(story.getAnchor()));
+            story.useParameters(examplesTable.parametersByAnchor(story.getAnchor(), this));
         }
         return stories;
     }
 
+<<<<<<< HEAD
     private Map<String, String> parametersByAnchor(String anchor) {
         int examplesRow = -1;
         examplesRow = getExamplesRow(anchor, examplesRow);
@@ -63,6 +62,8 @@ public class GivenStories {
         return examplesRow;
     }
 
+=======
+>>>>>>> e0a49cc04fe54967b2bcaf1848bfe394aa90c68a
     public List<String> getPaths() {
         List<String> paths = new ArrayList<>();
         for (GivenStory story : stories) {
